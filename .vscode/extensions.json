@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "ms-python.isort",
+        "mechatroner.rainbow-csv",
+        "charliermarsh.ruff",
+        "gruntfuggly.todo-tree",
+        "huizhou.githd"
+    ]
+}

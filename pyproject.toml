@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "moe_gatherer"
+version = "0.5.0"
+description = "march of empires gatherer"
+authors = ["a a <a@example.com>"]
+readme = "readme.md"
+packages = []
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+opencv-python-headless = "^4.7"
+pyautogui = "^0.9"
+pynput = "^1.7.6"
+pylightxl = "^1.61"
+pywin32 = "^306"
+
+[tool.poetry.group.dev.dependencies]
+opencv-contrib-python = "^4.7"
+pytest = "^7.3.2"
+ruff = "^0.0.278"
+isort = "^5.12.0"
+black = "^23.7.0"
+pyinstaller = {  version = "^5",python = "==3.11"}
+pywin32-ctypes = "^0.2.2"
+
+[tool.black]
+python = "^3.11"
+line-length = 135
+
+[tool.ruff]
+line-length = 135
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+moe_gatherer = "moe_gatherer.__main__:main"
+program_ac = "program_ac:main"
+anahtar_olustur = "anahtar_olustur:main"
+exe_olustur = "exe_olustur:main"
+
