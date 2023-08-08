@@ -802,16 +802,16 @@ class TaramaIslem:
         #  __tarama_islemi_gunlukcu().debug(
         #     f'tarama işlemi çalışmaya devam edecek mi kontrol edildi: {not self.acikmi_event.is_set()=}'
         # )   # type: ignore
-        gunlukcuGetir().debug(f"sinyal kontrol : {self._sinyal_alma=} {self._sinyal_gonderme=}")
-        while self._sinyal_alma == IslemSinyalleri.DUR:
+        gunlukcuGetir().debug(f"sinyal kontrol : {self._sinyal_alma.value=} {self._sinyal_gonderme.value=}")
+        while self._sinyal_alma.value == IslemSinyalleri.DUR:
             gunlukcuGetir().debug("DUR sinyali alindi")
-            self._sinyal_gonderme = IslemSinyalleri.MESAJ_ULASTI
+            self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
             sleep(3)
-            if self._sinyal_alma == IslemSinyalleri.DEVAM_ET:
+            if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
                 gunlukcuGetir().debug("Devam et sinyali alındi")
-                self._sinyal_gonderme = IslemSinyalleri.MESAJ_ULASTI
+                self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
                 break
-        self._sinyal_gonderme = IslemSinyalleri.MESAJ_ULASMADI
+        self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASMADI
         if self.acikmi_event.is_set():  # type: ignore
             return False
         return True

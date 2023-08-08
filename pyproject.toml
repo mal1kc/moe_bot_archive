@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "moe_gatherer"
-version = "0.5.0"
+version = "0.5.1"
 description = "march of empires gatherer"
 authors = ["a a <a@example.com>"]
 readme = "readme.md"

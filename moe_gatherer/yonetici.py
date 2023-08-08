@@ -1,5 +1,7 @@
+import ctypes
 import logging
 from multiprocessing import RLock
+import multiprocessing
 import sys
 from time import sleep
 
@@ -34,9 +36,10 @@ class BotIslemYonetici:
             svyler=self.tarama_islem_argumanları[1],
             maks_sefer_sayisi=self.tarama_islem_argumanları[2],
         )
-
+        self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.DEVAM_ET)
+        self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.MESAJ_ULASMADI)
         self.engel_tarayici_islem = EngelTarayiciİslem()
-        self._process_listesi = []
+        # self._process_listesi = []
         self._process_olusturma_kilidi = RLock()
         self.klavye_dinleyici = pynput.keyboard.Listener(on_press=self.tusKontrol)
         self.gunlukcu = logging.getLogger("gunlukcu.botyonetici")
@@ -70,7 +73,9 @@ class BotIslemYonetici:
         with self._process_olusturma_kilidi:
             if key == pynput.keyboard.KeyCode.from_char("s"):
                 if not hasattr(self, "engel_tarayici_islem_process"):
-                    self.engel_tarayici_islem_process = self.engel_tarayici_islem.processOlustur()
+                    self.engel_tarayici_islem_process = self.engel_tarayici_islem.processOlustur(
+                        sinyal_alma=self._sinyal_knl1, sinyal_gonderme=self._sinyal_knl2
+                    )
                     self.engel_tarayici_islem_process.start()
                     self.gunlukcu.debug("engel tarayıcı işlemi başlatıldı,pid: %s", self.engel_tarayici_islem_process.pid)
                 elif not self.engel_tarayici_islem_process.is_alive():
@@ -78,8 +83,7 @@ class BotIslemYonetici:
 
                 if not hasattr(self, "tarama_islem_process"):
                     self.tarama_islem_process = self.tarama_islem.processOlustur(
-                        sinyal_alma=self.engel_tarayici_islem._sinyal_gonderme,
-                        sinyal_gonderme=self.engel_tarayici_islem._sinyal_alma,
+                        sinyal_alma=self._sinyal_knl2, sinyal_gonderme=self._sinyal_knl1
                     )
                     self.tarama_islem_process.start()
                     self.gunlukcu.debug("tarama işlemi başlatıldı,pid: %s", self.tarama_islem_process.pid)
@@ -92,13 +96,15 @@ class BotIslemYonetici:
                 self.tarama_islem.kapat()
                 self.gunlukcu.debug("tarama işlemi kapatıldı")
                 self.tarama_islem_process = self.tarama_islem.processOlustur(
-                    sinyal_alma=self.engel_tarayici_islem._sinyal_gonderme, sinyal_gonderme=self.engel_tarayici_islem._sinyal_alma
+                    sinyal_alma=self._sinyal_knl2, sinyal_gonderme=self._sinyal_knl1
                 )
                 self.gunlukcu.debug("tarama işlemi process i oluşturuldu")
 
-                self.engel_tarayici_islem.acik_event.set()
+                self.engel_tarayici_islem._acik_event.set()
                 self.gunlukcu.debug("engel tarayıcı işlemi kapatıldı")
-                self.engel_tarayici_islem_process = self.engel_tarayici_islem.processOlustur()
+                self.engel_tarayici_islem_process = self.engel_tarayici_islem.processOlustur(
+                    sinyal_alma=self._sinyal_knl1, sinyal_gonderme=self._sinyal_knl2
+                )
                 self.gunlukcu.debug("engel tarayıcı işlemi process i oluşturuldu")
                 return
             else:
@@ -136,4 +142,8 @@ class BotIslemYonetici:
         """
         self.klavye_dinleyici.start()
         self._engelSinyalKontrol()
+        if self.tarama_islem_process.is_alive():
+            self.tarama_islem.kapat()
+        if self.engel_tarayici_islem_process.is_alive():
+            self.engel_tarayici_islem.kapat()
         # self.klavye_dinleyici.join()

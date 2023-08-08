@@ -1,4 +1,3 @@
-import ctypes
 import logging
 import multiprocessing
 from time import sleep
@@ -179,12 +178,12 @@ class EngelTarayiciİslem:
 
     def _sinyalYolla(self, sinyal) -> None:
         self.gunlukcu.debug("sinyal goderildi.")
-        self._sinyal_gonderme = sinyal
+        self._sinyal_gonderme.value = sinyal
         self._sinyalBekle()
 
     def _sinyalBekle(self) -> None:
         self.gunlukcu.debug("sinyal bekleniyor")
-        while self._sinyal_alma == IslemSinyalleri.MESAJ_ULASMADI:
+        while self._sinyal_alma.value == IslemSinyalleri.MESAJ_ULASMADI:
             self.gunlukcu.debug("sinyal ulasmasi bekleniyor")
             sleep(0.1)
 
@@ -192,11 +191,14 @@ class EngelTarayiciİslem:
         return f"{self.__class__.__name__}_(sinyal={self._sinyal.value})"  # type: ignore
 
     def _acikmi(self) -> bool:
-        return not self.acik_event.is_set()
+        return not self._acik_event.is_set()
 
-    def processOlustur(self) -> multiprocessing.Process:
+    def processOlustur(self, sinyal_gonderme, sinyal_alma) -> multiprocessing.Process:
         self._gunlukcuBaslat()
-        self._sinyal_gonderme = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.DEVAM_ET)
-        self._sinyal_alma = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.MESAJ_ULASMADI)
-        self.acik_event = multiprocessing.Event()
+        self._sinyal_gonderme = sinyal_gonderme
+        self._sinyal_alma = sinyal_alma
+        self._acik_event = multiprocessing.Event()
         return multiprocessing.Process(target=self.engelKontrol)
+
+    def kapat(self):
+        self._acik_event.set()
