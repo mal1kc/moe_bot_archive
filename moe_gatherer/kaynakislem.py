@@ -439,7 +439,6 @@ class SeferTarayici(CokluTarayici):
             sayac += 1
 
         if sefer_sayisi is not None:
-            self._seferMenusuAcKapat()
             gunlukcuGetir().debug("bulunan sefer sayisi %d" % sefer_sayisi)
 
             while sefer_sayisi == self.maks_sefer_sayisi:
@@ -447,12 +446,12 @@ class SeferTarayici(CokluTarayici):
 
                 if not self._islemDevamEtsinMi():
                     return False
-
                 gunlukcuGetir().debug("sefer sayisi maksimum azalması bekleniyor")
                 moveTo((400, 200))
                 sleep(bekleme_suresi)
                 sefer_sayisi = self._ekranTara()
                 moveTo((600, 400))
+            self._seferMenusuAcKapat()
             return True
         return False
 

@@ -16,7 +16,7 @@ class EngelTarayiciİslem:
             DosyaIslemleri.gorselGetir("hizmet_basarisiz"),
             DosyaIslemleri.gorselGetir("baglanti_kesildi"),
             DosyaIslemleri.gorselGetir("dunya_ikonu"),
-            DosyaIslemleri.gorselGetir("maks_Sefer"),
+            DosyaIslemleri.gorselGetir("maks_sefer"),
             DosyaIslemleri.gorselGetir("tekrar_dene"),
             DosyaIslemleri.gorselGetir("mavi_tamam"),
             DosyaIslemleri.gorselGetir("geri_ok"),
@@ -29,7 +29,7 @@ class EngelTarayiciİslem:
             eminlikGetir("hizmet_basarisiz"),
             eminlikGetir("baglanti_kesildi"),
             eminlikGetir("dunya_ikonu"),
-            eminlikGetir("maks_Sefer"),
+            eminlikGetir("maks_sefer"),
             eminlikGetir("tekrar_dene"),
             eminlikGetir("mavi_tamam"),
             eminlikGetir("geri_ok"),
@@ -42,7 +42,7 @@ class EngelTarayiciİslem:
             taramaBolgesiGetir("hizmet_basarisiz"),
             taramaBolgesiGetir("baglanti_kesildi"),
             taramaBolgesiGetir("dunya_ikonu"),
-            taramaBolgesiGetir("maks_Sefer"),
+            taramaBolgesiGetir("maks_sefer"),
             taramaBolgesiGetir("tekrar_dene"),
             taramaBolgesiGetir("mavi_tamam"),
             taramaBolgesiGetir("geri_ok"),
@@ -99,6 +99,7 @@ class EngelTarayiciİslem:
                 self._sinyalYolla(IslemSinyalleri.DUR)
                 self._sinyalBekle()
                 Fare.solTikla(_geriok_kare.merkez())
+                self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
 
         # FIXME oyundan çıkış engeli kaldırma
 
@@ -126,8 +127,9 @@ class EngelTarayiciİslem:
             if self.maksSeferUyari_tarayici.ekranTara() is not None:
                 self._sinyalYolla(IslemSinyalleri.DUR)
                 Fare.sagTikla()
-
+                sleep(ENGEL_KONTROL_SURESI / 2)
                 Fare.sagTikla()
+                sleep(ENGEL_KONTROL_SURESI / 2)
                 Fare.sagTikla()
                 self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
 

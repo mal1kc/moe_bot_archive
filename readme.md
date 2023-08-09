@@ -37,8 +37,7 @@
 ## FIXME Sorunlar
 
 > + öncelik
-
-- kaynak tarama islem asılı kalması (çözüm 30 saniye zorunlu suspend sonra devam)
+- maks sefer uyarısından kaçınamıyor
 - tüm çözünürlüklerde de daha çok test and foto optimizasyonu +
 
 

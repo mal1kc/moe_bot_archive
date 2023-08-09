@@ -12,6 +12,7 @@ from .hatalar import Hata, KullaniciHatasi
 
 izinli_anahtarlar = {
     "3c4d6bfb1a3bc68738a2ceb5db57ea61a003fbcd65357cd91027db9966149e7bad99affe5c86093644f141973e488a03bd049e28a26768ad395fe883d5d3b06e",  # 3840
+    "e94ec556caaa2a3fda2b037cf9d8d6c88bab1e5036851b6a64ad2cc1aaf97c05858b10af5cafd32bbc8156177f57f066d9d9ca8351d96c6fe4e45dbc8b5ea189",  # mal1kc , 2023-08-08 - 1
     # --------------------------------- önceki metod ile oluşturulan anahtarlar --------------------------------------------------------
     # "37af94aabee2109538566f1d6f7608e4ced073f2323a06e9598219600338d82a541868546cef6a0ddbc3539bb9442ff4f72b4501977d2e8d9d3f13bbae843fa1",  # mal1kc, 2023-07-23 - 1
     # "21eb42dbaa182e50736e39d40baa36048969adde335c0eeb09530a138ac1d7f161ebb69c48d9332f3ef0b587d413b0ecb3ad76e0e5b113d62ee73ff2d1cc96c1",
