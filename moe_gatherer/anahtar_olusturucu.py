@@ -181,19 +181,17 @@ class AnahtarKaynagiDXdiag:
     @staticmethod
     def get_sys_info(xml_root) -> SystemInfo:
         sys_info_xml = xml_root.find("SystemInformation")
-        sys_info_tuple = (
-            sys_info_xml.find("MachineName").text,
-            # sys_info_xml.find("MachineId").text, TODO: bu kısım eklenecek
-            sys_info_xml.find("OperatingSystem").text.split("(")[0].strip(),  # remove build number
-            sys_info_xml.find("SystemManufacturer").text,
-            sys_info_xml.find("SystemModel").text,
-            sys_info_xml.find("BIOS").text,
-            sys_info_xml.find("FirmwareType").text,
-            sys_info_xml.find(
+        return SystemInfo(
+            machine_name=sys_info_xml.find("MachineName").text,
+            operating_system=sys_info_xml.find("OperatingSystem").text.split("(")[0].strip(),  # remove build number
+            system_manufacturer=    sys_info_xml.find("SystemManufacturer").text,
+            system_model=sys_info_xml.find("SystemModel").text,
+            bios=sys_info_xml.find("BIOS").text,
+            firmware_type=sys_info_xml.find("FirmwareType").text,
+            processor=sys_info_xml.find(
                 "Processor"
-            ).text,  # remove cpu count and clock speed , # FIXME: bug var burda -> Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+            ).text,  # remove cpu count and clock speed 
         )
-        return SystemInfo(*sys_info_tuple)
 
 
 def anahtar_olustur():
