@@ -169,7 +169,7 @@ class EngelTarayiciİslem:
                 Fare.sagTikla()
                 maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
                 if maviTamamUyari_kare is not None:
-                    Fare.sagTikla()
+                    Fare.sagTikla(ENGEL_KONTROL_SURESI/2)
 
         def _oyundancikisTara():
             sleep(ENGEL_KONTROL_SURESI / 2)

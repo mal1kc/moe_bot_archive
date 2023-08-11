@@ -184,7 +184,7 @@ class AnahtarKaynagiDXdiag:
         return SystemInfo(
             machine_name=sys_info_xml.find("MachineName").text,
             operating_system=sys_info_xml.find("OperatingSystem").text.split("(")[0].strip(),  # remove build number
-            system_manufacturer=    sys_info_xml.find("SystemManufacturer").text,
+            system_manufacturer=sys_info_xml.find("SystemManufacturer").text,
             system_model=sys_info_xml.find("SystemModel").text,
             bios=sys_info_xml.find("BIOS").text,
             firmware_type=sys_info_xml.find("FirmwareType").text,
