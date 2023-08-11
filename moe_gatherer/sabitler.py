@@ -12,8 +12,8 @@ except Exception:
 
 UYUMA_SURESI = 2  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = "DEBUG"
-ENGEL_KONTROL_SURESI = 3  # Saniye
+GUNLUK_SEVIYESI = "INFO"
+ENGEL_KONTROL_SURESI = 2  # Saniye
 
 
 @dataclass(frozen=True, order=True)
@@ -54,6 +54,8 @@ class TaramaSabitleri:
         "mavi_tamam": "mavi_tamam*.png",
         "geri_ok": "geri_ok*.png",
         "tamam_buton": "tamam_buton*.png",
+        "geri_buton": "geri_buton.png",
+        "baglanti_yok": "baglanti_yok.png",
     }
 
     oyunui_gorsel_yl_dsn = {
@@ -92,7 +94,7 @@ class TaramaSabitleri:
             "sefer": Kare(400, 500, 100, 90),
             "sehir_ikonu": Kare(0, 2070, 240, 90),
             "moe_logo": Kare(1500, 0, 1000, 400),
-            "hizmet_basarisiz": Kare(1350, 960, 1200, 600),
+            "hizmet_basarisiz": Kare(1750, 500, 300, 300),
             "oyundan_cik": Kare(1650, 410, 500, 200),
             "baglanti_kesildi": Kare(1500, 400, 800, 300),
             "dunya_ikonu": Kare(0, 2070, 240, 90),
@@ -101,6 +103,8 @@ class TaramaSabitleri:
             "mavi_tamam": Kare(1550, 1150, 1000, 600),
             "geri_ok": Kare(0, 0, 200, 200),
             "tamam_buton": Kare(1550, 1150, 1000, 500),
+            "geri_buton": Kare(930, 1880, 500, 300),
+            "baglanti_yok": Kare(1900, 500, 200, 200),
         },
         "_1920": {
             "svy": Kare(925, 160, 235, 140),
@@ -130,9 +134,9 @@ class TaramaSabitleri:
         "_3840": [
             {
                 "x_taban": 0,
-                "x_tavan": 1190,
+                "x_tavan": 280,
                 "y_taban": 0,
-                "y_tavan": 1500,
+                "y_tavan": 1150,
             },
             {"y_taban": 1630},  # ölü bölge
             {"x_taban": 3580},  # ölü bölge
@@ -170,6 +174,7 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(2670, 1950),
             "isgal_duzeni": Koordinat2D(1100, 270),
             "bul_y": Koordinat2D(2030, 340),
+            "cikis_hayir": Koordinat2D(2110, 1370),
         },
         "_1920": {
             "bul_ikon": Koordinat2D(780, 50),
@@ -178,7 +183,6 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(1330, 965),
             "isgal_duzeni": Koordinat2D(450, 140),
             "bul_y": Koordinat2D(1020, 175),
-            "baglanti_yok": Koordinat2D(1050, 710),  # baglanti yok -tekrar dene- butonu # FIXME: koordinat ayarlanacak
             "sehir_ikonu": Koordinat2D(50, 1000),
         },
         "_1366": {
@@ -188,7 +192,6 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(950, 690),
             "isgal_duzeni": Koordinat2D(370, 100),
             "bul_y": Koordinat2D(730, 125),
-            "baglanti_yok": Koordinat2D(750, 490),
             "sehir_ikonu": Koordinat2D(30, 700),
         },
     }
@@ -258,6 +261,8 @@ class TaramaSabitleri:
             "mavi_tamam": 0.8,
             "geri_ok": 0.8,
             "tamam_buton": 0.8,
+            "geri_buton": 0.8,
+            "baglanti_yok": 0.8,
         },
         "_1920": {
             "sehir_ikonu": 0.8,

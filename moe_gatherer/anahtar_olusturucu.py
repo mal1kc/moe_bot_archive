@@ -32,15 +32,40 @@ xml_dosya_sifresi = "moe__gatherR"
 DXDIAG_KULLAN = True
 
 
+def get_first_word(full_word):
+    full_word = full_word.split(" ")[0].strip()
+    return full_word
+
+
 @dataclass
 class SystemInfo:
     machine_name: str
     operating_system: str
     system_manufacturer: str
     system_model: str
-    bios: str
     firmware_type: str
-    processor: str
+    bios: str  # type: ignore
+    processor: str  # type: ignore
+    # _processor: str = field(
+    #     init=False,
+    #     repr=False,
+    # )
+
+    @property
+    def processor(self) -> str:
+        return self._processor
+
+    @processor.setter
+    def processor(self, value):
+        self._processor = get_first_word(value)
+
+    @property
+    def bios(self) -> str:
+        return self._bios
+
+    @bios.setter
+    def bios(self, value):
+        self._bios = get_first_word(value)
 
     def __str__(self) -> str:
         return "+".join([str(i) for i in self.__dict__.values()])
@@ -155,10 +180,6 @@ class AnahtarKaynagiDXdiag:
 
     @staticmethod
     def get_sys_info(xml_root) -> SystemInfo:
-        def split_cpu_name(cpu_name):
-            cpu_name = cpu_name.split(" ")[0].strip()
-            return cpu_name
-
         sys_info_xml = xml_root.find("SystemInformation")
         sys_info_tuple = (
             sys_info_xml.find("MachineName").text,
@@ -168,9 +189,9 @@ class AnahtarKaynagiDXdiag:
             sys_info_xml.find("SystemModel").text,
             sys_info_xml.find("BIOS").text,
             sys_info_xml.find("FirmwareType").text,
-            split_cpu_name(
-                sys_info_xml.find("Processor").text
-            ),  # remove cpu count and clock speed , # FIXME: bug var burda -> Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
+            sys_info_xml.find(
+                "Processor"
+            ).text,  # remove cpu count and clock speed , # FIXME: bug var burda -> Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz
         )
         return SystemInfo(*sys_info_tuple)
 

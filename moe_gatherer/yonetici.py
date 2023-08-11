@@ -60,7 +60,7 @@ class BotIslemYonetici:
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
                     sleep(0.1)
-                    if self.engel_tarayici_islem._sinyal_gonderme == IslemSinyalleri.SONLANDIR:
+                    if self.engel_tarayici_islem._sinyal_gonderme.value == IslemSinyalleri.SONLANDIR:
                         return
 
     def tusKontrol(self, key):

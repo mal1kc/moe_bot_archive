@@ -1,13 +1,14 @@
-from moe_gatherer.kaynakislem import DosyaIslemleri, Tarayici, taramaBolgesiGetir
+from moe_gatherer.kaynakislem import DosyaIslemleri, Tarayici, eminlikGetir, taramaBolgesiGetir
+from moe_gatherer.temel_siniflar import Kare
 
 
 def main():
-    ad = "geri_ok"
+    ad = "hizmet_basarisiz"
     d_yl = DosyaIslemleri.gorselGetir(ad)
-    # eminlik = eminlikGetir(ad)
+    eminlik = eminlikGetir(ad)
     bolge = taramaBolgesiGetir(ad)
-    eminlik = 0.8
-    # bolge = Kare(0, 0, 500, 500)
+    # eminlik = 0.8
+    bolge = Kare(1750, 500, 300, 300)
     tarayici = Tarayici(ornek_d=d_yl, eminlik=eminlik, bolge=bolge, gri_tarama=True)
     tarayici_kare = tarayici.ekranTara()
     if tarayici_kare is not None:

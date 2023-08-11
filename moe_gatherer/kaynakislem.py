@@ -144,7 +144,7 @@ def klavyeGetir() -> Klavye:
 
 @cache
 def gunlukcuGetir() -> logging.Logger:
-    return logging.getLogger("tarama_islemi")
+    return logging.getLogger("kaynak_islemi")
 
 
 class BolgeTablosu:
@@ -247,18 +247,18 @@ class DosyaIslemleri:
 
 class Fare:
     @staticmethod
-    def sagTikla():
-        sleep(TaramaSabitleri.UYUMA_SURESI)
-        rightClick()
-        sleep(TaramaSabitleri.UYUMA_SURESI)
+    def sagTikla(uyuma_suresi=TaramaSabitleri.UYUMA_SURESI):
         _gunlukcu.debug("sağ tıklandı")
+        sleep(uyuma_suresi)
+        rightClick()
+        sleep(uyuma_suresi)
 
     @staticmethod
-    def solTikla(konum: Optional[Koordinat2D] = None):
+    def solTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi=TaramaSabitleri.UYUMA_SURESI):
         _gunlukcu.debug(f"sol tıklanıyor , konum: {str(konum)}")
-        sleep(TaramaSabitleri.UYUMA_SURESI)
+        sleep(uyuma_suresi)
         click(konum)
-        sleep(TaramaSabitleri.UYUMA_SURESI)
+        sleep(uyuma_suresi)
 
 
 class BolgeDegistirici(Fare):
@@ -803,14 +803,13 @@ class TaramaIslem:
         # )   # type: ignore
         gunlukcuGetir().debug(f"sinyal kontrol : {self._sinyal_alma.value=} {self._sinyal_gonderme.value=}")
         while self._sinyal_alma.value == IslemSinyalleri.DUR:
-            gunlukcuGetir().debug("DUR sinyali alindi")
             self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
             sleep(3)
             if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
-                gunlukcuGetir().debug("Devam et sinyali alındi")
                 self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
                 break
-        self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASMADI
+        if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
+            self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
         if self.acikmi_event.is_set():  # type: ignore
             return False
         return True

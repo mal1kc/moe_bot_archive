@@ -6,10 +6,10 @@ from moe_gatherer.temel_siniflar import KaynakTipi
 if __name__ == "__main__":
     # sleep(2)
     kaynak_tarama_eminlik = 0.7
-    kaynak_tarama = True
+    kaynak_tarama = False
     svy_tarama = False
     svy_tarama_eminlik = 0.8
-    sefer_tarama = False
+    sefer_tarama = True
     sefer_tarama_eminlik = 0.9
     max_sefer_sayisii = 3
 
