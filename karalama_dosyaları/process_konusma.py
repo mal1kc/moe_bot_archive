@@ -4,8 +4,9 @@ Denetleyici -> 'Calisan' denetler
 basYonetici -> 'Calisan' ve 'Denetleyici' yonetir
 
 Calisan sonsuza kadar calisir
-Detetleyici calisanin calismasini denetler | 
-    eger calisan x output verirse, denetleyici calisanin calismasini durdurur ve x'i y' ye donusturur ve calisanin calismasini devam_ettirir
+Detetleyici calisanin calismasini denetler |
+    eger calisan x output verirse, denetleyici calisanin calismasini durdurur ve \
+        x'i y' ye donusturur ve calisanin calismasini devam_ettirir
     eger calisan z output verise, denetleyici basyoneticiye programin calismasini durdurmasi icin bir sinyal gonderir
 """
 

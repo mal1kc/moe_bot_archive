@@ -22,7 +22,7 @@ else:
     """
 
     class Gunlukcu(logging.Logger):
-        def __init__(self, name=__qualname__, level: str = GUNLUK_SEVIYESI):
+        def __init__(self, name=__qualname__, level: str = GUNLUK_SEVIYESI):  # noqa: F821
             _gunluk_seviyesi = {
                 "DEBUG": logging.DEBUG,
                 "INFO": logging.INFO,

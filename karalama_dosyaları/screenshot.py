@@ -10,7 +10,7 @@ def screenshot():
     global photo_inx
     ekrangor = pyautogui.screenshot()
     ekrangor = cv2.cvtColor(np.array(ekrangor.convert("RGB")), cv2.COLOR_RGB2BGR)
-    cv2.imwrite(f"./tmp/ekrangor.png", ekrangor)
+    cv2.imwrite("./tmp/ekrangor.png", ekrangor)
 
 
 if __name__ == "__main__":

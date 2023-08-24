@@ -40,4 +40,3 @@ moe_gatherer = "moe_gatherer.__main__:main"
 program_ac = "program_ac:main"
 anahtar_olustur = "anahtar_olustur:main"
 exe_olustur = "exe_olustur:main"
-

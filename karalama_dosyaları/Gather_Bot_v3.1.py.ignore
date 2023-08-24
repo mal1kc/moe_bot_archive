@@ -37,14 +37,14 @@ def display_pannel():
     Image = Image
     ImageTk = ImageTk
     import PIL
-    
+
     def filter_finder():
         filter_val = entry.get()
         my_file = open('filter.txt', 'w', **('mode',))
         my_file.write(str(filter_val))
         my_file.close()
 
-    
+
     def Filter():
         global entry
         top = Toplevel()
@@ -68,7 +68,7 @@ def display_pannel():
     Entry_Frame = LabelFrame(root, 'Select Time', 20, 20, **('text', 'padx', 'pady'))
     entry_hour = Entry(Entry_Frame, 5, **('width',))
     entry_min = Entry(Entry_Frame, 5, **('width',))
-    
+
     def time_finder():
         global hours, hours, mins, mins, hours, mins
         val1 = entry_hour.get()
@@ -99,7 +99,7 @@ def display_pannel():
     March_Frame = LabelFrame(root, 'No. of marches', 20, 20, **('text', 'padx', 'pady'))
     entry_march = Entry(March_Frame, 5, **('width',))
     entry_march.grid(0, 0, **('row', 'column'))
-    
+
     def March_Finder():
         global marches
         val = entry_march.get()
@@ -107,7 +107,7 @@ def display_pannel():
             val = 6
         marches = val
 
-    
+
     def Swift_Finder():
         global swift_val
         curr_val = swiftt.get()
@@ -134,43 +134,43 @@ def display_pannel():
     five = IntVar()
     six = IntVar()
     seven = IntVar()
-    
+
     def food_finder():
         global food
         curr_val = one.get()
         food = curr_val
 
-    
+
     def wood_finder():
         global wood
         curr_val = two.get()
         wood = curr_val
 
-    
+
     def iron_finder():
         global iron
         curr_val = three.get()
         iron = curr_val
 
-    
+
     def stone_finder():
         global stone
         curr_val = four.get()
         stone = curr_val
 
-    
+
     def silver_finder():
         global silver
         curr_val = five.get()
         silver = curr_val
 
-    
+
     def gold_finder():
         global gold
         curr_val = six.get()
         gold = curr_val
 
-    
+
     def All_Tiles():
         global all_tile
         curr_val = seven.get()
@@ -184,7 +184,7 @@ def display_pannel():
     c6 = Checkbutton(Check_Box_Frame, seven, 'ALL', **('variable', 'text')).grid(0, 6, **('row', 'column'))
     c7 = Checkbutton(Check_Box_Frame, six, 'Gold', **('variable', 'text')).grid(0, 5, **('row', 'column'))
     Check_Box_Level = LabelFrame(root, 'Tile Lvl', 30, 20, **('text', 'padx', 'pady'))
-    
+
     def All_Finder():
         food_finder()
         wood_finder()
@@ -205,67 +205,67 @@ def display_pannel():
     l_9 = IntVar()
     l_10 = IntVar()
     l_11 = IntVar()
-    
+
     def l1_finder():
         global lvl_1
         curr_val = l_1.get()
         lvl_1 = curr_val
 
-    
+
     def l2_finder():
         global lvl_2
         curr_val = l_2.get()
         lvl_2 = curr_val
 
-    
+
     def l3_finder():
         global lvl_3
         curr_val = l_3.get()
         lvl_3 = curr_val
 
-    
+
     def l4_finder():
         global lvl_4
         curr_val = l_4.get()
         lvl_4 = curr_val
 
-    
+
     def l5_finder():
         global lvl_5
         curr_val = l_5.get()
         lvl_5 = curr_val
 
-    
+
     def l6_finder():
         global lvl_6
         curr_val = l_6.get()
         lvl_6 = curr_val
 
-    
+
     def l7_finder():
         global lvl_7
         curr_val = l_7.get()
         lvl_7 = curr_val
 
-    
+
     def l8_finder():
         global lvl_8
         curr_val = l_8.get()
         lvl_8 = curr_val
 
-    
+
     def l9_finder():
         global lvl_9
         curr_val = l_9.get()
         lvl_9 = curr_val
 
-    
+
     def l10_finder():
         global lvl_10
         curr_val = l_10.get()
         lvl_10 = curr_val
 
-    
+
     def l11_finder():
         global lvl_11
         curr_val = l_11.get()
@@ -282,7 +282,7 @@ def display_pannel():
     c99 = Checkbutton(Check_Box_Frame, l_9, '9', **('variable', 'text')).grid(1, 2, **('row', 'column'))
     c1010 = Checkbutton(Check_Box_Frame, l_10, '10', **('variable', 'text')).grid(1, 1, **('row', 'column'))
     c1111 = Checkbutton(Check_Box_Frame, l_11, '11', **('variable', 'text')).grid(1, 0, **('row', 'column'))
-    
+
     def All_lvl_Finder():
         l1_finder()
         l2_finder()
@@ -298,7 +298,7 @@ def display_pannel():
 
     Tweak_Frame = LabelFrame(root, 'Delay', 20, 20, **('text', 'padx', 'pady'))
     tweakk = DoubleVar()
-    
+
     def Tweaker_Finder():
         global tweaker
         curr_value = scale.get()
@@ -306,7 +306,7 @@ def display_pannel():
 
     scale = Scale(Tweak_Frame, 0, 10, HORIZONTAL, **('from_', 'to', 'orient'))
     scale.grid(0, 0, **('row', 'column'))
-    
+
     def killer():
         March_Finder()
         All_lvl_Finder()
@@ -536,71 +536,71 @@ def discord_commander(cmd_number, server_arr, discord_key_arr):
         for i in b[0:len(b)]:
             discord_key += i
         discord_key = str(discord_key)
-    
+
     if discord_key == 'none':
         return None
     bot = None.Bot('.', **('command_prefix',))
-    
+
     async def retry(ctx):
         pass
     # WARNING: Decompyle incomplete
 
     retry = bot.command()(retry)
-    
+
     async def hello(ctx):
         pass
     # WARNING: Decompyle incomplete
 
     hello = bot.command()(hello)
-    
+
     async def pic(ctx):
         pass
     # WARNING: Decompyle incomplete
 
     pic = bot.command()(pic)
-    
+
     async def video(ctx):
         pass
     # WARNING: Decompyle incomplete
 
     video = bot.command()(video)
-    
+
     async def about(ctx):
         pass
     # WARNING: Decompyle incomplete
 
     about = bot.command()(about)
-    
+
     async def startbot(ctx = None):
         pass
     # WARNING: Decompyle incomplete
 
     startbot = None(startbot)
-    
+
     async def stopbot(ctx = None):
         pass
     # WARNING: Decompyle incomplete
 
     stopbot = None(stopbot)
-    
+
     async def stopgame(ctx = None):
         pass
     # WARNING: Decompyle incomplete
 
     stopgame = None(stopgame)
-    
+
     async def stopsteam(ctx = None):
         pass
     # WARNING: Decompyle incomplete
 
     stopsteam = None(stopsteam)
-    
+
     async def startgame(ctx = None):
         pass
     # WARNING: Decompyle incomplete
 
     startgame = None(startgame)
-    
+
     async def status(ctx = None):
         pass
     # WARNING: Decompyle incomplete
@@ -617,11 +617,11 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         return None
     if None[0] == 1:
         display_pannel()
-    
+
     f = open('location_opener_stuck.txt', 'r')
     location_opener_stuck = f.read()
     f.close()
-    
+
     def check_for_disturbance():
         dir = ''
         wood_screen = py.locateOnScreen(resource_path(dir + 'img_1920/wood_screen.png'), (0, 13, 60, 60), 0.75, **('region', 'confidence'))
@@ -648,7 +648,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 game_restart()
         shield_checker()
 
-    
+
     def check_for_disturbance_global():
         haystack_img1 = py.screenshot((98, 800, 61, 34), **('region',))
         haystack_img1 = cv.cvtColor(np.array(haystack_img1), cv.COLOR_RGB2BGR)
@@ -681,7 +681,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         if len(ok) > 0:
             time.sleep(0.2)
             ok = pyautogui.locateOnScreen(resource_path(dir + 'ok.png'), (852, 639, 187, 65), 0.65, **('region', 'confidence'))
-            
+
             try:
                 ok = pyautogui.center(ok)
                 click(ok[0], ok[1])
@@ -721,7 +721,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 game_restart()
         shield_checker()
 
-    
+
     def normal_march():
         move_mouse(952, 784)
         py.click(952, 784)
@@ -731,7 +731,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         time.sleep(delay_2)
         py.click(1357, 990)
 
-    
+
     def shield_1920():
         py.press('w')
         time.sleep(0.2)
@@ -751,7 +751,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             aman = 'g'
         time.sleep(3)
 
-    
+
     def shield_checker():
         ss = py.locateOnScreen(resource_path(dir + 'shield_img.png'), 0.7, (1814, 358, 85, 80), **('confidence', 'region'))
         if ss == None:
@@ -759,7 +759,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             py.click('right', 1, **('button', 'clicks'))
             return None
 
-    
+
     def image_after_clicking():
         dir = 'img_1920/'
         s = py.locateOnScreen(resource_path(dir + 'unoccupied.png'), 0.85, (851, 362, 198, 60), **('confidence', 'region'))
@@ -811,7 +811,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                                                         return True
                                                     return None
 
-    
+
     def swift_attack():
         if march_type == 0:
             move_mouse(1221, 783)
@@ -819,7 +819,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             return None
         None()
 
-    
+
     def march_checker_2(n = None):
         side_icon()
         curr_time = time.time()
@@ -829,13 +829,13 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         if march != None:
             return True
 
-    
+
     def march_checker(n):
         march = py.locateOnScreen(resource_path('img_1920/march_' + str(n) + '.png'), 0.9, (199, 249, 65, 37), **('confidence', 'region'))
         if march != None:
             return True
 
-    
+
     def side_icon():
         side = py.locateOnScreen(resource_path('img_1920/side_icon.png'), 0.8, (49, 243, 67, 46), **('confidence', 'region'))
         if side == None:
@@ -844,7 +844,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             time.sleep(tweaker * 0.1)
             return None
 
-    
+
     def wait():
         check_for_disturbance_global()
         curr_time = time.time()
@@ -863,7 +863,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 return None
             return None
 
-    
+
     def one_screen_food():
         checker = False
         flag = False
@@ -924,7 +924,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance_global()
 
-    
+
     def one_screen_wood():
         checker = False
         flag = False
@@ -985,7 +985,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance_global()
 
-    
+
     def one_screen_iron():
         checker = False
         flag = False
@@ -1046,7 +1046,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance_global()
 
-    
+
     def one_screen_stone():
         checker = False
         flag = False
@@ -1107,7 +1107,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance_global()
 
-    
+
     def one_screen_silver():
         checker = False
         flag = False
@@ -1168,7 +1168,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance_global()
 
-    
+
     def badha():
         wood_screen = py.locateOnScreen(resource_path(dir + 'wood_screen.png'), (0, 13, 60, 60), 0.75, **('region', 'confidence'))
         if wood_screen != None:
@@ -1181,7 +1181,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         ok = pyautogui.locateOnScreen(resource_path(dir + 'ok.png'), 0.65, **('confidence',))
         if ok != None:
             time.sleep(0.25)
-            
+
             try:
                 ok = pyautogui.center(ok)
                 click(ok[0], ok[1])
@@ -1190,7 +1190,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             print('ok missed')
             cross = py.locateOnScreen(resource_path(dir + 'cross.png'), 0.75, **('confidence',))
             if cross != None:
-                
+
                 try:
                     cross = py.center(cross)
                     time.sleep(0.1)
@@ -1200,7 +1200,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
                 print('cross missed')
                 cross2 = py.locateOnScreen(resource_path(dir + 'cross2.png'), 0.75, **('confidence',))
                 if cross2 != None:
-                    
+
                     try:
                         cross2 = py.center(cross)
                         time.sleep(0.1)
@@ -1225,7 +1225,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             time.sleep(0.2)
             return None
 
-    
+
     def game_opener():
         retry_check = py.locateOnScreen(resource_path(dir + 'retry.png'), (858, 678, 192, 66), 0.8, **('region', 'confidence'))
         if retry_check != None:
@@ -1238,7 +1238,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         None.sleep(1)
         continue
 
-    
+
     def retry_checker():
         retry_check = py.locateOnScreen(resource_path(dir + 'retry.png'), (858, 678, 192, 66), 0.8, **('region', 'confidence'))
         if retry_check != None:
@@ -1247,7 +1247,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             game_restart()
             return None
 
-    
+
     def game_restart():
         time.sleep(1)
         os.system('start explorer shell:appsFolder\\A278AB0D.MarchofEmpires_h6adky7gbf63m!App')
@@ -1256,7 +1256,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         time.sleep(wait_val)
         clear_starting_screens
 
-    
+
     def clear_starting_screens():
         time.sleep(0.1)
         world = py.locateOnScreen(resource_path(dir + 'world.png'), (1804, 11, 100, 85), 0.6, **('region', 'confidence'))
@@ -1268,7 +1268,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
         badha()
         continue
 
-    
+
     def one_screen_gold():
         checker = False
         flag = False
@@ -1333,7 +1333,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             check_for_disturbance_global()
 
     if b_method == 1:
-        
+
         def location_opener(cord):
             x = str(cord[0])
             y = str(cord[1])
@@ -1361,7 +1361,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             py.click(1130, 186)
 
     elif b_method == 2:
-        
+
         def location_opener(cord):
             x = cord[0]
             y = cord[1]
@@ -1383,7 +1383,7 @@ def windows_1920(cmd_number, settings, server_arr, discord_key_arr):
             py.click(1130, 186)
 
     elif b_method == 3:
-        
+
         def location_opener(cord):
             x = cord[0]
             y = cord[1]
@@ -1465,8 +1465,8 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         return None
     if None[0] == 1:
         display_pannel()
-    
-    
+
+
     def normal_march():
         move_mouse(677, 557)
         py.click(677, 557)
@@ -1476,7 +1476,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         time.sleep(delay_2)
         py.click(940, 694)
 
-    
+
     def shield_1366():
         py.press('w')
         time.sleep(0.2)
@@ -1496,7 +1496,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             py.click(880, 433)
         time.sleep(3)
 
-    
+
     def shield_checker():
         ss = py.locateOnScreen(resource_path(dir + 'shield_img.png'), 0.7, (1289, 255, 68, 50), **('confidence', 'region'))
         if ss == None:
@@ -1504,7 +1504,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             py.click('right', 1, **('button', 'clicks'))
             return None
 
-    
+
     def image_after_clicking():
         dir = 'img_1366/'
         s = py.locateOnScreen(resource_path(dir + 'unoccupied.png'), 0.85, (605, 257, 140, 42), **('confidence', 'region'))
@@ -1556,7 +1556,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                                                         return True
                                                     return None
 
-    
+
     def swift_attack():
         if march_type == 0:
             move_mouse(864, 552)
@@ -1564,7 +1564,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             return None
         None()
 
-    
+
     def march_checker_2(n = None):
         side_icon()
         curr_time = time.time()
@@ -1574,7 +1574,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         if march != None:
             return True
 
-    
+
     def march_checker(n = None):
         curr_time = time.time()
         if curr_time - start_time > samay or cmd_number[1] == 0:
@@ -1583,7 +1583,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         if march != None:
             return True
 
-    
+
     def side_icon():
         side = py.locateOnScreen(resource_path('img_1366/side_icon.png'), 0.8, (34, 172, 47, 32), **('confidence', 'region'))
         if side == None:
@@ -1592,7 +1592,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             time.sleep(tweaker * 0.1)
             return None
 
-    
+
     def wait():
         curr_time = time.time()
         if curr_time - start_time > samay or cmd_number[1] == 0:
@@ -1611,7 +1611,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 return None
             return None
 
-    
+
     def one_screen_food():
         checker = False
         flag = False
@@ -1672,7 +1672,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def one_screen_wood():
         checker = False
         flag = False
@@ -1733,7 +1733,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def one_screen_stone():
         checker = False
         flag = False
@@ -1794,7 +1794,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def one_screen_iron():
         checker = False
         flag = False
@@ -1855,7 +1855,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def one_screen_silver():
         checker = False
         flag = False
@@ -1916,7 +1916,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def one_screen_gold():
         checker = False
         flag = False
@@ -1977,7 +1977,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
                 pyautogui.click('right', 1, **('button', 'clicks'))
             check_for_disturbance()
 
-    
+
     def badha():
         wood_screen = py.locateOnScreen(resource_path(dir + 'wood_screen.png'), (0, 9, 42, 42), 0.75, **('region', 'confidence'))
         if wood_screen != None:
@@ -1990,7 +1990,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         ok = pyautogui.locateOnScreen(resource_path(dir + 'ok.png'), (606, 454, 133, 46), 0.65, **('region', 'confidence'))
         if ok != None:
             time.sleep(0.25)
-            
+
             try:
                 ok = pyautogui.center(ok)
                 click(ok[0], ok[1])
@@ -1999,7 +1999,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             print('ok missed')
             cross = py.locateOnScreen(resource_path(dir + 'cross.png'), 0.75, **('confidence',))
             if cross != None:
-                
+
                 try:
                     cross = py.center(cross)
                     time.sleep(0.1)
@@ -2016,7 +2016,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
 
 
 
-    
+
     def game_opener():
         retry_check = py.locateOnScreen(resource_path(dir + 'retry.png'), (609, 483, 129, 37), 0.8, **('region', 'confidence'))
         if retry_check != None:
@@ -2029,7 +2029,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         None.sleep(1)
         continue
 
-    
+
     def clear_starting_screens():
         time.sleep(0.1)
         world = py.locateOnScreen(resource_path(dir + 'world.png'), (1278, 6, 71, 51), 0.6, **('region', 'confidence'))
@@ -2041,7 +2041,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         badha()
         continue
 
-    
+
     def game_restart():
         time.sleep(1)
         os.system('start explorer shell:appsFolder\\A278AB0D.MarchofEmpires_h6adky7gbf63m!App')
@@ -2051,7 +2051,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         badha()
         badha()
 
-    
+
     def retry_checker():
         retry_check = py.locateOnScreen(resource_path(dir + 'retry.png'), (609, 483, 129, 37), 0.8, **('region', 'confidence'))
         if retry_check != None:
@@ -2061,7 +2061,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             game_restart()
             return None
 
-    
+
     def check_for_disturbance():
         dir = ''
         wood_screen = py.locateOnScreen(resource_path(dir + 'img_1366/wood_screen.png'), (0, 9, 42, 42), 0.75, **('region', 'confidence'))
@@ -2087,7 +2087,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
         shield_checker()
 
     if b_method == 1:
-        
+
         def location_opener(cord):
             x = str(cord[0])
             y = str(cord[1])
@@ -2116,7 +2116,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             py.click(803, 132)
 
     elif b_method == 2:
-        
+
         def location_opener(cord):
             x = cord[0]
             y = cord[1]
@@ -2139,7 +2139,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
             py.click(803, 132)
 
     elif b_method == 3:
-        
+
         def location_opener(cord):
             x = cord[0]
             y = cord[1]
@@ -2224,7 +2224,7 @@ def windows_1366(cmd_number, settings, server_arr, discord_key_arr):
 
 def new_update_downloader(name, address):
     import gdown
-    
+
     def killer():
         top.destroy()
 
@@ -2325,7 +2325,7 @@ def server_communication(server_arr, discord_key_arr):
     bot_version = '3.2'
     d_d = ''
     result_w_g = ''
-    
+
     try:
         key_w_g = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, 'SOFTWARE\\Microsoft\\Cryptography', 0, winreg.KEY_READ | winreg.KEY_WOW64_64KEY)
         result_w_g = winreg.QueryValueEx(key_w_g, 'MachineGuid')
@@ -2333,7 +2333,7 @@ def server_communication(server_arr, discord_key_arr):
     finally:
         pass
     result_w_g = 'notfound'
-    
+
     try:
         d_d = subprocess.check_output('wmic DISKDRIVE get SerialNumber').decode().split('\n')[1].strip()
     finally:

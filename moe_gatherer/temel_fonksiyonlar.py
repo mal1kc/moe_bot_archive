@@ -39,7 +39,7 @@ def sozlukBirlestir(sozluk1: dict, sozluk2: dict):
     if sozluk1.keys() == sozluk2.keys():
         for k, v in sozluk1.items():
             ic_sonuc = dict()
-            if type(v) is dict:
+            if isinstance(v, dict):
                 ic_sonuc = sozlukBirlestir(sozluk1[k], sozluk2[k])
             sonuc[k] = ic_sonuc
         return sonuc

@@ -25,7 +25,7 @@
 
     - y > 1630 ise tıklama yapma (ölü bölge)
     - x > 3600 ise tıklama yapma (ölü bölge)
-- çözünürlük bazli templateler 
+- çözünürlük bazli templateler
 - çözünürlük bazli bölgeler
 - arayüz , yapıldı birleştirilcek
 - tarama sefer doıluysa yapılmasın ( önce sefer tarama)
@@ -47,7 +47,7 @@
 - testler yeniden yazılacak ve düzenlenecek
 - engeltarayici - devre dışı bırakıldı ( düzenlenecek | yeterince stabil değil )
     - s , d
-    - baglanti kesilmesi 
+    - baglanti kesilmesi
         - tekrar deneye basıp moe logosnun kaybolmasını beklicek
     - baska cihaz baglandı
         - kendini kapatsin ****
@@ -56,7 +56,7 @@
     - TODO daha birlestirilmedi
     - etkinlik ve reklam geçme --
         - şehir menüsü -dünya (dağlar)
-- kaynağa ait svy görsellerini kullanabiliyor 
+- kaynağa ait svy görsellerini kullanabiliyor
     > odun svy * için -> `o_svy_*.png`
     - eğer bulamazsa svy_*.png kullanıyor
 - basitEngelTarayici birleştirilecek

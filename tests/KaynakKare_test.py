@@ -24,14 +24,14 @@ def test_kare_str(ornek_kare):
     kaynak_kare = ornek_kare
     assert (
         str(kaynak_kare) == f"KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})"
-    ), f"KaynakKare str hatası\n beklenen: KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})\n alınan: {kaynak_kare}"
+    ), f"KaynakKare str hatası\n beklenen: KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})\n alınan: {kaynak_kare}"  # noqa: E501
 
 
 def test_kare_repr(ornek_kare):
     kaynak_kare = ornek_kare
     assert (
         repr(kaynak_kare) == f"KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})"
-    ), f"KaynakKare repr hatası\n beklenen: KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})\n alınan: {kaynak_kare}"
+    ), f"KaynakKare repr hatası\n beklenen: KaynakKare({kaynak_kare.x},{kaynak_kare.y},{kaynak_kare.genislik},{kaynak_kare.yukseklik})\n alınan: {kaynak_kare}"  # noqa: E501
 
 
 def test_kare_hash(ornek_kare):

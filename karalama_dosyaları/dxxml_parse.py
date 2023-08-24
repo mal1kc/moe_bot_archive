@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import os
-from time import time
 import xml.etree.ElementTree as ET
 import subprocess
 import datetime

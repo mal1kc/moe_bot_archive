@@ -1,7 +1,6 @@
 import cv2 as cv
 import numpy as np
 import pyautogui
-from matplotlib import pyplot as plt
 from pynput import keyboard
 
 

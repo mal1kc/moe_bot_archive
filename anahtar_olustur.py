@@ -45,7 +45,7 @@ def main():
     print(f"{elle_girilen_degerlerden_uretilmis_anahtar2=}")
     print(f"{elle_girilen_degerlerden_uretilmis_anahtar2 == elle_girilen_degerlerden_uretilmis_anahtar=}")
 
-    # 5766956de3bbee63fff3f6090b15c173beb16b83bc251890b35003d8a28dc8ecac390dde5429d242bd9f7659ae275a420ca71be763fb3de170fa21dc3f7a3f73_nfo
+    # 5766956de3bbee63fff3f6090b15c173beb16b83bc251890b35003d8a28dc8ecac390dde5429d242bd9f7659ae275a420ca71be763fb3de170fa21dc3f7a3f73_nfo # noqa: E501
     # gibi adı olan dosyayı sil paylaşma ; *_nfo dosyasını sil
     # kopyalansada işe yaramaz çunku adı kullanıcı adının + islemci adinin hashlenmiş hali (sha512)
     # dxdiag çıktısını yavaş veriyor diye şifrelediğim dxdiag çıktısı o

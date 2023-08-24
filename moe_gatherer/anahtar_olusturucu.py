@@ -6,7 +6,9 @@ import psutil
 from hashlib import sha512
 import platform
 import xml.etree.ElementTree as ET
-import subprocess
+
+# ruff: noqa: E501
+
 
 from .hatalar import Hata, KullaniciHatasi
 
@@ -188,9 +190,7 @@ class AnahtarKaynagiDXdiag:
             system_model=sys_info_xml.find("SystemModel").text,
             bios=sys_info_xml.find("BIOS").text,
             firmware_type=sys_info_xml.find("FirmwareType").text,
-            processor=sys_info_xml.find(
-                "Processor"
-            ).text,  # remove cpu count and clock speed 
+            processor=sys_info_xml.find("Processor").text,  # remove cpu count and clock speed
         )
 
 

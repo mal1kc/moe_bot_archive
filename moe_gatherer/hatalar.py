@@ -1,8 +1,8 @@
 # circular import hatası alabiliriz
 import logging
 from typing import Any
-import win32api
-import win32con
+import win32api  # noqa: F401
+import win32con  # noqa: F401
 
 hata_gunlukcu = logging.getLogger("gunlukcu.hatalar")
 
