@@ -78,14 +78,17 @@ class BotArayuz(Tk):
             self.arayuz_degiskenleri = None
             self.quit()
 
-        canvas = Canvas(self, height=390, width=550)
+        canvas = Canvas(self, height=390, width=530)
         canvas.pack()
 
         label_top = Label(self, text="LÜTFEN SEÇİMLERİNİZİ YAPINIZ", font="Verdana 14", foreground="RED")
-        label_top.place(x=65, y=15)
+        label_top.place(x=105, y=15)
+
+        label_bottom = Label(self, text="7. sefer sadece Ekstra Sefer açıldığında çalışır.", font="Verdana 13", foreground="RED")
+        label_bottom.place(x=65, y=355)
 
         frame_KaynakTipi = LabelFrame(self, text="Kaynak Tipi", font="Verdana 12")
-        frame_KaynakTipi.place(x=20, y=60, width=160, height=297)
+        frame_KaynakTipi.place(x=20, y=60, width=160, height=287)
 
         chkbks_kaynak = {
             k: Checkbutton(
@@ -109,7 +112,7 @@ class BotArayuz(Tk):
         chkbks_all_tip.place(x=20, y=220)
 
         frame_KaynakSeviyesi = LabelFrame(self, text="Kaynak Seviye", font="Verdana 12")
-        frame_KaynakSeviyesi.place(x=190, y=60, width=170, height=297)
+        frame_KaynakSeviyesi.place(x=190, y=60, width=170, height=287)
 
         svy_chkbks = {
             i: Checkbutton(
@@ -147,7 +150,7 @@ class BotArayuz(Tk):
             frame_SeferSayisi,
             font="Verdana 10",
             state="readonly",
-            values=["1", "2", "3", "4", "5", "6"],
+            values=["1", "2", "3", "4", "5", "6", "7"],
             textvariable=self.sefer_durum,
             width=10,
         )

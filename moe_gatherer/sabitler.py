@@ -12,8 +12,8 @@ except Exception:
 
 UYUMA_SURESI = 2  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = "DEBUG"
-ENGEL_KONTROL_SURESI = 3  # Saniye
+GUNLUK_SEVIYESI = "INFO"
+ENGEL_KONTROL_SURESI = 2  # Saniye
 
 
 @dataclass(frozen=True, order=True)
@@ -54,6 +54,11 @@ class TaramaSabitleri:
         "mavi_tamam": "mavi_tamam*.png",
         "geri_ok": "geri_ok*.png",
         "tamam_buton": "tamam_buton*.png",
+        "geri_buton": "geri_buton.png",
+        "baglanti_yok": "baglanti_yok.png",
+        # "kalkan": "kalkan.png",
+        # "devre_disi": "devre_disi.png",
+        # "devam_buton": "devam_buton.png",
     }
 
     oyunui_gorsel_yl_dsn = {
@@ -92,37 +97,59 @@ class TaramaSabitleri:
             "sefer": Kare(400, 500, 100, 90),
             "sehir_ikonu": Kare(0, 2070, 240, 90),
             "moe_logo": Kare(1500, 0, 1000, 400),
-            "hizmet_basarisiz": Kare(1350, 960, 1200, 600),
+            "hizmet_basarisiz": Kare(1750, 500, 300, 300),
             "oyundan_cik": Kare(1650, 410, 500, 200),
             "baglanti_kesildi": Kare(1500, 400, 800, 300),
             "dunya_ikonu": Kare(0, 2070, 240, 90),
             "maks_sefer": Kare(1650, 410, 500, 200),
             "tekrar_dene": Kare(1550, 1150, 1000, 600),
-            "mavi_tamam": Kare(1550, 1150, 1000, 600),
+            "mavi_tamam": Kare(1550, 1220, 1000, 600),
             "geri_ok": Kare(0, 0, 200, 200),
             "tamam_buton": Kare(1550, 1150, 1000, 500),
+            "geri_buton": Kare(930, 1880, 500, 300),
+            "baglanti_yok": Kare(1900, 500, 200, 200),
+            # "kalkan": Kare(3650, 720, 160, 110),
+            # "devre_disi": Kare(1780, 480, 250, 100),
+            # "devam_buton": Kare(430, 1600, 700, 500),
         },
         "_1920": {
             "svy": Kare(925, 160, 235, 140),
             "isgal_durumu": Kare(820, 330, 270, 100),
             "sefer": Kare(170, 210, 120, 100),
-            "sehir_ikonu": Kare(0, 920, 150, 260),
-            "moe_logo": Kare(750, 0, 500, 200),
-            "hizmet_basarisiz": Kare(670, 480, 600, 300),
-            "oyundan_cik": Kare(820, 410, 250, 100),
-            "baglanti_kesildi": Kare(750, 200, 400, 150),
-            "dunya_ikonu": Kare(0, 1030, 120, 45),
+            "sehir_ikonu": Kare(0, 950, 150, 130),
+            "moe_logo": Kare(860, 0, 300, 200),
+            "hizmet_basarisiz": Kare(740, 230, 470, 220),
+            "oyundan_cik": Kare(820, 230, 250, 100),
+            "baglanti_kesildi": Kare(740, 230, 470, 220),
+            "dunya_ikonu": Kare(0, 950, 120, 130),
             "maks_sefer": Kare(820, 200, 125, 50),
-            "tekrar_dene": Kare(775, 570, 500, 300),
-            "mavi_tamam": Kare(775, 570, 500, 300),
+            "tekrar_dene": Kare(960, 650, 200, 100),
+            "mavi_tamam": Kare(730, 550, 500, 500),
             "geri_ok": Kare(0, 0, 200, 200),
-            "tamam_buton": Kare(775, 570, 500, 250),
+            "tamam_buton": Kare(825, 450, 500, 250),
+            "geri_buton": Kare(490, 950, 200, 200),
+            "baglanti_yok": Kare(740, 230, 470, 220),
+            # "kalkan": Kare(3650, 720, 160, 110), #değişecek
+            # "devre_disi": Kare(1780, 480, 250, 100), #değişecek
+            # "devam_buton": Kare(200, 850, 550, 1030),
         },
         "_1366": {
-            "sehir_ikonu": Kare(0, 660, 100, 100),  # x,y ,genislik ,yukseklik
             "svy": Kare(640, 130, 180, 70),
             "isgal_durumu": Kare(575, 235, 200, 75),
             "sefer": Kare(110, 150, 100, 70),
+            "sehir_ikonu": Kare(0, 730, 100, 37),  #
+            "moe_logo": Kare(600, 0, 200, 150),  #
+            "hizmet_basarisiz": Kare(660, 170, 150, 60),  #
+            "oyundan_cik": Kare(600, 150, 120, 70),  #
+            "baglanti_kesildi": Kare(660, 170, 150, 60),  #
+            "dunya_ikonu": Kare(0, 730, 100, 37),  #
+            "maks_sefer": Kare(580, 160, 150, 50),  #
+            "tekrar_dene": Kare(680, 470, 140, 70),  #
+            "mavi_tamam": Kare(530, 415, 300, 260),  #
+            "geri_ok": Kare(0, 0, 50, 50),  #
+            "tamam_buton": Kare(610, 450, 140, 100),  #
+            "geri_buton": Kare(330, 670, 145, 70),  #
+            "baglanti_yok": Kare(660, 170, 150, 60),  #
         },
     }
 
@@ -130,9 +157,9 @@ class TaramaSabitleri:
         "_3840": [
             {
                 "x_taban": 0,
-                "x_tavan": 1190,
+                "x_tavan": 280,
                 "y_taban": 0,
-                "y_tavan": 1500,
+                "y_tavan": 1150,
             },
             {"y_taban": 1630},  # ölü bölge
             {"x_taban": 3580},  # ölü bölge
@@ -141,9 +168,9 @@ class TaramaSabitleri:
         "_1920": [
             {
                 "x_taban": 0,  # 290+
-                "x_tavan": 600,  # 540-
+                "x_tavan": 135,  # 540-
                 "y_taban": 0,  # 0+
-                "y_tavan": 630,  # 550-
+                "y_tavan": 550,  # 550-
                 # kombinleniyor x: 540-290 , y: 500-0
             },
             {"y_taban": 820},  # ölü bölge , 820+
@@ -153,12 +180,13 @@ class TaramaSabitleri:
         "_1366": [
             {
                 "x_taban": 0,
-                "x_tavan": 400,
+                "x_tavan": 100,
                 "y_taban": 0,
-                "y_tavan": 440,
+                "y_tavan": 400,
             },
             {"y_taban": 560},
             {"x_taban": 1270},
+            {"y_tavan": 100},
         ],
     }
 
@@ -170,6 +198,12 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(2670, 1950),
             "isgal_duzeni": Koordinat2D(1100, 270),
             "bul_y": Koordinat2D(2030, 340),
+            "cikis_hayir": Koordinat2D(2110, 1370),
+            # "mavi_tamam": Koordinat2D(1900, 1540),
+            # "kalkan": Koordinat2D(3700, 780),
+            # "kalkan2": Koordinat2D(500, 540),
+            # "kullan": Koordinat2D(2050, 1220),
+            # "kalkan_al_Evet": Koordinat2D(1660, 1370),
         },
         "_1920": {
             "bul_ikon": Koordinat2D(780, 50),
@@ -178,8 +212,7 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(1330, 965),
             "isgal_duzeni": Koordinat2D(450, 140),
             "bul_y": Koordinat2D(1020, 175),
-            "baglanti_yok": Koordinat2D(1050, 710),  # baglanti yok -tekrar dene- butonu # FIXME: koordinat ayarlanacak
-            "sehir_ikonu": Koordinat2D(50, 1000),
+            "cikis_hayir": Koordinat2D(1060, 690),
         },
         "_1366": {
             "bul_ikon": Koordinat2D(560, 35),
@@ -188,8 +221,7 @@ class TaramaSabitleri:
             "isgal_2": Koordinat2D(950, 690),
             "isgal_duzeni": Koordinat2D(370, 100),
             "bul_y": Koordinat2D(730, 125),
-            "baglanti_yok": Koordinat2D(750, 490),
-            "sehir_ikonu": Koordinat2D(30, 700),
+            "cikis_hayir": Koordinat2D(750, 485),  #
         },
     }
 
@@ -258,6 +290,11 @@ class TaramaSabitleri:
             "mavi_tamam": 0.8,
             "geri_ok": 0.8,
             "tamam_buton": 0.8,
+            "geri_buton": 0.8,
+            "baglanti_yok": 0.8,
+            # "kalkan": 0.8,
+            # "devre_disi": 0.8,
+            # "devam_buton": 0.8,
         },
         "_1920": {
             "sehir_ikonu": 0.8,
@@ -271,20 +308,27 @@ class TaramaSabitleri:
             "mavi_tamam": 0.8,
             "geri_ok": 0.8,
             "tamam_buton": 0.8,
+            "geri_buton": 0.8,
+            "baglanti_yok": 0.8,
         },
         "_1366": {
+            "sehir_ikonu": 0.8,
             "moe_logo": 0.8,
-            "baglanti_yok": 0.8,
+            "hizmet_basarisiz": 0.8,
             "oyundan_cik": 0.8,
             "baglanti_kesildi": 0.8,
             "dunya_ikonu": 0.8,
-            "devam_et_buton": 0.8,
+            "maks_sefer": 0.8,
+            "tekrar_dene": 0.8,
+            "mavi_tamam": 0.8,
+            "geri_ok": 0.8,
             "tamam_buton": 0.8,
+            "geri_buton": 0.8,
+            "baglanti_yok": 0.8,
         },
     }
 
     EMINLIKLER = {
-        # geçici değerler
         "_3840": {
             "svy": 0.9,
             "sefer": 0.9,

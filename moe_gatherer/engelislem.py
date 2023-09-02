@@ -4,7 +4,7 @@ from time import sleep
 
 from .temel_siniflar import IslemSinyalleri
 from .sabitler import ENGEL_KONTROL_SURESI
-from .kaynakislem import DosyaIslemleri, Fare, Tarayici, eminlikGetir, taramaBolgesiGetir
+from .kaynakislem import DosyaIslemleri, Fare, Tarayici, eminlikGetir, taramaBolgesiGetir, tiklamaNoktasiGetir
 
 
 class EngelTarayiciİslem:
@@ -22,6 +22,11 @@ class EngelTarayiciİslem:
             DosyaIslemleri.gorselGetir("geri_ok"),
             DosyaIslemleri.gorselGetir("tamam_buton"),
             DosyaIslemleri.gorselGetir("oyundan_cik"),
+            DosyaIslemleri.gorselGetir("geri_buton"),
+            DosyaIslemleri.gorselGetir("baglanti_yok"),
+            # DosyaIslemleri.gorselGetir("kalkan"),
+            # DosyaIslemleri.gorselGetir("devre_disi"),
+            # DosyaIslemleri.gorselGetir("devam_buton"),
         )
         eminlikler = (
             eminlikGetir("sehir_ikonu"),
@@ -35,6 +40,11 @@ class EngelTarayiciİslem:
             eminlikGetir("geri_ok"),
             eminlikGetir("tamam_buton"),
             eminlikGetir("oyundan_cik"),
+            eminlikGetir("geri_buton"),
+            eminlikGetir("baglanti_yok"),
+            # eminlikGetir("kalkan"),
+            # eminlikGetir("devre_disi"),
+            # eminlikGetir("devam_buton"),
         )
         bolgeler = (
             taramaBolgesiGetir("sehir_ikonu"),
@@ -48,6 +58,11 @@ class EngelTarayiciİslem:
             taramaBolgesiGetir("geri_ok"),
             taramaBolgesiGetir("tamam_buton"),
             taramaBolgesiGetir("oyundan_cik"),
+            taramaBolgesiGetir("geri_buton"),
+            taramaBolgesiGetir("baglanti_yok"),
+            # taramaBolgesiGetir("kalkan"),
+            # taramaBolgesiGetir("devre_disi"),
+            # taramaBolgesiGetir("devam_buton"),
         )
         self.sehirIkon_tarayici = Tarayici(
             ornek_d=dler[0], eminlik=eminlikler[0], bolge=bolgeler[0], gri_tarama=True, isim="engelTarayici.sehirIkon_tarayici"
@@ -79,6 +94,24 @@ class EngelTarayiciİslem:
         self.tamam_tarayici = Tarayici(
             ornek_d=dler[9], eminlik=eminlikler[9], bolge=bolgeler[9], gri_tarama=True, isim="engelTarayici.tamam_tarayici"
         )
+        self.oyundan_cik = Tarayici(
+            ornek_d=dler[10], eminlik=eminlikler[10], bolge=bolgeler[10], gri_tarama=True, isim="engelTarayici.oyundanCik_tarayici"
+        )
+        self.geri_buton_tarayici = Tarayici(
+            ornek_d=dler[11], eminlik=eminlikler[11], bolge=bolgeler[11], gri_tarama=True, isim="engelTarayici.geri_tarayici"
+        )
+        self.baglantiYok_tarayici = Tarayici(
+            ornek_d=dler[12], eminlik=eminlikler[12], bolge=bolgeler[12], gri_tarama=True, isim="engelTarayici.baglantiYok_tarayici"
+        )
+        # self.kalkan_tarayici = Tarayici(
+        #     ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.kalkan_tarayici"
+        # )
+        # self.devre_disi_tarayici = Tarayici(
+        #     ornek_d=dler[14], eminlik=eminlikler[14], bolge=bolgeler[14], gri_tarama=True, isim="engelTarayici.devre_disi_tarayici"
+        # )
+        # self.devam_buton_tarayici = Tarayici(
+        #     ornek_d=dler[15], eminlik=eminlikler[15], bolge=bolgeler[15], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
+        # )
 
     def _gunlukcuBaslat(self) -> None:
         self.gunlukcu = logging.getLogger("engelTarayiciİslem")
@@ -97,100 +130,137 @@ class EngelTarayiciİslem:
             _geriok_kare = self.geriOk_tarayici.ekranTara()
             if _geriok_kare is not None:
                 self._sinyalYolla(IslemSinyalleri.DUR)
-                self._sinyalBekle()
                 Fare.solTikla(_geriok_kare.merkez())
-                self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
+            self.gunlukcu.debug("geri ok tarama bitti")
 
         # FIXME oyundan çıkış engeli kaldırma
 
         def _sehirYoksa() -> None:
             _dunyaIkon_kare = self.dunyaIkon_tarayici.ekranTara()
             if _dunyaIkon_kare is not None:
+                self.gunlukcu.debug("dunya ikonu algilandi.")
                 Fare.solTikla(_dunyaIkon_kare.merkez())
                 if _sehirIkonuTara():
-                    self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
-                self.gunlukcu.debug("_sehirYoksa :-> sehir ikonu bulunamadi")
-            self.gunlukcu.debug("_sehirYoksa :-> dünya ikonu bulunamadi")
+                    self.gunlukcu.debug("sehir ikonu algilandi")
+                else:
+                    self.gunlukcu.debug("_sehirYoksa :-> sehir ikonu bulunamadi")
+                    Fare.sagTikla()
+            else:
+                self.gunlukcu.debug("_sehirYoksa :-> dünya ikonu bulunamadi")
 
         def _hizmetBasarisizTara():
             if self.hizmetBasarisiz_tarayici.ekranTara() is not None:
+                self.gunlukcu.debug("hizmet basarisiz uyarisi algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
                 _yenidenDeneButonTikla()
-                self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
 
         def _baglantiKesildiTara():
             if self.baglantiKesildi_tarayici.ekranTara() is not None:
+                self.gunlukcu.debug("baglanti kesildi uyarisi algilandi.")
                 # exit sinyali
                 self._sinyalYolla(IslemSinyalleri.SONLANDIR)
 
         def _maksSeferUyariTara():
             if self.maksSeferUyari_tarayici.ekranTara() is not None:
+                self.gunlukcu.debug("maks sefer uyarisi algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
-                Fare.sagTikla()
-                sleep(ENGEL_KONTROL_SURESI / 2)
-                Fare.sagTikla()
-                sleep(ENGEL_KONTROL_SURESI / 2)
-                Fare.sagTikla()
-                self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
+                tamam_konum = self.tamam_tarayici.ekranTara()
+                if tamam_konum is not None:
+                    Fare.solTikla(tamam_konum.merkez())
+                    geri_konum = self.geri_buton_tarayici.ekranTara()
+                    if geri_konum is not None:
+                        Fare.solTikla(geri_konum.merkez())
+                        Fare.sagTikla()
+
+        # def _devambutonTara():
+        #     devamTara = self.devam_buton_tarayici.ekranTara()
+        #     if devamTara is not None:
+        #         sleep(0.5)
+        #         Fare.solTikla(devamTara.merkez())
+
+        # def _barisKalkani():
+        #     kalkanTara = self.kalkan_tarayici.ekranTara()
+        #     if kalkanTara is None:
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan"))
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan2"))
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kullan"))
+        #         devredisiTara = self.devre_disi_tarayici.ekranTara()
+        #         if devredisiTara is not None:
+        #             Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan_al_Evet"))
+        #         _geriok_kare = self.geriOk_tarayici.ekranTara()
+        #         if _geriok_kare is not None:
+        #             Fare.solTikla(_geriok_kare.merkez())
 
         def _yenidenDeneButonTikla():
             yenidenDeneButon_Kare = self.tekrarDeneButon_tarayici.ekranTara()
             if yenidenDeneButon_Kare is not None:
+                self.gunlukcu.debug("yeniden dene butonu algilandi.")
                 sleep(ENGEL_KONTROL_SURESI)
                 Fare.solTikla(yenidenDeneButon_Kare.merkez())
 
         def _maviTamamTara():
             maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
             if maviTamamUyari_kare is not None:
+                self.gunlukcu.debug("mavi tamam butonu algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
-                Fare.sagTikla()
+                sleep(2)
+                Fare.solTikla(maviTamamUyari_kare.merkez())
                 maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
                 if maviTamamUyari_kare is not None:
-                    Fare.sagTikla()
-                self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
+                    sleep(2)
+                    Fare.solTikla(maviTamamUyari_kare.merkez())
 
-        # def _tamam2UyariTara() -> bool:
-        #     tamam2Uyari_kare = self.tamam2Uyari_tarayici.ekranTara()
-        #     if tamam2Uyari_kare is not None:
-        #         self._sinyalYolla(IslemSinyalleri.DUR)
-        #         Fare.sagTikla()
-        #         if self.seferDuzenLogo_tarayici.ekranTara() is not None:
-        #             Fare.sagTikla()
-        #             Fare.sagTikla()
-        #         self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
+        def _oyundancikisTara():
+            sleep(ENGEL_KONTROL_SURESI / 2)
+            if self.oyundan_cik.ekranTara() is not None:
+                self.gunlukcu.debug("oyundak cik uyarrısı bulundu")
+                self._sinyalYolla(IslemSinyalleri.DUR)
+                Fare.solTikla(konum=tiklamaNoktasiGetir("cikis_hayir"))
 
         def _moeLogoBekle() -> None:
-            while self.moeLogo_tarayici.ekranTara() is None:
+            while self.moeLogo_tarayici.ekranTara() is not None:
+                self.gunlukcu.debug("moe logo algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
                 sleep(ENGEL_KONTROL_SURESI)
                 _yenidenDeneButonTikla()
-            self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
+
+        def _baglantiYokTara():
+            if self.baglantiYok_tarayici.ekranTara() is not None:
+                self.gunlukcu.debug("baglanti yok algilandi.")
+                self._sinyalYolla(IslemSinyalleri.DUR)
+                sleep(ENGEL_KONTROL_SURESI)
+                _yenidenDeneButonTikla()
 
         while True and self._acikmi():
-            # _moeLogoBekle()
+            _moeLogoBekle()
+            _baglantiYokTara()
             _baglantiKesildiTara()
             _hizmetBasarisizTara()
             _maviTamamTara()
             _geriOkTara()
+            _oyundancikisTara()
+            # _devambutonTara()
             _sehirIkonuTara()
-            # _oyundancikisTara
             _maksSeferUyariTara()
-
+            self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
             sleep(ENGEL_KONTROL_SURESI)
 
     def _sinyalYolla(self, sinyal) -> None:
-        self.gunlukcu.debug("sinyal goderildi.")
+        self.gunlukcu.debug("sinyal gonderildi.")
         self._sinyal_gonderme.value = sinyal
-        self._sinyalBekle()
+        if sinyal != IslemSinyalleri.DEVAM_ET:
+            self._sinyalBekle()
 
     def _sinyalBekle(self) -> None:
         self.gunlukcu.debug("sinyal bekleniyor")
         while self._sinyal_alma.value == IslemSinyalleri.MESAJ_ULASMADI:
             self.gunlukcu.debug("sinyal ulasmasi bekleniyor")
             sleep(0.1)
+        self._sinyal_alma.value = IslemSinyalleri.MESAJ_ULASMADI
+        self.gunlukcu.debug("sinyal ulasti")
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}_(sinyal={self._sinyal.value})"  # type: ignore
+        return f"{self.__class__.__name__}"  # type: ignore
 
     def _acikmi(self) -> bool:
         return not self._acik_event.is_set()
