@@ -12,7 +12,7 @@ except Exception:
 
 UYUMA_SURESI = 2  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = "INFO"
+GUNLUK_SEVIYESI = "DEBUG"
 ENGEL_KONTROL_SURESI = 2  # Saniye
 
 
