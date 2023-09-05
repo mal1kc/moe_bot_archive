@@ -8,7 +8,7 @@ def main():
     anahtar_kaynagi = AnahtarKaynagiDXdiag()
     print(AnahtarKaynagiDXdiag.get_sys_info(anahtar_kaynagi._dxdiag))
     sys_info = SystemInfo(
-        machine_name="DESKTOP-RIQLJRQ",
+        machine_name="DESKTOP-RK0QR39",
         operating_system="Windows 10 Pro 64-bit",
         system_manufacturer="ASUSTeK COMPUTER INC.",
         system_model="GL553VD",

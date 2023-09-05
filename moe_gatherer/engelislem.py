@@ -24,6 +24,9 @@ class EngelTarayiciİslem:
             DosyaIslemleri.gorselGetir("oyundan_cik"),
             DosyaIslemleri.gorselGetir("geri_buton"),
             DosyaIslemleri.gorselGetir("baglanti_yok"),
+            # DosyaIslemleri.gorselGetir("kalkan"),
+            # DosyaIslemleri.gorselGetir("devre_disi"),
+            # DosyaIslemleri.gorselGetir("devam_buton"),
         )
         eminlikler = (
             eminlikGetir("sehir_ikonu"),
@@ -39,6 +42,9 @@ class EngelTarayiciİslem:
             eminlikGetir("oyundan_cik"),
             eminlikGetir("geri_buton"),
             eminlikGetir("baglanti_yok"),
+            # eminlikGetir("kalkan"),
+            # eminlikGetir("devre_disi"),
+            # eminlikGetir("devam_buton"),
         )
         bolgeler = (
             taramaBolgesiGetir("sehir_ikonu"),
@@ -54,6 +60,9 @@ class EngelTarayiciİslem:
             taramaBolgesiGetir("oyundan_cik"),
             taramaBolgesiGetir("geri_buton"),
             taramaBolgesiGetir("baglanti_yok"),
+            # taramaBolgesiGetir("kalkan"),
+            # taramaBolgesiGetir("devre_disi"),
+            # taramaBolgesiGetir("devam_buton"),
         )
         self.sehirIkon_tarayici = Tarayici(
             ornek_d=dler[0], eminlik=eminlikler[0], bolge=bolgeler[0], gri_tarama=True, isim="engelTarayici.sehirIkon_tarayici"
@@ -94,6 +103,15 @@ class EngelTarayiciİslem:
         self.baglantiYok_tarayici = Tarayici(
             ornek_d=dler[12], eminlik=eminlikler[12], bolge=bolgeler[12], gri_tarama=True, isim="engelTarayici.baglantiYok_tarayici"
         )
+        # self.kalkan_tarayici = Tarayici(
+        #     ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.kalkan_tarayici"
+        # )
+        # self.devre_disi_tarayici = Tarayici(
+        #     ornek_d=dler[14], eminlik=eminlikler[14], bolge=bolgeler[14], gri_tarama=True, isim="engelTarayici.devre_disi_tarayici"
+        # )
+        # self.devam_buton_tarayici = Tarayici(
+        #     ornek_d=dler[15], eminlik=eminlikler[15], bolge=bolgeler[15], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
+        # )
 
     def _gunlukcuBaslat(self) -> None:
         self.gunlukcu = logging.getLogger("engelTarayiciİslem")
@@ -154,6 +172,25 @@ class EngelTarayiciİslem:
                         Fare.solTikla(geri_konum.merkez())
                         Fare.sagTikla()
 
+        # def _devambutonTara():
+        #     devamTara = self.devam_buton_tarayici.ekranTara()
+        #     if devamTara is not None:
+        #         sleep(0.5)
+        #         Fare.solTikla(devamTara.merkez())
+
+        # def _barisKalkani():
+        #     kalkanTara = self.kalkan_tarayici.ekranTara()
+        #     if kalkanTara is None:
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan"))
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan2"))
+        #         Fare.solTikla(konum=tiklamaNoktasiGetir("kullan"))
+        #         devredisiTara = self.devre_disi_tarayici.ekranTara()
+        #         if devredisiTara is not None:
+        #             Fare.solTikla(konum=tiklamaNoktasiGetir("kalkan_al_Evet"))
+        #         _geriok_kare = self.geriOk_tarayici.ekranTara()
+        #         if _geriok_kare is not None:
+        #             Fare.solTikla(_geriok_kare.merkez())
+
         def _yenidenDeneButonTikla():
             yenidenDeneButon_Kare = self.tekrarDeneButon_tarayici.ekranTara()
             if yenidenDeneButon_Kare is not None:
@@ -166,10 +203,12 @@ class EngelTarayiciİslem:
             if maviTamamUyari_kare is not None:
                 self.gunlukcu.debug("mavi tamam butonu algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
-                Fare.sagTikla()
+                sleep(2)
+                Fare.solTikla(maviTamamUyari_kare.merkez())
                 maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
                 if maviTamamUyari_kare is not None:
-                    Fare.sagTikla(ENGEL_KONTROL_SURESI / 2)
+                    sleep(2)
+                    Fare.solTikla(maviTamamUyari_kare.merkez())
 
         def _oyundancikisTara():
             sleep(ENGEL_KONTROL_SURESI / 2)
@@ -200,6 +239,7 @@ class EngelTarayiciİslem:
             _maviTamamTara()
             _geriOkTara()
             _oyundancikisTara()
+            # _devambutonTara()
             _sehirIkonuTara()
             _maksSeferUyariTara()
             self._sinyalYolla(IslemSinyalleri.DEVAM_ET)

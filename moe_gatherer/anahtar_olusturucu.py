@@ -13,8 +13,10 @@ import xml.etree.ElementTree as ET
 from .hatalar import Hata, KullaniciHatasi
 
 izinli_anahtarlar = {
-    "3c4d6bfb1a3bc68738a2ceb5db57ea61a003fbcd65357cd91027db9966149e7bad99affe5c86093644f141973e488a03bd049e28a26768ad395fe883d5d3b06e",  # 3840
+    "8a9c4d226984a4a25d812fcc1881dff100cd4b5c5c19a14d5a0386ba2402aed38fa55048bf12afd4c0a26b6e31cec73d3f6705f89b7ddc3e93ac12097a5ca0d8",  # 3840
     "e94ec556caaa2a3fda2b037cf9d8d6c88bab1e5036851b6a64ad2cc1aaf97c05858b10af5cafd32bbc8156177f57f066d9d9ca8351d96c6fe4e45dbc8b5ea189",  # mal1kc , 2023-08-08 - 1
+    "3ea564c12301d7f2d15fde215f8fa89027d1d6c81cf8abd387a86578f146320e7c89b001a4f47ae250c6282b3c68bb9852e7f52ad34a1880d82ce2f2a8fdbcc6",  # burakAnaPC
+    "bd332cebb9dc33358d9909236a17c12922d898edd0caae8d88b5c15f0aa2c76b5caaef38a1928c613fb20108ec8d400d60f17250718a282cacd9f916223f78e9",  # burak SanalPC
     # --------------------------------- önceki metod ile oluşturulan anahtarlar --------------------------------------------------------
     # "37af94aabee2109538566f1d6f7608e4ced073f2323a06e9598219600338d82a541868546cef6a0ddbc3539bb9442ff4f72b4501977d2e8d9d3f13bbae843fa1",  # mal1kc, 2023-07-23 - 1
     # "21eb42dbaa182e50736e39d40baa36048969adde335c0eeb09530a138ac1d7f161ebb69c48d9332f3ef0b587d413b0ecb3ad76e0e5b113d62ee73ff2d1cc96c1",
