@@ -1,0 +1,13 @@
+# only base packges
+opencv-python-headless
+pyautogui
+pynput
+pylightxl
+pywin32
+# dev
+pytest
+ruff-lsp # it also installs ruff, i think
+black
+isort
+pre-commit
+pyinstaller

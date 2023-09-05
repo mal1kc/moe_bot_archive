@@ -201,14 +201,12 @@ class EngelTarayiciİslem:
         def _maviTamamTara():
             maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
             if maviTamamUyari_kare is not None:
-                self.gunlukcu.debug("mavi tamam butonu algilandi.")
                 self._sinyalYolla(IslemSinyalleri.DUR)
-                sleep(2)
+                self.gunlukcu.debug("mavi tamam butonu algilandi.")
+                sleep(ENGEL_KONTROL_SURESI) # 2
                 Fare.solTikla(maviTamamUyari_kare.merkez())
-                maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
-                if maviTamamUyari_kare is not None:
-                    sleep(2)
-                    Fare.solTikla(maviTamamUyari_kare.merkez())
+                sleep(ENGEL_KONTROL_SURESI) # 2
+                _maviTamamTara()
 
         def _oyundancikisTara():
             sleep(ENGEL_KONTROL_SURESI / 2)
