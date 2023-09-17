@@ -1,5 +1,5 @@
-from .kaynakislem import KaynakFare, Varsayilanlar
-from .temel_siniflar import Koordinat2D
+from moe_gatherer.kaynakislem import KaynakFare, Varsayilanlar
+from moe_gatherer.temel_siniflar import Koordinat2D
 
 
 def test_kisitli_bolgeler():

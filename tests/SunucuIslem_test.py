@@ -2,9 +2,9 @@ import logging
 
 import pytest
 import requests
-from .sifremele import hazirlanmis_sifre_olustur, sifre_hash_olustur
-from .sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
-from .temel_siniflar import KullaniciGirisVerisi
+from moe_gatherer.sifremele import hazirlanmis_sifre_olustur, sifre_hash_olustur
+from moe_gatherer.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
+from moe_gatherer.temel_siniflar import KullaniciGirisVerisi
 
 LOCAL_SUNUCU_ADRESI = "http://127.0.0.1:5000"
 LOGGER = logging.getLogger(__name__)
