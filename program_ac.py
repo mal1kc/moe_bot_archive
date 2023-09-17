@@ -33,35 +33,11 @@ def _bilgi_yazdir():
 
 
 def main():
-    print("yetki kontrolu yapiliyor...")
-    if cihaz_yetkilimi():
-        print("yetki kontrolu basarili.")
-        botarayuz = arayuz.BotArayuz()
-        _bilgi_yazdir()
-        botarayuz.mainloop()
-        arayuz_degisgenleri = botarayuz.arayuz_degiskenleri
-
-        # TEMP:
-        # arayuz_degisgenleri = {
-        #     "kaynak_tipleri": [KaynakTipi.TAS,KaynakTipi.DEMIR],
-        #     "svyler": [1,2,3,4,5],
-        #     "sefer_sayisi": 6,
-        # }
-
-        if arayuz_degisgenleri is not None:
-            bt = BotIslemYonetici(
-                maks_sefer_sayisi=arayuz_degisgenleri["sefer_sayisi"],
-                kaynak_tipleri=arayuz_degisgenleri["kaynak_tipleri"],
-                svyler=arayuz_degisgenleri["svyler"],
-            )
-            bt.botBaslat()
-    else:
-        print("yetki kontrolu basarisiz.")
+    app = uygulama_olustur()
+    app.mainloop()
 
 
 if __name__ == "__main__":
-    from moe_gatherer import BotIslemYonetici, arayuz, cihaz_yetkilimi  # noqa
-    from moe_gatherer.temel_siniflar import KaynakTipi  # noqa
-    from moe_gatherer import sabitler  # noqa
+    from moe_gatherer import uygulama_olustur
 
     main()

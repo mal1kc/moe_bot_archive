@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import logging.handlers
 import os
 from datetime import datetime
 from typing import Any
@@ -16,6 +17,8 @@ if __name__ == "__main__":
 else:
     from .sabitler import GUNLUK_KLASORU, GUNLUK_SEVIYESI
 
+    # Hata => circular import hatası alabiliriz
+
     # gunlukcu = logging.getLogger('gunlukcu')
     """
     __qualname__ : classın ismini alıyor
@@ -31,15 +34,19 @@ else:
                 "CRITICAL": logging.CRITICAL,
             }[level]
             super().__init__(name, level=_gunluk_seviyesi)
-            _suan = datetime.now()
-
             # self.stream_handlr =logging.StreamHandler()
 
             # self.addHandler(self.stream_handlr)
             if not os.path.exists(GUNLUK_KLASORU):
                 os.mkdir(GUNLUK_KLASORU)
             if _gunluk_seviyesi == logging.DEBUG:
-                self.file_handlr = logging.FileHandler(f"{GUNLUK_KLASORU}/{name}_{_suan.hour}_{_suan.minute}.log", mode="w")
+                self.file_handlr = logging.handlers.RotatingFileHandler(
+                    # f"{GUNLUK_KLASORU}/{name}_{_suan.hour}_{_suan.minute}.log",
+                    f"{GUNLUK_KLASORU}/{name}.log",
+                    mode="w",
+                    maxBytes=1024 * 1024 * 10,  # 10 MB,
+                    backupCount=10,
+                )
 
                 self.addHandler(self.file_handlr)
             for handler in self.handlers:
@@ -50,7 +57,7 @@ else:
 
     # gunlukcu = logging.getLogger('gunlukcu')
 
-    def gunlukcuGetir(cls_instance: object = None, name: str = "moe_gatherer") -> logging.Logger:
+    def gunlukcuGetir(name: str = "moe_gatherer", cls_instance: object = None) -> logging.Logger:
         if cls_instance is None:
             return logging.getLogger(name)
         if not hasattr(cls_instance, "gunlukcu"):

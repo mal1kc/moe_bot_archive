@@ -10,7 +10,7 @@ from typing import Any, Callable, Optional
 import pylightxl as xl
 from pyautogui import click, locateAllOnScreen, locateOnScreen, moveTo, press, rightClick
 from pyautogui import size as _ekranBoyutu
-from pyautogui import write
+from pyautogui import write, FailSafeException
 
 from .gunlukcu import Gunlukcu  # noqa
 from .hatalar import Hata, KullaniciHatasi
@@ -263,14 +263,14 @@ class Fare:
 
 class BolgeDegistirici(Fare):
     """
-    d    Fare sınıfından türetilmiş BolgeDegistirici sınıfı\n
-        -> Fare sınıfının solTikla ve sagTikla metotlarını kullanır\n
-        -> BolgeTablosu sınıfından bolge koordinatlarını alır\n
-        -> KaynakKare sınıfından kareler oluşturur\n
-        -> buyutec ikonuna tıklar\n
-        -> BolgeTablosunda kaldigi yerden devam eder\n
-        -> bolgeDegistir metodu ile bolge değiştirir\n
-        -> eğer bolge tablosu sonuna gelirse başa döner\n
+    Fare sınıfından türetilmiş BolgeDegistirici sınıfı\n
+     -> Fare sınıfının solTikla ve sagTikla metotlarını kullanır\n
+     -> BolgeTablosu sınıfından bolge koordinatlarını alır\n
+     -> KaynakKare sınıfından kareler oluşturur\n
+     -> buyutec ikonuna tıklar\n
+     -> BolgeTablosunda kaldigi yerden devam eder\n
+     -> bolgeDegistir metodu ile bolge değiştirir\n
+     -> eğer bolge tablosu sonuna gelirse başa döner\n
     """
 
     def __init__(
@@ -793,9 +793,22 @@ class TaramaIslem:
     def otoKaynakToplama(self):
         """ana işlem döngüsü gerçekleştiren fonksiyon\n"""
         while True:
-            if not self.acikmi():
-                break
-            self.kaynak_yonetici.ekranTara(0.7)  # type: ignore , eğer üst satırda break olursa bu satır çalışmayacak
+            try:
+                if not self.acikmi():
+                    break
+                self.kaynak_yonetici.ekranTara(0.7)
+            except FailSafeException as pyautogui_failsafe_exc:
+                gunlukcuGetir().debug(f"FailSafeException yakalandı, {pyautogui_failsafe_exc}")
+                self._sinyal_gonderme.value = IslemSinyalleri.FAILSAFE_SONLANDIR
+            except OSError as os_err:
+                gunlukcuGetir().debug(f"OSError yakalandı, {os_err}")
+                sleep(5)  # 5 saniye bekle ve tekrar dene
+            except KeyboardInterrupt as kb_intrp_exc:
+                gunlukcuGetir().debug(f"KeyboardInterrupt yakalandı, {kb_intrp_exc}")
+                self._sinyal_gonderme.value = IslemSinyalleri.SONLANDIR
+            except Exception as exc:
+                gunlukcuGetir().debug(f"Exception yakalandı, {exc}")
+                self._sinyal_gonderme.value = IslemSinyalleri.DUR
 
     def acikmi(self) -> bool:
         #  __tarama_islemi_gunlukcu().debug(

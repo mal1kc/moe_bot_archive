@@ -1,179 +1,180 @@
-{"better-comments.tags": [
-    {
-        "tag": "",
-        "color": "#BB8D70",
-        "bold": true
+{
+    "better-comments.tags": [
+        {
+            "tag": "",
+            "color": "#BB8D70",
+            "bold": true
+        },
+        {
+            "tag": "!",
+            "color": "#FF2D00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "FIXME",
+            "color": "#FF2D00",
+            "strikethrough": false,
+            "underline": true,
+            "backgroundColor": "black",
+            "bold": true,
+            "italic": false
+        },
+        {
+            "tag": "?",
+            "color": "#3498DB",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "//",
+            "color": "#474747",
+            "strikethrough": true,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "todo",
+            "color": "#FF8C00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "*",
+            "color": "#98C379",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "IMPORTANT",
+            "color": "#FF2D00",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": false,
+            "italic": false
+        },
+        {
+            "tag": "H1",
+            "color": "#6B2C70",
+            "strikethrough": false,
+            "underline": true,
+            "backgroundColor": "#9ae897",
+            "bold": true,
+            "italic": true
+        },
+        {
+            "tag": "H2",
+            "color": "#936697",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": true
+        },
+        {
+            "tag": "Q:",
+            "color": "#D16927",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "#2f2f2f",
+            "bold": true,
+            "italic": true
+        },
+        {
+            "tag": "SUMMARY",
+            "color": "#37dd11",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": true
+        },
+        {
+            "tag": "-",
+            "color": "#5D9160",
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": true
+        }
+    ],
+    "python.analysis.typeCheckingMode": "basic",
+    "python.linting.flake8Enabled": false,
+    "python.linting.enabled": true,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll": true
+        },
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
-    {
-        "tag": "!",
-        "color": "#FF2D00",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },       {
-        "tag": "FIXME",
-        "color": "#FF2D00",
-        "strikethrough": false,
-        "underline": true,
-        "backgroundColor": "black",
-        "bold": true,
-        "italic": false
-    }
-    ,
-    {
-        "tag": "?",
-        "color": "#3498DB",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },
-    {
-        "tag": "//",
-        "color": "#474747",
-        "strikethrough": true,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },
-    {
-        "tag": "todo",
-        "color": "#FF8C00",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },
-    {
-        "tag": "*",
-        "color": "#98C379",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },
-    {
-        "tag": "IMPORTANT",
-        "color": "#FF2D00",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": false,
-        "italic": false
-    },
-    {
-        "tag": "H1",
-        "color": "#6B2C70",
-        "strikethrough": false,
-        "underline": true,
-        "backgroundColor": "#9ae897",
-        "bold": true,
-        "italic": true
-    },
-    {
-        "tag": "H2",
-        "color": "#936697",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": true,
-        "italic": true
-    },
-    {
-        "tag": "Q:",
-        "color": "#D16927",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "#2f2f2f",
-        "bold": true,
-        "italic": true
-    },
-    {
-        "tag": "SUMMARY",
-        "color": "#37dd11",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": true,
-        "italic": true
-    },
-    {
-        "tag": "-",
-        "color": "#5D9160",
-        "strikethrough": false,
-        "underline": false,
-        "backgroundColor": "transparent",
-        "bold": true,
-        "italic": true
-    }
-],
-"python.analysis.typeCheckingMode": "basic",
-"python.linting.flake8Enabled": false,
-"python.linting.enabled": true,
-"[python]": {
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-      "source.fixAll": true
-    },
-    "editor.defaultFormatter": "ms-python.black-formatter"
-  },
-"python.formatting.provider": "none",
-"python.testing.pytestArgs": [
-    "tests"
-],
-"python.testing.unittestEnabled": false,
-"python.testing.pytestEnabled": true,
-"cSpell.enableFiletypes": [
-    "bat",
-    "lua",
-    "makefile",
-    "powershell"
-],
-"cSpell.words": [
-    "Bolgeleri",
-    "Coklu",
-    "fonk",
-    "genislik",
-    "gunlukcu",
-    "miktr",
-    "ndigits",
-    "olcek",
-    "pynput",
-    "pywin",
-    "readxl",
-    "yukseklik"
-],
-"files.eol": "\r\n",
-"todo-tree.highlights.customHighlight": {
-    "BUG": {
-        "icon": "bug"
-    },
-    "HACK": {
-        "icon": "tools"
-    },
-    "FIXME": {
-        "icon": "flame",
-        "foreground": "#f17354"
-    },
-    "XXX": {
-        "icon": "x"
-    },
-    "[ ]": {
-        "icon": "issue-draft"
-    },
-    "[x]": {
-        "icon": "issue-closed"
-    },
-    "REMEMBER": {
-        "icon": "light-bulb",
-        "iconColour": "#FFCC00",
-        "foreground": "#00ff80"
+    "python.formatting.provider": "none",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "cSpell.enableFiletypes": [
+        "bat",
+        "lua",
+        "makefile",
+        "powershell"
+    ],
+    "cSpell.words": [
+        "Bolgeleri",
+        "Coklu",
+        "fonk",
+        "genislik",
+        "gunlukcu",
+        "miktr",
+        "ndigits",
+        "olcek",
+        "pynput",
+        "pywin",
+        "readxl",
+        "yukseklik"
+    ],
+    "files.eol": "\r\n",
+    "todo-tree.highlights.customHighlight": {
+        "BUG": {
+            "icon": "bug"
+        },
+        "HACK": {
+            "icon": "tools"
+        },
+        "FIXME": {
+            "icon": "flame",
+            "foreground": "#f17354"
+        },
+        "XXX": {
+            "icon": "x"
+        },
+        "[ ]": {
+            "icon": "issue-draft"
+        },
+        "[x]": {
+            "icon": "issue-closed"
+        },
+        "REMEMBER": {
+            "icon": "light-bulb",
+            "iconColour": "#FFCC00",
+            "foreground": "#00ff80"
+        }
     }
 }
- }

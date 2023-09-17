@@ -203,9 +203,9 @@ class EngelTarayiciİslem:
             if maviTamamUyari_kare is not None:
                 self._sinyalYolla(IslemSinyalleri.DUR)
                 self.gunlukcu.debug("mavi tamam butonu algilandi.")
-                sleep(ENGEL_KONTROL_SURESI) # 2
+                sleep(ENGEL_KONTROL_SURESI)  # 2
                 Fare.solTikla(maviTamamUyari_kare.merkez())
-                sleep(ENGEL_KONTROL_SURESI) # 2
+                sleep(ENGEL_KONTROL_SURESI)  # 2
                 _maviTamamTara()
 
         def _oyundancikisTara():
@@ -242,6 +242,7 @@ class EngelTarayiciİslem:
             _maksSeferUyariTara()
             self._sinyalYolla(IslemSinyalleri.DEVAM_ET)
             sleep(ENGEL_KONTROL_SURESI)
+            self._sinyalDurKontrol()
 
     def _sinyalYolla(self, sinyal) -> None:
         self.gunlukcu.debug("sinyal gonderildi.")
@@ -256,6 +257,12 @@ class EngelTarayiciİslem:
             sleep(0.1)
         self._sinyal_alma.value = IslemSinyalleri.MESAJ_ULASMADI
         self.gunlukcu.debug("sinyal ulasti")
+
+    def _sinyalDurKontrol(self) -> None:
+        if self._sinyal_alma.value == IslemSinyalleri.DUR:
+            self.gunlukcu.debug("sinyal dur kontrol")
+            sleep(ENGEL_KONTROL_SURESI * 2)
+            self.gunlukcu.debug("sinyal dur kontrol bitti")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"  # type: ignore

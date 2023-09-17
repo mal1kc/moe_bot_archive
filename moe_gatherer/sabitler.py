@@ -2,8 +2,8 @@ from dataclasses import dataclass
 import os
 import sys
 
-from moe_gatherer.temel_fonksiyonlar import sozlukeriBirlestir
-from moe_gatherer.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
+from .temel_fonksiyonlar import sozlukeriBirlestir
+from .temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
 
 try:
     BASE_PATH = sys._MEIPASS  # type: ignore
@@ -28,10 +28,6 @@ class TaramaSabitleri:
         "coordinates/regions.xlsx",
         os.path.join(BASE_PATH, "imgs/"),
     ]
-
-    # *******************************************
-    dil_tablos = {"en": {KaynakTipi.EKMEK.name: "food"}}
-    # *******************************************
 
     kaynak_gorsel_yl_dsn = {
         KaynakTipi.EKMEK.name: "ek_*.png",

@@ -37,7 +37,12 @@
 - çözünürlük bazli bölgeler
 - arayüz , yapıldı birleştirilcek
 - tarama sefer doıluysa yapılmasın ( önce sefer tarama)
+- testler yeniden yazılacak ve düzenlenecek (yapıldı)
 
+- kullanılacak modul secim arayüzü (yapıldı)
+- sunucu entegrasyonu (yapıldı)
+- temel sunucu bağlantısı (yapıldı)
+- login arayüzü (yapıldı)
 
 ## eklendi - test edilecek
 
@@ -45,14 +50,18 @@
 ## FIXME Sorunlar
 
 - tüm çözünürlüklerde de daha çok test and foto optimizasyonu +
-
+- confidence değerlerinin hepsi ayarlardan alınmıyor
 
 ## TODO eksikler
 
-- testler yeniden yazılacak ve düzenlenecek
-- cprofile ile performans testi yapılacak 
+- cprofile ile performans testi yapılacak ve pympler ile memory testi yapılacak
     + minimum 10 sefer
-- sunucu entegrasyonu
+- ayarlar modul secildiğinde yüklenicek (ayarlar modulu) (%50) (karalamada)
+- daha moduler özellikler (feauture)
+    - moe_gatherer (sonradan modulerleştirilecek)
+    - moe_advantures (sonra)
+    - moe_camp (sonra)
+    - moe_raid (sonra)
 
 ## olsa güzel olur
 
@@ -60,5 +69,4 @@
 - siniflari tiplerine göre dosyalara konulabilir
 - pynput controller --> rlock oluşturduğundan (rlock pickle edilemiyor) kaldırılmıştı
 - daha anlaşılabilir hale getirilecek
-- logları decaroterle yap
 - arayüzde resim yok (resim gözükmüyor)

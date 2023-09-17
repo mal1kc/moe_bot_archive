@@ -1,12 +1,8 @@
 # circular import hatası alabiliriz
-import logging
 from typing import Any
+
 import win32api  # noqa: F401
 import win32con  # noqa: F401
-
-hata_gunlukcu = logging.getLogger("gunlukcu.hatalar")
-
-hata_gunlukcu.setLevel(logging.ERROR)
 
 
 class Hata(Exception):
@@ -14,8 +10,12 @@ class Hata(Exception):
     Hata sınıfı
     """
 
+    ...
+
+
+class BaglantiHatasi(Hata):
     def __init__(self, *args: Any) -> None:
-        hata_gunlukcu.exception(f"Hata oluştu {args}")
+        self.hata_mesaji = args[0] if len(args) > 0 else "Bağlantı Hatası"
         return super().__init__(*args)
 
 

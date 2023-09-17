@@ -2,7 +2,6 @@ from dataclasses import dataclass
 import os
 import subprocess
 from typing import Optional
-import psutil
 from hashlib import sha512
 import platform
 import xml.etree.ElementTree as ET
@@ -143,9 +142,7 @@ class AnahtarKaynagiDXdiag:
     @staticmethod
     def _dxdiag_xml_olustur() -> str:
         temel_dosya_adi = "dxdiag.xml"
-        yeni_dosya_adi = (
-            f"{sha512(psutil.users()[0].name.encode('utf-8') + platform.uname().processor.encode('utf-8')).hexdigest()}_nfo"
-        )
+        yeni_dosya_adi = f"{sha512(platform.uname().processor.encode('utf-8')).hexdigest()}_nfo"
 
         if os.path.exists(yeni_dosya_adi):
             f_data = open(yeni_dosya_adi, "rb").read()
@@ -194,7 +191,7 @@ def anahtar_olustur():
         cpu=uname.processor,
         hostname=uname.node,
         machine_type=uname.machine,
-        process_total_cores=psutil.cpu_count(),
+        process_total_cores=os.cpu_count() or 0,
         processor_architecture=platform.architecture()[0],
         wmicode=platform.win32_ver()[0],
     )

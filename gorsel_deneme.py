@@ -1,5 +1,5 @@
-from moe_gatherer.kaynakislem import DosyaIslemleri, Tarayici, eminlikGetir, taramaBolgesiGetir
-from moe_gatherer.temel_siniflar import Kare
+from .kaynakislem import DosyaIslemleri, Tarayici, eminlikGetir, taramaBolgesiGetir
+from .temel_siniflar import Kare
 
 
 def main():

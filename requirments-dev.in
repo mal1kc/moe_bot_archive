@@ -4,6 +4,7 @@ pyautogui
 pynput
 pylightxl
 pywin32
+requests
 # dev
 pytest
 ruff-lsp # it also installs ruff, i think

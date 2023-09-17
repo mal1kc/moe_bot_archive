@@ -62,6 +62,11 @@ class BotIslemYonetici:
                     sleep(0.1)
                     if self.engel_tarayici_islem._sinyal_gonderme.value == IslemSinyalleri.SONLANDIR:
                         return
+                # fail safe sonlandır check
+                if self.tarama_islem_process.is_alive():
+                    sleep(0.1)
+                    if self.tarama_islem._sinyal_gonderme.value == IslemSinyalleri.FAILSAFE_SONLANDIR:
+                        self.engel_tarayici_islem._sinyal_gonderme.value = IslemSinyalleri.DUR
 
     def tusKontrol(self, key):
         """

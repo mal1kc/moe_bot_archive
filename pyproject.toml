@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "moe_gatherer"
-version = "0.5.4"
+version = "0.7.5"
 description = "march of empires gatherer"
 authors = ["a a <a@example.com>"]
 readme = "readme.md"
@@ -13,6 +13,7 @@ pyautogui = "^0.9"
 pynput = "^1.7.6"
 pylightxl = "^1.61"
 pywin32 = "^306"
+requests = "^2.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7.4.1"
@@ -29,6 +30,12 @@ line-length = 135
 
 [tool.ruff]
 line-length = 135
+
+[tool.pytest.ini_options]
+log_format = "%(asctime)s %(levelname)s %(message)s"
+log_date_format = "%Y-%m-%d %H:%M:%S"
+log_cli = 1
+log_cli_level = "DEBUG"
 
 [build-system]
 requires = ["poetry-core"]
