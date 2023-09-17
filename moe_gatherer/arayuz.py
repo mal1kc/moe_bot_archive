@@ -1,13 +1,27 @@
 from __future__ import annotations
 import multiprocessing
 
+import os
+
 from moe_gatherer.hatalar import BaglantiHatasi, Hata
+from moe_gatherer.sabitler import BASE_PATH
 
 from moe_gatherer.sifremele import sifre_hash_olustur
 from moe_gatherer.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
 
 
-from tkinter import BooleanVar, Checkbutton, LabelFrame, PhotoImage, Tk, Frame, Label, Entry, Button, messagebox
+from tkinter import (
+    BooleanVar,
+    Checkbutton,
+    LabelFrame,
+    PhotoImage,
+    Tk,
+    Frame,
+    Label,
+    Entry,
+    Button,
+    messagebox,
+)
 from tkinter.ttk import Combobox
 from enum import Enum, auto
 
@@ -19,9 +33,11 @@ multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
 
 # TODO : ayarlardan al
-LOGO_PATH = "./arayuz/moe_logo.png"
+LOGO_PATH = os.path.join(BASE_PATH, "arayuz/moe_logo.png")
 
 ENTRY_WIDTH = 30
+
+ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
 
 
 def _error_msgbx(error: str) -> None:
@@ -59,26 +75,36 @@ class UnExpectedPageError(Exception):
 class MainGui:
     __slots__ = ["root", "page", "pageshow", "interaction_variables"]
 
-    def __init__(self, root: Tk | None = None, title: str = "moe_auto_bot", geometry: str = "500x600"):
+    def __init__(
+        self,
+        root: Tk | None = None,
+        title: str = "window_title_main",
+        geometry: str = "500x600",
+    ):
         if root is None:
             root = Tk()
         self.root = root
-        self.root.title(title)
         self.root.resizable(False, False)
         self.root.geometry(geometry)
-        self.pageshow = Login_Page(self, self.root)
+        self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
+        self.change_title(title)
         self.interaction_variables = {}
+        self.pageshow = Login_Page(self, self.root)
 
     def change_page(self, page: GUIPagesEnum):
         self.page = page
+        if hasattr(self.pageshow, "frame"):
+            self.pageshow.frame.destroy()  # type: ignore
 
         if self.page == GUIPagesEnum.MOD_SELECT:
-            # del self.pageshow
             self.pageshow = Mod_Select_Page(self, self.root)
 
         elif self.page == GUIPagesEnum.MOE_GATHERER:
-            # del self.pageshow
             self.pageshow = Moe_Gatherer_Page(self, self.root)
+
+    def change_title(self, title: str):
+        prefix = lokalizasyon("window_title_main")
+        self.root.title("{} - {}".format(prefix, title))
 
     def make_interaction_variables_ready(self) -> None:
         if isinstance(self.pageshow.name, ModEnum):
@@ -102,6 +128,7 @@ class MainGui:
 class Login_Page:
     def __init__(self, parent, window):
         self.parent = parent
+        self.parent.change_title(lokalizasyon("window_title_login"))
         self.name = GUIPagesEnum.LOGIN
         self.window = window
         # change size of window to 360x140
@@ -116,7 +143,11 @@ class Login_Page:
         self.select_lang_lbl = Label(self.frame, text=lokalizasyon("select_lang_lbl"))
         self.select_lang_lbl.grid(row=3, column=0)
 
-        self.select_lang_combo = Combobox(self.frame, values=[lokalizasyon(lang.name) for lang in DilEnum], state="readonly")
+        self.select_lang_combo = Combobox(
+            self.frame,
+            values=[lokalizasyon(lang.name) for lang in DilEnum],
+            state="readonly",
+        )
         self.select_lang_combo.current(0)  # default value
         self.select_lang_combo.bind("<<ComboboxSelected>>", self._lang_changed)
         self.select_lang_combo.grid(row=4, column=0)
@@ -136,14 +167,24 @@ class Login_Page:
         self.login_lbl = Label(self.frame, text=lokalizasyon("login_lbl"))
         self.login_lbl.grid(row=0, column=1)
 
-        self.name_lbl = Label(self.frame, text=lokalizasyon("name_lbl"), anchor="e", width=ENTRY_WIDTH // 2)
+        self.name_lbl = Label(
+            self.frame,
+            text=lokalizasyon("name_lbl"),
+            anchor="e",
+            width=ENTRY_WIDTH // 2,
+        )
         self.name_lbl.grid(row=1, column=0)
 
         self.name_entry = Entry(self.frame, width=ENTRY_WIDTH)
         self.name_entry.bind("<Return>", _focus_next_widget)
         self.name_entry.grid(row=1, column=1)
 
-        self.pass_lbl = Label(self.frame, text=lokalizasyon("pass_lbl"), width=ENTRY_WIDTH // 2, anchor="e")
+        self.pass_lbl = Label(
+            self.frame,
+            text=lokalizasyon("pass_lbl"),
+            width=ENTRY_WIDTH // 2,
+            anchor="e",
+        )
         self.pass_lbl.grid(row=2, column=0)
 
         self.pass_entry = Entry(self.frame, width=ENTRY_WIDTH, show="*")
@@ -212,28 +253,35 @@ class Login_Page:
 class Mod_Select_Page:
     def __init__(self, parent, window) -> None:
         self.parent = parent
+        self.parent.change_title(lokalizasyon("window_title_mode_select"))
         self.name = GUIPagesEnum.MOD_SELECT
 
         # change size of window to 200x100
-        self.parent.root.geometry("200x100")
+        self.parent.root.geometry("200x140")
 
-        self.main_frame = Frame(window)
-        self.main_frame.pack()
+        self.frame = Frame(window)
+        self.frame.pack(fill="both", expand=False, padx=10, pady=10, anchor="center")
 
-        self.mod_select_lbl = Label(self.main_frame, text="mod_select_lbl")
+        self.mod_select_lbl = Label(self.frame, text="mod_select_lbl")
         self.mod_select_lbl.grid(row=0, column=1)
 
         self.mod_selection_combo = Combobox(
-            self.main_frame, state="readonly", values=[lokalizasyon(module.name) for module in SelectibleModEnum]
+            self.frame,
+            state="readonly",
+            values=[lokalizasyon(module.name) for module in SelectibleModEnum],
         )
         self.mod_selection_combo.current(0)  # default value moe_gatherer
-        self.mod_selection_combo.grid(row=1, column=1)
+        self.mod_selection_combo.grid(row=1, column=1, padx=10, pady=10, ipadx=10, ipady=10)
 
-        self.mod_select_continue_btn = Button(self.main_frame, text=lokalizasyon("mod_select_continue_btn"), command=self.clicked)
+        self.mod_select_continue_btn = Button(
+            self.frame,
+            text=lokalizasyon("mod_select_continue_btn"),
+            command=self.clicked,
+        )
         self.mod_select_continue_btn.grid(row=2, column=1)
 
     def clicked(self):
-        self.main_frame.destroy()
+        self.frame.destroy()
         # TODO: go to selected mod page
         self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
 
@@ -243,37 +291,62 @@ class Moe_Gatherer_Page:
         self.parent = parent
         self.name = ModEnum.MOE_GATHERER
 
-        # change size of window to 580x380
-        self.parent.root.geometry("580x380")
+        self.parent.root.geometry("540x400")
+        self.parent.change_title(lokalizasyon("window_title_gatherer"))
+        self.frame = Frame(window, padx=15, pady=15, border=5)
+        self.frame.pack(anchor="center")
 
-        self.main_frame = Frame(window, padx=10, pady=10)
-        self.main_frame.pack()
+        # -- warning top --
 
-        self.moe_logo_img = PhotoImage(file=LOGO_PATH, width=148, height=78)
-        self.moe_logo_lbl = Label(
-            self.main_frame,
-            text="moe_logo_lbl",
-            image=self.moe_logo_img,
+        self.warning_top_lbl = Label(
+            self.frame,
+            text=lokalizasyon("warning_top_lbl"),
+            font="Verdana 18",
+            fg="red",
         )
-        self.moe_logo_lbl.grid(row=0, column=0)
-        # -- march selection --
+        # centered first row
+        self.warning_top_lbl.grid(row=0, column=0)
 
-        self.march_select_lbl = LabelFrame(
-            self.main_frame, text=lokalizasyon("march_select_lbl"), height=100, width=100, padx=10, pady=10
-        )
-        self.march_select_lbl.grid(row=0, column=1)
+        # -- warning top --
+        self._fill_mid_frame()
 
-        self.march_selection_combo = Combobox(
-            self.march_select_lbl, state="readonly", values=[str(march_count) for march_count in range(1, 8)]
+        # -- warning bottom --
+        self.warning_bottom_lbl = Label(
+            self.frame,
+            text=lokalizasyon("warning_bottom_lbl"),
+            font="Verdana 14",
+            fg="red",
         )
-        self.march_selection_combo.current(0)  # default value
-        self.march_selection_combo.grid(row=0, column=0)
+        # centered last row
+        self.warning_bottom_lbl.grid(row=2, column=0)
+
+    def _fill_mid_frame(self):
+        self.mid_frame = Frame(self.frame, height=300)
+        self.mid_frame.grid(row=1, column=0)
+        self.mid_frame.grid_anchor("center")
+        self.mid_frame.grid_columnconfigure((0, 1, 2), pad=10)
+        self.mid_frame.grid_rowconfigure(0, pad=10)
+
+        # mid left frame -> resource selection labelframe
+        # mid center frame -> lvl selection labelframe
+        # mid right frame -> right frame
 
         # -- resource selection --
         self.resource_selection_lbl = LabelFrame(
-            self.main_frame, text=lokalizasyon("resource_selection_lbl"), height=100, width=100, padx=10, pady=10
+            self.mid_frame,
+            text=lokalizasyon("resource_selection_lbl"),
+            font="Verdana 12",
+            width=160,
+            height=300,
+            pady=10,
+            padx=10,
         )
-        self.resource_selection_lbl.grid(row=1, column=0)
+        self.resource_selection_lbl.grid(
+            row=0,
+            column=0,
+            sticky="w",
+        )
+        self.resource_selection_lbl.grid_propagate(False)
 
         self.resorce_variables = {
             KaynakTipi.EKMEK: BooleanVar(),
@@ -295,30 +368,57 @@ class Moe_Gatherer_Page:
             for resource in self.resorce_variables
         }
         for i, resource in enumerate(self.resource_selection_checkbuttons):
-            self.resource_selection_checkbuttons[resource].grid(row=i, column=0)
+            # self.resource_selection_checkbuttons[resource].grid(row=i, column=0, ipadx=25, ipady=2, sticky="w")
+            if i == 0:
+                self.resource_selection_checkbuttons[resource].grid(
+                    row=i,
+                    column=0,
+                    sticky="w",
+                    ipadx=15,
+                    ipady=3,
+                )
+                continue
+            self.resource_selection_checkbuttons[resource].grid(
+                row=i,
+                column=0,
+                sticky="w",
+                ipadx=15,
+                ipady=3,
+            )
 
-        self.resource_select_all_btn = Button(
-            self.resource_selection_lbl, text=lokalizasyon("resource_select_all_btn"), command=self.resource_select_all_clicked
+        self.resource_select_all_chkbx_var = BooleanVar()
+        self.resource_select_all_chkbx = Checkbutton(
+            self.resource_selection_lbl,
+            text=lokalizasyon("resource_select_all_chkbx"),
+            font=("Verdana 10"),
+            command=self.resource_select_all_command,
+            variable=self.resource_select_all_chkbx_var,
         )
-        self.resource_select_all_btn.grid(row=len(self.resorce_variables), column=0)
-
-        self.resource_select_none_btn = Button(
-            self.resource_selection_lbl, text=lokalizasyon("resource_select_none_btn"), command=self.resource_select_none_clicked
-        )
-        self.resource_select_none_btn.grid(row=len(self.resorce_variables) + 1, column=0)
+        self.resource_select_all_chkbx.grid(row=6, column=0, ipadx=15, ipady=20, pady=0, padx=0)
+        # centered in last row of resource selection (6th row)
+        # self.resource_select_all_chkbx.place(x=20, y=205, width=100, height=30)
 
         # -- resource selection --
 
         # -- lvl selection --
 
-        self.lvl_select_lbl = LabelFrame(self.main_frame, text=lokalizasyon("lvl_select_lbl"), height=100, width=100, padx=10, pady=10)
-        self.lvl_select_lbl.grid(sticky="E", row=1, column=1, padx=10, pady=10, ipadx=10, ipady=10)
+        self.lvl_selection_lbl = LabelFrame(
+            self.mid_frame,
+            text=lokalizasyon("lvl_selection_lbl"),
+            font="Verdana 12",
+            width=160,
+            height=300,
+            pady=10,
+            padx=10,
+        )
+        self.lvl_selection_lbl.grid(row=0, column=1, sticky="w")
+        self.lvl_selection_lbl.grid_propagate(False)
 
         self.lvl_selection_variables = [BooleanVar() for _ in range(1, 13)]
 
         self.lvl_selection_checkbuttons = {
             i: Checkbutton(
-                self.lvl_select_lbl,
+                self.lvl_selection_lbl,
                 onvalue=True,
                 offvalue=False,
                 text=str(i),
@@ -330,41 +430,131 @@ class Moe_Gatherer_Page:
 
         for i in range(1, len(self.lvl_selection_checkbuttons) + 1):
             if i < 7:
-                self.lvl_selection_checkbuttons[i].grid(row=i - 1, column=0)
+                self.lvl_selection_checkbuttons[i].grid(
+                    row=i - 1,
+                    column=0,
+                    sticky="w",
+                    ipadx=20,
+                    ipady=3,
+                )
             else:
-                self.lvl_selection_checkbuttons[i].grid(row=i - 7, column=1)
+                self.lvl_selection_checkbuttons[i].grid(
+                    row=i - 7,
+                    column=1,
+                    sticky="w",
+                    ipadx=0,
+                    ipady=3,
+                )
 
-        self.lvl_select_all_btn = Button(
-            self.lvl_select_lbl, text=lokalizasyon("lvl_select_all_btn"), command=self.lvl_select_all_clicked
+        self.lvl_select_all_chkbx_var = BooleanVar()
+        self.lvl_select_all_chkbx = Checkbutton(
+            self.lvl_selection_lbl,
+            text=lokalizasyon("lvl_select_all_chkbx"),
+            font=("Verdana 10"),
+            command=self.lvl_select_all_command,
+            variable=self.lvl_select_all_chkbx_var,
         )
-        self.lvl_select_all_btn.grid(row=6, column=0)
-        self.lvl_select_all_btn = Button(
-            self.lvl_select_lbl, text=lokalizasyon("lvl_select_none_btn"), command=self.lvl_select_none_clicked
-        )
-        self.lvl_select_all_btn.grid(row=6, column=1)
+        # centered in last row of lvl selection (6th row)
+        self.lvl_select_all_chkbx.place(x=25, y=205, width=100, height=30)
+        # self.lvl_select_all_chkbx.grid(ipadx=20, ipady=20, pady=0, padx=0)
 
         # -- lvl selection --
 
-        # -- close gui btn --
+        # ------------- mid right frame -------------
 
-        self.close_gui_btn = Button(self.main_frame, text=lokalizasyon("close_gui_btn"), command=self.clicked)
-        self.close_gui_btn.grid(row=1, column=2)
+        self.mid_right_frame = Frame(
+            self.mid_frame,
+            width=160,
+            height=300,
+        )
 
-    def resource_select_all_clicked(self):
-        for resource in self.resorce_variables:
-            self.resource_selection_checkbuttons[resource].select()
+        self.mid_right_frame.grid(
+            row=0,
+            column=2,
+            sticky="w",
+        )
+        # self.mid_right_frame.grid_columnconfigure(0, pad=10)
+        self.mid_right_frame.grid_propagate(False)
+        # ------------- mid right frame -------------
 
-    def resource_select_none_clicked(self):
+        # -- march selection --
+        self.march_selection_lbl = LabelFrame(
+            self.mid_right_frame,
+            text=lokalizasyon("march_selection_lbl"),
+            font="Verdana 12",
+            height=120,
+        )
+
+        self.march_selection_lbl.grid(row=0, column=0)
+        # self.march_selection_lbl.grid_propagate(False)
+
+        self.march_selection_combo = Combobox(
+            self.march_selection_lbl,
+            state="readonly",
+            values=[str(march_count) for march_count in range(1, 8)],
+            width=5,
+            height=7,
+        )
+        self.march_selection_combo.current(0)  # default value
+        self.march_selection_combo.grid(row=1, column=1, padx=50, pady=5)
+        # self.march_selection_combo.grid_propagate(False)
+
+        # -- march selection --
+
+        # -- moe logo --
+
+        self.moe_logo_img = PhotoImage(file=LOGO_PATH, width=150, height=80)
+        self.moe_logo_lbl = Label(
+            self.mid_right_frame,
+            text="moe_logo_lbl",
+            image=self.moe_logo_img,
+            width=150,
+            height=80,
+        )
+        # centered in mid right frame (2nd row) ipadding y 20px
+        self.moe_logo_lbl.grid(row=2, column=0, ipady=20)
+
+        # -- moe logo --
+
+        self.start_bot_btn = Button(
+            self.mid_right_frame,
+            width=10,
+            height=1,
+            font="Verdana 18",
+            text=lokalizasyon("start_bot_btn"),
+            bg="#62aade",
+            command=self.clicked,
+        )
+        self.start_bot_btn.grid(row=4, column=0)
+
+        self.exit_btn = Button(
+            self.mid_right_frame,
+            width=10,
+            height=1,
+            font="Verdana 18",
+            text=lokalizasyon("exit_btn"),
+            bg="#62aade",
+            command=self.parent.root.destroy,
+        )
+        self.exit_btn.grid(row=5, column=0, pady=10)
+
+    def resource_select_all_command(self):
+        if self.resource_select_all_chkbx_var.get():
+            for resource in self.resorce_variables:
+                self.resource_selection_checkbuttons[resource].select()
+            return
         for resource in self.resorce_variables:
             self.resource_selection_checkbuttons[resource].deselect()
+        return
 
-    def lvl_select_all_clicked(self):
-        for lvl in self.lvl_selection_checkbuttons:
-            self.lvl_selection_checkbuttons[lvl].select()
-
-    def lvl_select_none_clicked(self):
+    def lvl_select_all_command(self):
+        if self.lvl_select_all_chkbx_var.get():
+            for lvl in self.lvl_selection_checkbuttons:
+                self.lvl_selection_checkbuttons[lvl].select()
+            return
         for lvl in self.lvl_selection_checkbuttons:
             self.lvl_selection_checkbuttons[lvl].deselect()
+        return
 
     def get_settings(self) -> dict:
         # check if is there any resource selected if not raise error
@@ -377,7 +567,7 @@ class Moe_Gatherer_Page:
         if not any([self.lvl_selection_variables[lvl_num - 1].get() for lvl_num in range(1, len(self.lvl_selection_variables) + 1)]):
             LOGGER.debug("Seviye seçimi yapılmadı. Uyarı mesajı gösteriliyor.")
             _warning_msgbx("level_selection_warning")
-            self.lvl_select_all_clicked()
+            self.lvl_select_all_chkbx_var.set(True)
         return {
             "march_count": str(self.march_selection_combo.get()),
             "resources": [resource for resource in self.resorce_variables if self.resorce_variables[resource].get()],
@@ -387,6 +577,7 @@ class Moe_Gatherer_Page:
                 if self.lvl_selection_variables[lvl_num - 1].get()
             ],
         }
+        pass
 
     def clicked(self):
         self.parent.make_interaction_variables_ready()

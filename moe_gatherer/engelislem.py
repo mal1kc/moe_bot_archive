@@ -4,7 +4,14 @@ from time import sleep
 
 from .temel_siniflar import IslemSinyalleri
 from .sabitler import ENGEL_KONTROL_SURESI
-from .kaynakislem import DosyaIslemleri, Fare, Tarayici, eminlikGetir, taramaBolgesiGetir, tiklamaNoktasiGetir
+from .kaynakislem import (
+    DosyaIslemleri,
+    Fare,
+    Tarayici,
+    eminlikGetir,
+    taramaBolgesiGetir,
+    tiklamaNoktasiGetir,
+)
 
 
 class EngelTarayiciİslem:
@@ -65,43 +72,95 @@ class EngelTarayiciİslem:
             # taramaBolgesiGetir("devam_buton"),
         )
         self.sehirIkon_tarayici = Tarayici(
-            ornek_d=dler[0], eminlik=eminlikler[0], bolge=bolgeler[0], gri_tarama=True, isim="engelTarayici.sehirIkon_tarayici"
+            ornek_d=dler[0],
+            eminlik=eminlikler[0],
+            bolge=bolgeler[0],
+            gri_tarama=True,
+            isim="engelTarayici.sehirIkon_tarayici",
         )
         self.moeLogo_tarayici = Tarayici(
-            ornek_d=dler[1], eminlik=eminlikler[1], bolge=bolgeler[1], gri_tarama=True, isim="engelTarayici.moeLogo_tarayici"
+            ornek_d=dler[1],
+            eminlik=eminlikler[1],
+            bolge=bolgeler[1],
+            gri_tarama=True,
+            isim="engelTarayici.moeLogo_tarayici",
         )
         self.hizmetBasarisiz_tarayici = Tarayici(
-            ornek_d=dler[2], eminlik=eminlikler[2], bolge=bolgeler[2], gri_tarama=True, isim="engelTarayici.hizmetBasarisiz_tarayici"
+            ornek_d=dler[2],
+            eminlik=eminlikler[2],
+            bolge=bolgeler[2],
+            gri_tarama=True,
+            isim="engelTarayici.hizmetBasarisiz_tarayici",
         )
         self.baglantiKesildi_tarayici = Tarayici(
-            ornek_d=dler[3], eminlik=eminlikler[3], bolge=bolgeler[3], gri_tarama=True, isim="engelTarayici.baglantiKesildi_tarayici"
+            ornek_d=dler[3],
+            eminlik=eminlikler[3],
+            bolge=bolgeler[3],
+            gri_tarama=True,
+            isim="engelTarayici.baglantiKesildi_tarayici",
         )
         self.dunyaIkon_tarayici = Tarayici(
-            ornek_d=dler[4], eminlik=eminlikler[4], bolge=bolgeler[4], gri_tarama=True, isim="engelTarayici.dunyaIkon_tarayici"
+            ornek_d=dler[4],
+            eminlik=eminlikler[4],
+            bolge=bolgeler[4],
+            gri_tarama=True,
+            isim="engelTarayici.dunyaIkon_tarayici",
         )
         self.maksSeferUyari_tarayici = Tarayici(
-            ornek_d=dler[5], eminlik=eminlikler[5], bolge=bolgeler[5], gri_tarama=True, isim="engelTarayici.maksSeferUyari_tarayici"
+            ornek_d=dler[5],
+            eminlik=eminlikler[5],
+            bolge=bolgeler[5],
+            gri_tarama=True,
+            isim="engelTarayici.maksSeferUyari_tarayici",
         )
         self.tekrarDeneButon_tarayici = Tarayici(
-            ornek_d=dler[6], eminlik=eminlikler[6], bolge=bolgeler[6], gri_tarama=True, isim="engelTarayici.tekrarDeneButon_tarayici"
+            ornek_d=dler[6],
+            eminlik=eminlikler[6],
+            bolge=bolgeler[6],
+            gri_tarama=True,
+            isim="engelTarayici.tekrarDeneButon_tarayici",
         )
         self.maviTamam_tarayici = Tarayici(
-            ornek_d=dler[7], eminlik=eminlikler[7], bolge=bolgeler[7], gri_tarama=True, isim="engelTarayici.maviTamam_tarayici"
+            ornek_d=dler[7],
+            eminlik=eminlikler[7],
+            bolge=bolgeler[7],
+            gri_tarama=True,
+            isim="engelTarayici.maviTamam_tarayici",
         )
         self.geriOk_tarayici = Tarayici(
-            ornek_d=dler[8], eminlik=eminlikler[8], bolge=bolgeler[8], gri_tarama=True, isim="engelTarayici.geriOk_tarayici"
+            ornek_d=dler[8],
+            eminlik=eminlikler[8],
+            bolge=bolgeler[8],
+            gri_tarama=True,
+            isim="engelTarayici.geriOk_tarayici",
         )
         self.tamam_tarayici = Tarayici(
-            ornek_d=dler[9], eminlik=eminlikler[9], bolge=bolgeler[9], gri_tarama=True, isim="engelTarayici.tamam_tarayici"
+            ornek_d=dler[9],
+            eminlik=eminlikler[9],
+            bolge=bolgeler[9],
+            gri_tarama=True,
+            isim="engelTarayici.tamam_tarayici",
         )
         self.oyundan_cik = Tarayici(
-            ornek_d=dler[10], eminlik=eminlikler[10], bolge=bolgeler[10], gri_tarama=True, isim="engelTarayici.oyundanCik_tarayici"
+            ornek_d=dler[10],
+            eminlik=eminlikler[10],
+            bolge=bolgeler[10],
+            gri_tarama=True,
+            isim="engelTarayici.oyundanCik_tarayici",
         )
         self.geri_buton_tarayici = Tarayici(
-            ornek_d=dler[11], eminlik=eminlikler[11], bolge=bolgeler[11], gri_tarama=True, isim="engelTarayici.geri_tarayici"
+            ornek_d=dler[11],
+            eminlik=eminlikler[11],
+            bolge=bolgeler[11],
+            gri_tarama=True,
+            isim="engelTarayici.geri_tarayici",
         )
         self.baglantiYok_tarayici = Tarayici(
-            ornek_d=dler[12], eminlik=eminlikler[12], bolge=bolgeler[12], gri_tarama=True, isim="engelTarayici.baglantiYok_tarayici"
+            ornek_d=dler[12],
+            eminlik=eminlikler[12],
+            bolge=bolgeler[12],
+            gri_tarama=True,
+            isim="engelTarayici.baglantiYok_tarayici",
         )
         # self.kalkan_tarayici = Tarayici(
         #     ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.kalkan_tarayici"
@@ -136,6 +195,7 @@ class EngelTarayiciİslem:
         # FIXME oyundan çıkış engeli kaldırma
 
         def _sehirYoksa() -> None:
+            _maviTamamTara()
             _dunyaIkon_kare = self.dunyaIkon_tarayici.ekranTara()
             if _dunyaIkon_kare is not None:
                 self.gunlukcu.debug("dunya ikonu algilandi.")
@@ -230,6 +290,7 @@ class EngelTarayiciİslem:
                 _yenidenDeneButonTikla()
 
         while True and self._acikmi():
+            _maviTamamTara()
             _moeLogoBekle()
             _baglantiYokTara()
             _baglantiKesildiTara()
