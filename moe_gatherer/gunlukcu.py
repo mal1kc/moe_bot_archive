@@ -15,7 +15,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"hata meydana geldi {e}")
 else:
-    from .sabitler import GUNLUK_KLASORU, GUNLUK_SEVIYESI
+    from .ayar_kontrolcusu import GUNLUK_KLASORU, GUNLUK_SEVIYESI
 
     # Hata => circular import hatası alabiliriz
 

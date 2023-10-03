@@ -3,7 +3,7 @@ import multiprocessing
 from time import sleep
 
 from .temel_siniflar import IslemSinyalleri
-from .sabitler import ENGEL_KONTROL_SURESI
+from .ayar_kontrolcusu import ENGEL_KONTROL_SURESI
 from .kaynakislem import (
     DosyaIslemleri,
     Fare,

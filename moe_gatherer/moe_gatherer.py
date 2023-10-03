@@ -3,18 +3,18 @@ from moe_gatherer.yonetici import BotIslemYonetici  # noqa
 
 from moe_gatherer import arayuz
 
-from moe_gatherer.lokalizasyon import lokalizasyon
-from moe_gatherer.temel_siniflar import KaynakTipi  # noqa
+from moe_gatherer.temel_siniflar import DilEnum, Diller, KaynakTipi  # noqa
 
 from moe_gatherer.hatalar import Hata  # noqa
 
 
 def _bilgi_yazdir():
     print("\r")
-    print(lokalizasyon("bot_start_info"))
+    print(Diller.lokalizasyon("bot_start_info", "UI"))
 
 
 def main():
+    Diller.aktif_dil_ayarla(DilEnum.TR)
     moe_gatherer_arayuz = arayuz.MainGui()
     moe_gatherer_arayuz.mainloop()
 

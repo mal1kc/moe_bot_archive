@@ -4,7 +4,7 @@ import multiprocessing
 import os
 
 from moe_gatherer.hatalar import BaglantiHatasi, Hata
-from moe_gatherer.sabitler import BASE_PATH
+from moe_gatherer.ayar_kontrolcusu import BASE_PATH
 
 from moe_gatherer.sifremele import sifre_hash_olustur
 from moe_gatherer.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
@@ -25,9 +25,8 @@ from tkinter import (
 from tkinter.ttk import Combobox
 from enum import Enum, auto
 
-from moe_gatherer.temel_siniflar import KaynakTipi, KullaniciGirisVerisi
+from moe_gatherer.temel_siniflar import KaynakTipi, KullaniciGirisVerisi, Diller, DilEnum
 from moe_gatherer.gunlukcu import gunlukcuGetir
-from moe_gatherer.lokalizasyon import DilEnum, DilSabitleri, lokalizasyon
 
 multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
@@ -41,11 +40,11 @@ ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
 
 
 def _error_msgbx(error: str) -> None:
-    messagebox.showerror(lokalizasyon("msgbx_error_title"), lokalizasyon(error))
+    messagebox.showerror(Diller.lokalizasyon("msgbx_error_title"), Diller.lokalizasyon(error))
 
 
 def _warning_msgbx(warning: str) -> None:
-    messagebox.showwarning(lokalizasyon("msgbx_warning_title"), lokalizasyon(warning))
+    messagebox.showwarning(Diller.lokalizasyon("msgbx_warning_title"), Diller.lokalizasyon(warning))
 
 
 class SelectibleModEnum(Enum):
@@ -103,7 +102,7 @@ class MainGui:
             self.pageshow = Moe_Gatherer_Page(self, self.root)
 
     def change_title(self, title: str):
-        prefix = lokalizasyon("window_title_main")
+        prefix = Diller.lokalizasyon("window_title_main")
         self.root.title("{} - {}".format(prefix, title))
 
     def make_interaction_variables_ready(self) -> None:
@@ -128,7 +127,7 @@ class MainGui:
 class Login_Page:
     def __init__(self, parent, window):
         self.parent = parent
-        self.parent.change_title(lokalizasyon("window_title_login"))
+        self.parent.change_title(Diller.lokalizasyon("window_title_login"))
         self.name = GUIPagesEnum.LOGIN
         self.window = window
         # change size of window to 360x140
@@ -140,12 +139,12 @@ class Login_Page:
         # -- language selection --
         self.frame = Frame(self.window)
         self.frame.pack()
-        self.select_lang_lbl = Label(self.frame, text=lokalizasyon("select_lang_lbl"))
+        self.select_lang_lbl = Label(self.frame, text=Diller.lokalizasyon("select_lang_lbl"))
         self.select_lang_lbl.grid(row=3, column=0)
 
         self.select_lang_combo = Combobox(
             self.frame,
-            values=[lokalizasyon(lang.name) for lang in DilEnum],
+            values=[Diller.lokalizasyon(lang.name) for lang in DilEnum],
             state="readonly",
         )
         self.select_lang_combo.current(0)  # default value
@@ -164,12 +163,12 @@ class Login_Page:
 
         # -- login --
 
-        self.login_lbl = Label(self.frame, text=lokalizasyon("login_lbl"))
+        self.login_lbl = Label(self.frame, text=Diller.lokalizasyon("login_lbl"))
         self.login_lbl.grid(row=0, column=1)
 
         self.name_lbl = Label(
             self.frame,
-            text=lokalizasyon("name_lbl"),
+            text=Diller.lokalizasyon("name_lbl"),
             anchor="e",
             width=ENTRY_WIDTH // 2,
         )
@@ -181,7 +180,7 @@ class Login_Page:
 
         self.pass_lbl = Label(
             self.frame,
-            text=lokalizasyon("pass_lbl"),
+            text=Diller.lokalizasyon("pass_lbl"),
             width=ENTRY_WIDTH // 2,
             anchor="e",
         )
@@ -191,7 +190,7 @@ class Login_Page:
         self.pass_entry.bind("<Return>", _focus_next_widget)
         self.pass_entry.grid(row=2, column=1)
 
-        self.sbt = Button(self.frame, text=lokalizasyon("login_btn"), command=self.clicked)
+        self.sbt = Button(self.frame, text=Diller.lokalizasyon("login_btn"), command=self.clicked)
         self.sbt.bind("<Return>", _press_btn)
         self.sbt.grid(row=4, column=1)
 
@@ -199,13 +198,12 @@ class Login_Page:
 
     def _lang_changed(self, event) -> None:
         # update language
-
-        DilSabitleri.aktifi_dil_degistir(DilEnum[self.select_lang_combo.get()])
-        self.name_lbl.config(text=lokalizasyon("name_lbl"))
-        self.pass_lbl.config(text=lokalizasyon("pass_lbl"))
-        self.sbt.config(text=lokalizasyon("login_btn"))
-        self.select_lang_lbl.config(text=lokalizasyon("select_lang_lbl"))
-        self.login_lbl.config(text=lokalizasyon("login_lbl"))
+        Diller.aktif_dil_ayarla(DilEnum[self.select_lang_combo.get()])
+        self.name_lbl.config(text=Diller.lokalizasyon("name_lbl"))
+        self.pass_lbl.config(text=Diller.lokalizasyon("pass_lbl"))
+        self.sbt.config(text=Diller.lokalizasyon("login_btn"))
+        self.select_lang_lbl.config(text=Diller.lokalizasyon("select_lang_lbl"))
+        self.login_lbl.config(text=Diller.lokalizasyon("login_lbl"))
 
     def clicked(self):
         user_data = (self.name_entry.get(), self.pass_entry.get())
@@ -253,7 +251,7 @@ class Login_Page:
 class Mod_Select_Page:
     def __init__(self, parent, window) -> None:
         self.parent = parent
-        self.parent.change_title(lokalizasyon("window_title_mode_select"))
+        self.parent.change_title(Diller.lokalizasyon("window_title_mode_select"))
         self.name = GUIPagesEnum.MOD_SELECT
 
         # change size of window to 200x100
@@ -268,14 +266,14 @@ class Mod_Select_Page:
         self.mod_selection_combo = Combobox(
             self.frame,
             state="readonly",
-            values=[lokalizasyon(module.name) for module in SelectibleModEnum],
+            values=[Diller.lokalizasyon(module.name) for module in SelectibleModEnum],
         )
         self.mod_selection_combo.current(0)  # default value moe_gatherer
         self.mod_selection_combo.grid(row=1, column=1, padx=10, pady=10, ipadx=10, ipady=10)
 
         self.mod_select_continue_btn = Button(
             self.frame,
-            text=lokalizasyon("mod_select_continue_btn"),
+            text=Diller.lokalizasyon("mod_select_continue_btn"),
             command=self.clicked,
         )
         self.mod_select_continue_btn.grid(row=2, column=1)
@@ -292,7 +290,7 @@ class Moe_Gatherer_Page:
         self.name = ModEnum.MOE_GATHERER
 
         self.parent.root.geometry("540x400")
-        self.parent.change_title(lokalizasyon("window_title_gatherer"))
+        self.parent.change_title(Diller.lokalizasyon("window_title_gatherer"))
         self.frame = Frame(window, padx=15, pady=15, border=5)
         self.frame.pack(anchor="center")
 
@@ -300,7 +298,7 @@ class Moe_Gatherer_Page:
 
         self.warning_top_lbl = Label(
             self.frame,
-            text=lokalizasyon("warning_top_lbl"),
+            text=Diller.lokalizasyon("warning_top_lbl"),
             font="Verdana 18",
             fg="red",
         )
@@ -313,7 +311,7 @@ class Moe_Gatherer_Page:
         # -- warning bottom --
         self.warning_bottom_lbl = Label(
             self.frame,
-            text=lokalizasyon("warning_bottom_lbl"),
+            text=Diller.lokalizasyon("warning_bottom_lbl"),
             font="Verdana 14",
             fg="red",
         )
@@ -334,7 +332,7 @@ class Moe_Gatherer_Page:
         # -- resource selection --
         self.resource_selection_lbl = LabelFrame(
             self.mid_frame,
-            text=lokalizasyon("resource_selection_lbl"),
+            text=Diller.lokalizasyon("resource_selection_lbl"),
             font="Verdana 12",
             width=160,
             height=300,
@@ -362,7 +360,7 @@ class Moe_Gatherer_Page:
                 self.resource_selection_lbl,
                 onvalue=True,
                 offvalue=False,
-                text=lokalizasyon(resource.name),
+                text=Diller.lokalizasyon(resource.name),
                 variable=self.resorce_variables[resource],
             )
             for resource in self.resorce_variables
@@ -389,7 +387,7 @@ class Moe_Gatherer_Page:
         self.resource_select_all_chkbx_var = BooleanVar()
         self.resource_select_all_chkbx = Checkbutton(
             self.resource_selection_lbl,
-            text=lokalizasyon("resource_select_all_chkbx"),
+            text=Diller.lokalizasyon("resource_select_all_chkbx"),
             font=("Verdana 10"),
             command=self.resource_select_all_command,
             variable=self.resource_select_all_chkbx_var,
@@ -404,7 +402,7 @@ class Moe_Gatherer_Page:
 
         self.lvl_selection_lbl = LabelFrame(
             self.mid_frame,
-            text=lokalizasyon("lvl_selection_lbl"),
+            text=Diller.lokalizasyon("lvl_selection_lbl"),
             font="Verdana 12",
             width=160,
             height=300,
@@ -449,7 +447,7 @@ class Moe_Gatherer_Page:
         self.lvl_select_all_chkbx_var = BooleanVar()
         self.lvl_select_all_chkbx = Checkbutton(
             self.lvl_selection_lbl,
-            text=lokalizasyon("lvl_select_all_chkbx"),
+            text=Diller.lokalizasyon("lvl_select_all_chkbx"),
             font=("Verdana 10"),
             command=self.lvl_select_all_command,
             variable=self.lvl_select_all_chkbx_var,
@@ -480,7 +478,7 @@ class Moe_Gatherer_Page:
         # -- march selection --
         self.march_selection_lbl = LabelFrame(
             self.mid_right_frame,
-            text=lokalizasyon("march_selection_lbl"),
+            text=Diller.lokalizasyon("march_selection_lbl"),
             font="Verdana 12",
             height=120,
         )
@@ -521,7 +519,7 @@ class Moe_Gatherer_Page:
             width=10,
             height=1,
             font="Verdana 18",
-            text=lokalizasyon("start_bot_btn"),
+            text=Diller.lokalizasyon("start_bot_btn"),
             bg="#62aade",
             command=self.clicked,
         )
@@ -532,7 +530,7 @@ class Moe_Gatherer_Page:
             width=10,
             height=1,
             font="Verdana 18",
-            text=lokalizasyon("exit_btn"),
+            text=Diller.lokalizasyon("exit_btn"),
             bg="#62aade",
             command=self.parent.root.destroy,
         )

@@ -14,7 +14,7 @@ from pyautogui import write, FailSafeException
 
 from .gunlukcu import Gunlukcu  # noqa
 from .hatalar import Hata, KullaniciHatasi
-from .sabitler import TaramaSabitleri, BASE_PATH
+from .ayar_kontrolcusu import TaramaSabitleri, BASE_PATH
 from .temel_fonksiyonlar import ifItsNone, tipVeyaNone
 from .temel_siniflar import EkranBoyut, IslemSinyalleri, Kare, KaynakKare, KaynakTipi, Koordinat2D
 

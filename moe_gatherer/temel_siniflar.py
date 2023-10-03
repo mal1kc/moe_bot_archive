@@ -1,6 +1,8 @@
 import logging
+import importlib
+
 from collections import namedtuple
-from enum import Enum, IntEnum, auto
+from enum import Enum, IntEnum, auto, StrEnum
 from typing import NamedTuple, Optional
 
 from .hatalar import Hata
@@ -139,3 +141,115 @@ class KaynakKare(Kare):
             self.koordinat.x + self.koordinat.genislik / 2,
             self.koordinat.y + self.koordinat.yukseklik / 2,
         )
+
+
+# lazy loader
+class AyarYukleyici(object):
+    _yuklenebilir_ayarlar = ["lokalizasyon.tr", "lokalizasyon.en", "ayarlar.moe_gatherer", "ayarlar.ui", "ayarlar.moe_genel"]
+
+    def __init__(self) -> None:
+        self.aktif_ayarlar = None
+
+    def ayar_yukle(self, ayar_dosyasi_adi):
+        if ayar_dosyasi_adi not in self._yuklenebilir_ayarlar:
+            raise Hata(f"Yüklenemeyen ayar dosyası: {ayar_dosyasi_adi}")
+        ayar_dosyasi_adi = "." + ayar_dosyasi_adi
+        self.ayarlar = importlib.import_module(ayar_dosyasi_adi, __package__).__dict__
+        return self.ayarlar
+
+
+class DilEnum(StrEnum):
+    TR = auto()
+    EN = auto()
+
+
+class Diller(object):
+    __slots__ = []
+    _instance = None
+    _EN_DICT = None
+    _TR_DICT = None
+    _aktif_dil = None
+
+    def __new__(cls) -> "Diller":
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self, aktif_dil: DilEnum = DilEnum.TR) -> None:
+        Diller.aktif_dil_ayarla(aktif_dil)
+
+    @property
+    def aktif_dil(self):
+        return Diller._aktif_dil
+
+    @staticmethod
+    def _dil_yukle(dil: DilEnum | None = None):
+        if dil is None:
+            dil = Diller._aktif_dil
+        if dil == DilEnum.TR:
+            return Diller.TR
+        elif dil == DilEnum.EN:
+            return Diller.EN
+        else:
+            raise Hata("Dil bulunamadı.")
+
+    @staticmethod
+    def aktif_dil_ayarla(dil: DilEnum):
+        Diller._aktif_dil = dil
+        Diller._dil_yukle()
+
+    @property
+    def TR(self) -> dict[str, dict[str, str]]:
+        if not hasattr(self, "_TR_DICT"):
+            Diller._TR_DICT = None
+        if Diller._TR_DICT is None:
+            _GUNLUKCU.debug("TR_DICT oluşturuluyor.")
+            Diller._TR_DICT = AyarYukleyici().ayar_yukle("lokalizasyon.tr")
+
+        if not hasattr(self, "_EN_DICT"):
+            Diller._EN_DICT = None
+        else:
+            if Diller._EN_DICT is not None:
+                _GUNLUKCU.debug("EN_DICT siliniyor.")
+                del Diller._EN_DICT
+
+        return Diller._TR_DICT
+
+    @property
+    def EN(self) -> dict[str, dict[str, str]]:
+        if not hasattr(self, "_EN_DICT"):
+            Diller._EN_DICT = None
+        if Diller._EN_DICT is None:
+            _GUNLUKCU.debug("EN_DICT oluşturuluyor.")
+            Diller._EN_DICT = AyarYukleyici().ayar_yukle("lokalizasyon.en")
+
+        if not hasattr(self, "_TR_DICT"):
+            Diller._TR_DICT = None
+        else:
+            if Diller._TR_DICT is not None:
+                _GUNLUKCU.debug("TR_DICT siliniyor.")
+                del Diller._TR_DICT
+
+        return Diller._EN_DICT
+
+    @staticmethod
+    def dil_kitapligi(dil: DilEnum) -> dict[str, dict[str, str]]:
+        diller_instance = Diller()
+        if dil == DilEnum.TR:
+            return diller_instance.TR
+        elif dil == DilEnum.EN:
+            return diller_instance.EN
+        else:
+            raise Hata("Dil bulunamadı.")
+
+    @staticmethod
+    def lokalizasyon(kelime_anahtari, kitaplik="UI", dil: DilEnum | None = None):
+        if dil is None:
+            dil = Diller._aktif_dil
+            if dil is None:
+                raise Hata("Dil ayarlanmadı.")
+        dil_kitapligi = Diller.dil_kitapligi(dil)
+        if kitaplik in dil_kitapligi:
+            if kelime_anahtari in dil_kitapligi[kitaplik]:
+                return dil_kitapligi[kitaplik][kelime_anahtari]
+        return "{}.{}".format(kitaplik, kelime_anahtari)
