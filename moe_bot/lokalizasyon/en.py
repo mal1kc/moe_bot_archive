@@ -1,4 +1,4 @@
-from moe_gatherer.temel_siniflar import KaynakTipi
+from moe_bot.temel_siniflar import KaynakTipi
 
 UI = {
     "TR": "TR",

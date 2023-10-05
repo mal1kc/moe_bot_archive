@@ -1,6 +1,6 @@
 import os
 
-files_to_check = {"./moe_gatherer/hatalar.py": [32, 40]}
+files_to_check = {"./moe_bot/hatalar.py": [32, 40]}
 
 
 def main():

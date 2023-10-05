@@ -1,7 +1,7 @@
 from pprint import pprint
 
-from moe_gatherer.kaynakislem import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
-from moe_gatherer.temel_siniflar import KaynakTipi
+from moe_bot.kaynakislem import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
+from moe_bot.temel_siniflar import KaynakTipi
 
 if __name__ == "__main__":
     # sleep(2)

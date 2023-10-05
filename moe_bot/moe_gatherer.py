@@ -1,11 +1,11 @@
-from moe_gatherer.yonetici import BotIslemYonetici  # noqa
+from moe_bot.yonetici import BotIslemYonetici  # noqa
 
 
-from moe_gatherer import arayuz
+from moe_bot import arayuz
 
-from moe_gatherer.temel_siniflar import DilEnum, Diller, KaynakTipi  # noqa
+from moe_bot.temel_siniflar import DilEnum, Diller, KaynakTipi  # noqa
 
-from moe_gatherer.hatalar import Hata  # noqa
+from moe_bot.hatalar import Hata  # noqa
 
 
 def _bilgi_yazdir():

@@ -15,7 +15,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"hata meydana geldi {e}")
 else:
-    from .ayar_kontrolcusu import GUNLUK_KLASORU, GUNLUK_SEVIYESI
+    from .sabilter import GUNLUK_KLASORU, GUNLUK_SEVIYESI
 
     # Hata => circular import hatası alabiliriz
 
@@ -25,21 +25,14 @@ else:
     """
 
     class Gunlukcu(logging.Logger):
-        def __init__(self, name=__qualname__, level: str = GUNLUK_SEVIYESI):  # noqa: F821
-            _gunluk_seviyesi = {
-                "DEBUG": logging.DEBUG,
-                "INFO": logging.INFO,
-                "WARNING": logging.WARNING,
-                "ERROR": logging.ERROR,
-                "CRITICAL": logging.CRITICAL,
-            }[level]
-            super().__init__(name, level=_gunluk_seviyesi)
+        def __init__(self, name=__qualname__, level: int = GUNLUK_SEVIYESI):  # noqa: F821
+            super().__init__(name, level=level)
             # self.stream_handlr =logging.StreamHandler()
 
             # self.addHandler(self.stream_handlr)
             if not os.path.exists(GUNLUK_KLASORU):
                 os.mkdir(GUNLUK_KLASORU)
-            if _gunluk_seviyesi == logging.DEBUG:
+            if level == logging.DEBUG:
                 self.file_handlr = logging.handlers.RotatingFileHandler(
                     # f"{GUNLUK_KLASORU}/{name}_{_suan.hour}_{_suan.minute}.log",
                     f"{GUNLUK_KLASORU}/{name}.log",
@@ -51,7 +44,9 @@ else:
                 self.addHandler(self.file_handlr)
             for handler in self.handlers:
                 handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-            # self.propagate = False
+            self.propagate = False
+            # -- propagate --> bu loggerın parent loggerlara mesaj göndermesini engeller \
+            # ----  ( eğer True ise parent loggerlara da mesaj gönderir)
 
     logging.setLoggerClass(Gunlukcu)
 
@@ -66,7 +61,7 @@ else:
             return cls_instance.gunlukcu  # type: ignore
         return cls_instance.gunlukcu  # type: ignore
 
-    def islemSuresiHesapla(gunluk_seviyesi: str = GUNLUK_SEVIYESI) -> Any:
+    def islemSuresiHesapla(gunluk_seviyesi: int = GUNLUK_SEVIYESI) -> Any:
         """
         islem süresini hesaplar ve gunlukler
         """

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 import os
 import sys
+import logging
 
-from .temel_fonksiyonlar import sozlukeriBirlestir
-from .temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
+from moe_bot.temel_fonksiyonlar import sozlukeriBirlestir
+from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
 
 try:
     BASE_PATH = sys._MEIPASS  # type: ignore
@@ -12,7 +13,7 @@ except Exception:
 
 UYUMA_SURESI = 2  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = "DEBUG"
+GUNLUK_SEVIYESI = logging.DEBUG
 ENGEL_KONTROL_SURESI = 2  # Saniye
 
 
@@ -22,12 +23,14 @@ class TaramaSabitleri:
     çalışma zamanı sabitleri
     """
 
-    UYUMA_SURESI = 0.5
-
     DOSYA_YOLLARI = [
         "coordinates/regions.xlsx",
         os.path.join(BASE_PATH, "imgs/"),
     ]
+
+    # *******************************************
+    dil_tablos = {"en": {KaynakTipi.EKMEK.name: "food"}}
+    # *******************************************
 
     kaynak_gorsel_yl_dsn = {
         KaynakTipi.EKMEK.name: "ek_*.png",
@@ -72,9 +75,20 @@ class TaramaSabitleri:
 
     # örn { 'EKMEK_svy': 'e_svy_*.png', 'ALTIN_svy': 'a_svy_*.png', ...}
 
-    GLOB_DSNLER = sozlukeriBirlestir(GLOB_DSNLER, kaynak_gorsel_yl_dsn, oyunui_gorsel_yl_dsn, svy_gorsel_yl_dsn, engel_gorsel_yl_dsn)
+    GLOB_DSNLER = sozlukeriBirlestir(
+        GLOB_DSNLER,
+        kaynak_gorsel_yl_dsn,
+        oyunui_gorsel_yl_dsn,
+        svy_gorsel_yl_dsn,
+        engel_gorsel_yl_dsn,
+    )
 
-    del kaynak_gorsel_yl_dsn, oyunui_gorsel_yl_dsn, svy_gorsel_yl_dsn, engel_gorsel_yl_dsn
+    del (
+        kaynak_gorsel_yl_dsn,
+        oyunui_gorsel_yl_dsn,
+        svy_gorsel_yl_dsn,
+        engel_gorsel_yl_dsn,
+    )
 
     # SVY_GORSEL_YL = [ 'svy_' + str(i) + '.png' for i in range(1, 12)]
 
@@ -133,19 +147,19 @@ class TaramaSabitleri:
             "svy": Kare(640, 130, 180, 70),
             "isgal_durumu": Kare(575, 235, 200, 75),
             "sefer": Kare(110, 150, 100, 70),
-            "sehir_ikonu": Kare(0, 730, 100, 37),  #
-            "moe_logo": Kare(600, 0, 200, 150),  #
-            "hizmet_basarisiz": Kare(660, 170, 150, 60),  #
-            "oyundan_cik": Kare(600, 150, 120, 70),  #
-            "baglanti_kesildi": Kare(660, 170, 150, 60),  #
-            "dunya_ikonu": Kare(0, 730, 100, 37),  #
-            "maks_sefer": Kare(580, 160, 150, 50),  #
-            "tekrar_dene": Kare(680, 470, 140, 70),  #
-            "mavi_tamam": Kare(530, 415, 300, 260),  #
-            "geri_ok": Kare(0, 0, 50, 50),  #
+            "sehir_ikonu": Kare(0, 730, 100, 38),  #
+            "moe_logo": Kare(400, 0, 300, 200),  #
+            "hizmet_basarisiz": Kare(480, 140, 410, 110),  #
+            "oyundan_cik": Kare(480, 140, 410, 110),  #
+            "baglanti_kesildi": Kare(480, 140, 410, 110),  #
+            "dunya_ikonu": Kare(0, 730, 100, 38),  #
+            "maks_sefer": Kare(480, 140, 400, 100),  #
+            "tekrar_dene": Kare(680, 450, 140, 80),  #
+            "mavi_tamam": Kare(530, 400, 300, 300),  #
+            "geri_ok": Kare(0, 0, 50, 60),  #
             "tamam_buton": Kare(610, 450, 140, 100),  #
-            "geri_buton": Kare(330, 670, 145, 70),  #
-            "baglanti_yok": Kare(660, 170, 150, 60),  #
+            "geri_buton": Kare(300, 650, 200, 100),  #
+            "baglanti_yok": Kare(480, 140, 410, 110),  #
         },
     }
 
@@ -159,7 +173,7 @@ class TaramaSabitleri:
             },
             {"y_taban": 1630},  # ölü bölge
             {"x_taban": 3580},  # ölü bölge
-            {"y_tavan": 260},
+            {"y_tavan": 280},
         ],
         "_1920": [
             {
@@ -171,7 +185,7 @@ class TaramaSabitleri:
             },
             {"y_taban": 820},  # ölü bölge , 820+
             {"x_taban": 1750},  # ölü bölge  1750+
-            {"y_tavan": 120},
+            {"y_tavan": 140},
         ],
         "_1366": [
             {
@@ -180,7 +194,7 @@ class TaramaSabitleri:
                 "y_taban": 0,
                 "y_tavan": 400,
             },
-            {"y_taban": 560},
+            {"y_taban": 580},
             {"x_taban": 1270},
             {"y_tavan": 100},
         ],
@@ -335,7 +349,7 @@ class TaramaSabitleri:
         },
         "_1366": {
             "svy": 0.8,
-            "sefer": 0.9,
+            "sefer": 0.8,
         },
     }
 

@@ -3,7 +3,7 @@ import multiprocessing
 from time import sleep
 
 from .temel_siniflar import IslemSinyalleri
-from .ayar_kontrolcusu import ENGEL_KONTROL_SURESI
+from .sabilter import ENGEL_KONTROL_SURESI
 from .kaynakislem import (
     DosyaIslemleri,
     Fare,
@@ -324,6 +324,11 @@ class EngelTarayiciİslem:
             self.gunlukcu.debug("sinyal dur kontrol")
             sleep(ENGEL_KONTROL_SURESI * 2)
             self.gunlukcu.debug("sinyal dur kontrol bitti")
+        elif self._sinyal_alma == (IslemSinyalleri.SONLANDIR, IslemSinyalleri.FAILSAFE_SONLANDIR):
+            self.gunlukcu.debug("sinyal dur kontrol")
+            self.kapat()
+            sleep(ENGEL_KONTROL_SURESI)
+            exit(0)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"  # type: ignore

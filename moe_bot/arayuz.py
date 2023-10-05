@@ -3,11 +3,11 @@ import multiprocessing
 
 import os
 
-from moe_gatherer.hatalar import BaglantiHatasi, Hata
-from moe_gatherer.ayar_kontrolcusu import BASE_PATH
+from moe_bot.hatalar import BaglantiHatasi, Hata
+from moe_bot.sabilter import BASE_PATH
 
-from moe_gatherer.sifremele import sifre_hash_olustur
-from moe_gatherer.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
+from moe_bot.sifremele import sifre_hash_olustur
+from moe_bot.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
 
 
 from tkinter import (
@@ -25,8 +25,8 @@ from tkinter import (
 from tkinter.ttk import Combobox
 from enum import Enum, auto
 
-from moe_gatherer.temel_siniflar import KaynakTipi, KullaniciGirisVerisi, Diller, DilEnum
-from moe_gatherer.gunlukcu import gunlukcuGetir
+from moe_bot.temel_siniflar import KaynakTipi, KullaniciGirisVerisi, Diller, DilEnum
+from moe_bot.gunlukcu import gunlukcuGetir
 
 multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
@@ -36,7 +36,7 @@ LOGO_PATH = os.path.join(BASE_PATH, "arayuz/moe_logo.png")
 
 ENTRY_WIDTH = 30
 
-ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
+# ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
 
 
 def _error_msgbx(error: str) -> None:
@@ -85,7 +85,7 @@ class MainGui:
         self.root = root
         self.root.resizable(False, False)
         self.root.geometry(geometry)
-        self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
+        # self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
         self.change_title(title)
         self.interaction_variables = {}
         self.pageshow = Login_Page(self, self.root)

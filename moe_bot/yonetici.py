@@ -2,7 +2,6 @@ import ctypes
 import logging
 from multiprocessing import RLock
 import multiprocessing
-import sys
 from time import sleep
 
 import pynput
@@ -57,6 +56,8 @@ class BotIslemYonetici:
 
     def _engelSinyalKontrol(self):
         while True:
+            sleep(0.1)  # 100
+
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
                     sleep(0.1)
@@ -67,6 +68,8 @@ class BotIslemYonetici:
                     sleep(0.1)
                     if self.tarama_islem._sinyal_gonderme.value == IslemSinyalleri.FAILSAFE_SONLANDIR:
                         self.engel_tarayici_islem._sinyal_gonderme.value = IslemSinyalleri.DUR
+            if self._sinyal_knl1 == IslemSinyalleri.SONLANDIR:
+                self._on_exit(win32con.CTRL_CLOSE_EVENT)
 
     def tusKontrol(self, key):
         """
@@ -74,6 +77,7 @@ class BotIslemYonetici:
         --> baslatma tuşuna basıldığında tarama başlat\n
         --> bitirme tuşuna basıldığında tarama durdur\n
         """
+        sleep(0.2)
         self.gunlukcu.debug(f"tus basıldı {key}")
         with self._process_olusturma_kilidi:
             if key == pynput.keyboard.KeyCode.from_char("s"):
@@ -112,6 +116,10 @@ class BotIslemYonetici:
                 )
                 self.gunlukcu.debug("engel tarayıcı işlemi process i oluşturuldu")
                 return
+            # FIXME : silmeyi unutma (test için sadece "q" tuşu ile çıkış)
+            elif key == pynput.keyboard.KeyCode.from_char("q"):
+                print("ciıkış tuşuna basıldı")
+                self._on_exit(win32con.CTRL_CLOSE_EVENT)
             else:
                 pass
 
@@ -126,29 +134,35 @@ class BotIslemYonetici:
             win32con.CTRL_C_EVENT,
             win32con.CTRL_BREAK_EVENT,
             win32con.CTRL_CLOSE_EVENT,
+            win32con.CTRL_LOGOFF_EVENT,
+            win32con.CTRL_SHUTDOWN_EVENT,
         ):
-            self.tarama_islem.kapat()
+            self._sinyal_knl1.value = IslemSinyalleri.SONLANDIR  # type: ignore
+            self._sinyal_knl2.value = IslemSinyalleri.SONLANDIR  # type: ignore
+            # self.tarama_islem.kapat()
+            # self.engel_tarayici_islem.kapat()
             # TODO: sleep muhtemelen gereksiz
             sleep(3)
             if not hasattr(self, "tarama_islem_process"):
                 self.gunlukcu.info("program kapatılıyor")
-            elif self.tarama_islem_process.is_alive():
-                self.gunlukcu.debug("tarama işlemi process i zorla sonlandırılıyor")
-                self.tarama_islem_process.terminate()
+            self.tarama_islem_process.terminate()
+            self.engel_tarayici_islem_process.terminate()
             self.klavye_dinleyici.stop()
-            sys.exit(0)
+            exit(0)
         return False
 
     def botBaslat(self):
-        """
-        klavye dinleyiciyi başlatır\n
-        tarama işlemi process olarak başlatır\n
-        klavye dinleyiciyi tarama işlem process i sonlanana kadar bekletir\n
-        """
-        self.klavye_dinleyici.start()
-        self._engelSinyalKontrol()
-        if self.tarama_islem_process.is_alive():
-            self.tarama_islem.kapat()
-        if self.engel_tarayici_islem_process.is_alive():
-            self.engel_tarayici_islem.kapat()
+        try:
+            self.klavye_dinleyici.start()
+            self._engelSinyalKontrol()
+            if self.tarama_islem_process.is_alive():
+                self.tarama_islem.kapat()
+            if self.engel_tarayici_islem_process.is_alive():
+                self.engel_tarayici_islem.kapat()
+            if self.klavye_dinleyici.is_alive():
+                self.klavye_dinleyici.stop()
+            exit(0)
+        except KeyboardInterrupt:
+            print("keyboard interrupt")
+            self._on_exit(win32con.CTRL_C_EVENT)
         # self.klavye_dinleyici.join()

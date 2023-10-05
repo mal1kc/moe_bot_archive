@@ -1,5 +1,6 @@
 ## düzeltildi
 
+- d(durma) 'durumunda cpu kullanımı %10 - %20 değerlerine çıkıyor ( çalışma sırasında %1-%2 ) (çözüldü)
 - _1920 ve _1366 bölge değişmiyor ++
     -> eğer ekranda bul ikonunu bulamazsa bölgeyi değişemiyor
         buda sonsuz boş ekranda bul ikonu taramasına neden oluyor
@@ -48,6 +49,7 @@
 
 
 ## FIXME Sorunlar
+
 
 - tüm çözünürlüklerde de daha çok test and foto optimizasyonu +
 - confidence değerlerinin hepsi ayarlardan alınmıyor

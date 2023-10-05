@@ -14,7 +14,7 @@ from pyautogui import write, FailSafeException
 
 from .gunlukcu import Gunlukcu  # noqa
 from .hatalar import Hata, KullaniciHatasi
-from .ayar_kontrolcusu import TaramaSabitleri, BASE_PATH
+from .sabilter import TaramaSabitleri, BASE_PATH, UYUMA_SURESI
 from .temel_fonksiyonlar import ifItsNone, tipVeyaNone
 from .temel_siniflar import EkranBoyut, IslemSinyalleri, Kare, KaynakKare, KaynakTipi, Koordinat2D
 
@@ -98,14 +98,14 @@ class Klavye:
     def tus_tek(tus: str):
         # _gunlukcu.info(f"{tus} tuşuna basılıyor.")
         press(tus)
-        sleep(TaramaSabitleri.UYUMA_SURESI / 1.5)
+        sleep(UYUMA_SURESI / 1.5)
 
     @staticmethod
     def tuslar(tuslar: list[str] | str):
         # _gunlukcu.info(f"{tuslar} tuşlarına basılıyor.")
         if isinstance(tuslar, int):
             tuslar = str(tuslar)
-        write(tuslar, interval=TaramaSabitleri.UYUMA_SURESI / 1.5)
+        write(tuslar, interval=UYUMA_SURESI / 1.5)
 
 
 def tiklamaNoktasiGetir(nokta_adi: str) -> Koordinat2D:
@@ -247,14 +247,14 @@ class DosyaIslemleri:
 
 class Fare:
     @staticmethod
-    def sagTikla(uyuma_suresi=TaramaSabitleri.UYUMA_SURESI):
+    def sagTikla(uyuma_suresi=UYUMA_SURESI):
         _gunlukcu.debug("sağ tıklandı")
         sleep(uyuma_suresi)
         rightClick()
         sleep(uyuma_suresi)
 
     @staticmethod
-    def solTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi=TaramaSabitleri.UYUMA_SURESI):
+    def solTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi=UYUMA_SURESI):
         _gunlukcu.debug(f"sol tıklanıyor , konum: {str(konum)}")
         sleep(uyuma_suresi)
         click(konum)
@@ -434,7 +434,7 @@ class SeferTarayici(CokluTarayici):
         while sefer_sayisi is None and sayac < 3:
             gunlukcuGetir().debug(f"sefer sayisi bulunamadi tekrar bakılıyor , deneme:{sayac}")
             self._seferMenusuAcKapat()
-            # sleep(TaramaSabitleri.UYUMA_SURESI)
+            # sleep(UYUMA_SURESI)
             sefer_sayisi = self._ekranTara()
             sayac += 1
 
@@ -803,9 +803,6 @@ class TaramaIslem:
             except OSError as os_err:
                 gunlukcuGetir().debug(f"OSError yakalandı, {os_err}")
                 sleep(5)  # 5 saniye bekle ve tekrar dene
-            except KeyboardInterrupt as kb_intrp_exc:
-                gunlukcuGetir().debug(f"KeyboardInterrupt yakalandı, {kb_intrp_exc}")
-                self._sinyal_gonderme.value = IslemSinyalleri.SONLANDIR
             except Exception as exc:
                 gunlukcuGetir().debug(f"Exception yakalandı, {exc}")
                 self._sinyal_gonderme.value = IslemSinyalleri.DUR
@@ -823,6 +820,10 @@ class TaramaIslem:
                 break
         if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
             self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
+        if self._sinyal_alma.value == IslemSinyalleri.SONLANDIR:
+            self._sinyal_gonderme.value = IslemSinyalleri.SONLANDIR
+            self.kapat()
+            return False
         if self.acikmi_event.is_set():  # type: ignore
             return False
         return True

@@ -1,4 +1,4 @@
-import moe_gatherer.arayuz as arayuz
+import moe_bot.arayuz as arayuz
 
 
 def print_window_size(event):
