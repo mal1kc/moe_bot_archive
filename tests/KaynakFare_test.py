@@ -1,4 +1,4 @@
-from moe_bot.kaynakislem import KaynakFare, Varsayilanlar
+from moe_bot.moe_gatherer import KaynakFare, Varsayilanlar
 from moe_bot.temel_siniflar import Koordinat2D
 
 

@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from moe_bot.kaynakislem import Kare, KaynakKare
+from moe_bot.moe_gatherer import Kare, KaynakKare
 
 
 @pytest.fixture

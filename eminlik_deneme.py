@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from moe_bot.kaynakislem import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
+from moe_bot.moe_gatherer import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
 from moe_bot.temel_siniflar import KaynakTipi
 
 if __name__ == "__main__":

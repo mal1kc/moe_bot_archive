@@ -8,12 +8,11 @@ def ayarları_olustur() -> Ayarlar.ModAyarlari:
         bosta_bekleme_suresi=0.1,
         bekleme_suresi=0.5,
         tarama_bekleme_suresi=1,
-        okunucak_dosyalar="coordinates/regions.xlsx",
         tarayicilar={
             # t_adi : ( "gorsel_adi", "eminlik" , (x, y, genislik, yukseklik))
+            "sehir_ikonu": ("sehir_ikonu", 0.9, None),
         },
-        coklu_tarayicilar={
-            "svy_demir": ("svy_demir", (0.9, 0.9, 0.9), None),
-        },
+        okunucak_dosyalar=None,
+        coklu_tarayicilar=None,
         ekstra_ayarlar=None,
     )

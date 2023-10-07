@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "moe_gatherer"
-version = "0.7.5"
-description = "march of empires gatherer"
+name = "moe_bot"
+version = "0.8.5"
+description = "moe helper bot"
 authors = ["a a <a@example.com>"]
 readme = "readme.md"
 packages = []
@@ -49,7 +49,7 @@ exe_olustur_pyinstaller = "exe_olustur_pyinstaller:main"
 
 [project]
 name = "moe_bot"
-version = "0.7.5"
+version = "0.8.5"
 description = "moe helper bot"
 
 [tool.distutils.build_exe]

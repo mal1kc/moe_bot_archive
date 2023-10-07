@@ -198,7 +198,7 @@ class Login_Page:
 
     def _lang_changed(self, event) -> None:
         # update language
-        Diller.aktif_dil_ayarla(DilEnum[self.select_lang_combo.get()])
+        Diller.aktif_dil_degistir(DilEnum[self.select_lang_combo.get()])  # type: ignore
         self.name_lbl.config(text=Diller.lokalizasyon("name_lbl"))
         self.pass_lbl.config(text=Diller.lokalizasyon("pass_lbl"))
         self.sbt.config(text=Diller.lokalizasyon("login_btn"))
@@ -355,12 +355,21 @@ class Moe_Gatherer_Page:
             KaynakTipi.ALTIN: BooleanVar(),
         }
 
+        localization = (
+            "food",
+            "wood",
+            "stone",
+            "silver",
+            "iron",
+            "gold",
+        )
+
         self.resource_selection_checkbuttons = {
             resource: Checkbutton(
                 self.resource_selection_lbl,
                 onvalue=True,
                 offvalue=False,
-                text=Diller.lokalizasyon(resource.name),
+                text=Diller.lokalizasyon(localization[resource.value]),
                 variable=self.resorce_variables[resource],
             )
             for resource in self.resorce_variables

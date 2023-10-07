@@ -12,8 +12,8 @@ import win32con
 # from .engelislem import EngelTarayiciİslem
 from .engelislem import EngelTarayiciİslem
 from .gunlukcu import Gunlukcu  # noqa
-from .kaynakislem import TaramaIslem
-from .temel_siniflar import IslemSinyalleri, KaynakTipi
+from .moe_gatherer import TaramaIslem
+from .temel_siniflar import ModSinyal, KaynakTipi
 
 
 class BotIslemYonetici:
@@ -35,8 +35,8 @@ class BotIslemYonetici:
             svyler=self.tarama_islem_argumanları[1],
             maks_sefer_sayisi=self.tarama_islem_argumanları[2],
         )
-        self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.DEVAM_ET)
-        self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.MESAJ_ULASMADI)
+        self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, ModSinyal.DEVAM_ET)
+        self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, ModSinyal.MESAJ_ULASMADI)
         self.engel_tarayici_islem = EngelTarayiciİslem()
         # self._process_listesi = []
         self._process_olusturma_kilidi = RLock()
@@ -61,14 +61,14 @@ class BotIslemYonetici:
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
                     sleep(0.1)
-                    if self.engel_tarayici_islem._sinyal_gonderme.value == IslemSinyalleri.SONLANDIR:
+                    if self.engel_tarayici_islem._sinyal_gonderme.value == ModSinyal.SONLANDIR:
                         return
                 # fail safe sonlandır check
                 if self.tarama_islem_process.is_alive():
                     sleep(0.1)
-                    if self.tarama_islem._sinyal_gonderme.value == IslemSinyalleri.FAILSAFE_SONLANDIR:
-                        self.engel_tarayici_islem._sinyal_gonderme.value = IslemSinyalleri.DUR
-            if self._sinyal_knl1 == IslemSinyalleri.SONLANDIR:
+                    if self.tarama_islem._sinyal_gonderme.value == ModSinyal.FAILSAFE_SONLANDIR:
+                        self.engel_tarayici_islem._sinyal_gonderme.value = ModSinyal.DUR
+            if self._sinyal_knl1 == ModSinyal.SONLANDIR:
                 self._on_exit(win32con.CTRL_CLOSE_EVENT)
 
     def tusKontrol(self, key):
@@ -137,8 +137,8 @@ class BotIslemYonetici:
             win32con.CTRL_LOGOFF_EVENT,
             win32con.CTRL_SHUTDOWN_EVENT,
         ):
-            self._sinyal_knl1.value = IslemSinyalleri.SONLANDIR  # type: ignore
-            self._sinyal_knl2.value = IslemSinyalleri.SONLANDIR  # type: ignore
+            self._sinyal_knl1.value = ModSinyal.SONLANDIR  # type: ignore
+            self._sinyal_knl2.value = ModSinyal.SONLANDIR  # type: ignore
             # self.tarama_islem.kapat()
             # self.engel_tarayici_islem.kapat()
             # TODO: sleep muhtemelen gereksiz
