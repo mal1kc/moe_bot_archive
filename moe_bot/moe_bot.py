@@ -25,18 +25,19 @@ def main():
     _bilgi_yazdir()
 
     # TODO: botislem yoneticisi ne mod adi verilecek? modları parçalı yaptıktan sonra
+    arayuz_degisgenleri_sunucu = moe_gatherer_arayuz.interaction_variables["server"]
     if moe_gatherer_arayuz.interaction_variables["mod_name"] == arayuz.ModEnum.MOE_GATHERER:
-        arayuz_degisgenleri = moe_gatherer_arayuz.interaction_variables["mod_settings"]
+        arayuz_degisgenleri_mod_ayarlari = moe_gatherer_arayuz.interaction_variables["mod_settings"]
         del moe_gatherer_arayuz
     else:
         raise Hata("mod_hatalı")
 
-    if arayuz_degisgenleri is not None:
+    if arayuz_degisgenleri_mod_ayarlari is not None:
         bt = BotIslemYonetici(
-            maks_sefer_sayisi=arayuz_degisgenleri["march_count"],
-            kaynak_tipleri=arayuz_degisgenleri["resources"],
-            svyler=arayuz_degisgenleri["lvls"],
-            sunucu_islem=arayuz_degisgenleri["server"],
+            maks_sefer_sayisi=arayuz_degisgenleri_mod_ayarlari["march_count"],
+            kaynak_tipleri=arayuz_degisgenleri_mod_ayarlari["resources"],
+            svyler=arayuz_degisgenleri_mod_ayarlari["lvls"],
+            sunucu_islem=arayuz_degisgenleri_sunucu,  # type: ignore
         )
 
         bt.botBaslat()

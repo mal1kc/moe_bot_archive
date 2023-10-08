@@ -31,7 +31,6 @@ from moe_bot.gunlukcu import gunlukcuGetir
 multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
 
-# TODO : ayarlardan al
 LOGO_PATH = os.path.join(BASE_PATH, "arayuz/moe_logo.png")
 
 ENTRY_WIDTH = 30
@@ -228,10 +227,11 @@ class Login_Page:
             )
             self.sunucu_islem = SunucuIslem(self.user_login_data)
             if (giris_sonucu := self.sunucu_islem.giris_yap()) == SunucuIslemSonucu.BASARILI:
-                # TODO: sadece kullanicinin sahip oldugu modlari goster
                 self.frame.destroy()
                 self.parent.interaction_variables["server"] = self.sunucu_islem
-                self.parent.change_page(GUIPagesEnum.MOD_SELECT)
+                # TODO: kullanicinin sahip oldugu modlari al ve ona göre mod secim sayfasi olustur (tek mod var suan)
+                # TODO: MOD_SELECT sayfasina gecis yap
+                self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
             elif giris_sonucu == SunucuIslemSonucu.BAGLANTI_HATASI:
                 _error_msgbx("login_error_connection_error")
                 return
@@ -250,7 +250,6 @@ class Login_Page:
             _error_msgbx("login_error_connection_error")
         except Exception as exc:
             LOGGER.exception(f"Exception occured {exc}")
-            # TODO: bilinmeyen hata mesaji goster
             _error_msgbx("login_error_unknown_error")
 
 
@@ -286,7 +285,7 @@ class Mod_Select_Page:
 
     def clicked(self):
         self.frame.destroy()
-        # TODO: go to selected mod page
+        # TODO: secilen modu al ve ona göre sayfa olustur
         self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
 
 

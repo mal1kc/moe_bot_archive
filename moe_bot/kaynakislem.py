@@ -49,15 +49,15 @@ class Varsayilanlar:
     dinamik olarak değişir (sadece ilk çalışmada)
     """
 
-    __slots__ = (
-        "_EKRAN_BOYUT_ETIKETI",
-        "_GLOB_DSNLER",
-        "_TARAMA_BOLGELERI",
-        "_TIKLAMA_KISITLAMALARI",
-        "_TIKLAMA_NOKTALARI",
-        "_EMINLIKLER",
-        "_PROCESS_OLARAK_CALISMA",
-    )
+    __dict__ = {
+        "_EKRAN_BOYUT_ETIKETI": None,
+        "_GLOB_DSNLER": None,
+        "_TARAMA_BOLGELERI": None,
+        "_TIKLAMA_KISITLAMALARI": None,
+        "_TIKLAMA_NOKTALARI": None,
+        "_EMINLIKLER": None,
+        "_PROCESS_OLARAK_CALISMA": None,
+    }
 
     _instance = None
 
@@ -178,14 +178,8 @@ def taramaBolgesiGetir(bolge_adi: str) -> Kare:
     return Varsayilanlar().taramaBolgesiGetir(bolge_adi)
 
 
-# global gerektiren fonksiyonlar
-# TODO: Daha iyi bir çözüm bulunmalı
-#   - belki tüm siniflar bir sinifblogu içinde toplanabilir
-
-
 @cache
 def klavyeGetir() -> Klavye:
-    # gunlukcuGetir().info("klavye oluşturuluyor.")
     if "klavye" not in globals():
         global _klavye
         _klavye = Klavye()
@@ -715,10 +709,6 @@ class KaynakTarayici:
                     )
                     gunlukcuGetir().debug(f"{self.tip} için taramada,{bulunan_kare=}")
                     islem_devam_etsin_mi = self._kaynakKareEkleVeTopla(bulunan_kare)
-                    # TODO : tek kaynak toplamasına neden oluyor (bilmediğim bir noktadan none dönüyr)
-                    # if islem_devam_etsin_mi is None:
-                    #     gunlukcuGetir().debug(f"{self.tip} için tarama durduruldu,kaynakFare.kaynakTikla False döndü")
-                    #     return
                 del islem_devam_etsin_mi
 
         tarama_bitis = time_ns()

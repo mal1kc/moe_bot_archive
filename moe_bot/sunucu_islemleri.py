@@ -12,7 +12,7 @@ from .temel_siniflar import KullaniciGirisVerisi
 LOGGER = getLogger(__name__)
 
 # TODO: bunu ayarlar dosyasına taşı
-SUNUCU_BASE_URL = "http://127.0.0.1:5000"  # sunucu adresi # FIXME: sunucu adresi degisecek
+SUNUCU_BASE_URL = "http://127.0.0.1:8080"  # sunucu adresi # FIXME: sunucu adresi degisecek
 
 # TODO: bunu ayarlar dosyasına taşı
 URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint

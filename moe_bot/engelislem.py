@@ -35,8 +35,8 @@ class EngelTarayiciİslem:
             # DosyaIslemleri.gorselGetir("devre_disi"),
             # DosyaIslemleri.gorselGetir("devam_buton"),
         )
-        eminlikler = (
-            eminlikGetir("sehir_ikonu"),
+        eminlikler: tuple[float, ...] = (
+            eminlikGetir("sehir_ikonu"),  # type: ignore
             eminlikGetir("moe_logo"),
             eminlikGetir("hizmet_basarisiz"),
             eminlikGetir("baglanti_kesildi"),
@@ -191,8 +191,6 @@ class EngelTarayiciİslem:
                 self._sinyalYolla(ModSinyal.Bekle)
                 Fare.solTikla(_geriok_kare.merkez())
             self.gunlukcu.debug("geri ok tarama bitti")
-
-        # FIXME oyundan çıkış engeli kaldırma
 
         def _sehirYoksa() -> None:
             _maviTamamTara()

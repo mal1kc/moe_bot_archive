@@ -145,9 +145,6 @@ class BotIslemYonetici:
         ):
             self._sinyal_knl1.value = ModSinyal.SONLANDIR  # type: ignore
             self._sinyal_knl2.value = ModSinyal.SONLANDIR  # type: ignore
-            # self.tarama_islem.kapat()
-            # self.engel_tarayici_islem.kapat()
-            # TODO: sleep muhtemelen gereksiz
             sleep(3)
             if not hasattr(self, "tarama_islem_process"):
                 self.gunlukcu.info("program kapatılıyor")
