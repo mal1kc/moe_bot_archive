@@ -8,12 +8,13 @@ import pynput
 import win32api
 import win32con
 
+from moe_bot.sunucu_islemleri import SunucuIslem, SUNUCU_OTURUM_SURESI
 
 # from .engelislem import EngelTarayiciİslem
 from .engelislem import EngelTarayiciİslem
-from .gunlukcu import Gunlukcu  # noqa
 from .kaynakislem import TaramaIslem
-from .temel_siniflar import IslemSinyalleri, KaynakTipi
+from .enumlar import ModSinyal
+from .temel_siniflar import KaynakTipi, RepeatedTimer
 
 
 class BotIslemYonetici:
@@ -28,15 +29,18 @@ class BotIslemYonetici:
         maks_sefer_sayisi: int,
         kaynak_tipleri: tuple[KaynakTipi, ...],
         svyler: tuple[int, ...],
+        sunucu_islem: SunucuIslem,
     ) -> None:
+        self.s_islem = sunucu_islem
+        self.sunucu_o_kontrol_zamanlayici = RepeatedTimer(SUNUCU_OTURUM_SURESI, self._oturum_kontrol)
         self.tarama_islem_argumanları = (kaynak_tipleri, svyler, maks_sefer_sayisi)
         self.tarama_islem = TaramaIslem(
             kaynak_tipleri=self.tarama_islem_argumanları[0],
             svyler=self.tarama_islem_argumanları[1],
             maks_sefer_sayisi=self.tarama_islem_argumanları[2],
         )
-        self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.DEVAM_ET)
-        self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, IslemSinyalleri.MESAJ_ULASMADI)
+        self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, ModSinyal.DevamEt)
+        self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, ModSinyal.MesajUlasmadi)
         self.engel_tarayici_islem = EngelTarayiciİslem()
         # self._process_listesi = []
         self._process_olusturma_kilidi = RLock()
@@ -56,19 +60,18 @@ class BotIslemYonetici:
 
     def _engelSinyalKontrol(self):
         while True:
-            sleep(0.1)  # 100
-
+            sleep(0.1)  # 100 ms
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
                     sleep(0.1)
-                    if self.engel_tarayici_islem._sinyal_gonderme.value == IslemSinyalleri.SONLANDIR:
+                    if self.engel_tarayici_islem._sinyal_gonderme.value == ModSinyal.Sonlandir:
                         return
                 # fail safe sonlandır check
                 if self.tarama_islem_process.is_alive():
                     sleep(0.1)
-                    if self.tarama_islem._sinyal_gonderme.value == IslemSinyalleri.FAILSAFE_SONLANDIR:
-                        self.engel_tarayici_islem._sinyal_gonderme.value = IslemSinyalleri.DUR
-            if self._sinyal_knl1 == IslemSinyalleri.SONLANDIR:
+                    if self.tarama_islem._sinyal_gonderme.value == ModSinyal.FailSafe:
+                        self.engel_tarayici_islem._sinyal_gonderme.value = ModSinyal.Bekle
+            if self._sinyal_knl1 == ModSinyal.Sonlandir:
                 self._on_exit(win32con.CTRL_CLOSE_EVENT)
 
     def tusKontrol(self, key):
@@ -118,10 +121,13 @@ class BotIslemYonetici:
                 return
             # FIXME : silmeyi unutma (test için sadece "q" tuşu ile çıkış)
             elif key == pynput.keyboard.KeyCode.from_char("q"):
-                print("ciıkış tuşuna basıldı")
+                print("cikis tusuna basildi")
                 self._on_exit(win32con.CTRL_CLOSE_EVENT)
             else:
                 pass
+
+    def _oturum_kontrol(self):
+        self.s_islem.giris_yenile()
 
     def _on_exit(self, signal) -> bool:
         """
@@ -137,8 +143,8 @@ class BotIslemYonetici:
             win32con.CTRL_LOGOFF_EVENT,
             win32con.CTRL_SHUTDOWN_EVENT,
         ):
-            self._sinyal_knl1.value = IslemSinyalleri.SONLANDIR  # type: ignore
-            self._sinyal_knl2.value = IslemSinyalleri.SONLANDIR  # type: ignore
+            self._sinyal_knl1.value = ModSinyal.SONLANDIR  # type: ignore
+            self._sinyal_knl2.value = ModSinyal.SONLANDIR  # type: ignore
             # self.tarama_islem.kapat()
             # self.engel_tarayici_islem.kapat()
             # TODO: sleep muhtemelen gereksiz
@@ -163,6 +169,5 @@ class BotIslemYonetici:
                 self.klavye_dinleyici.stop()
             exit(0)
         except KeyboardInterrupt:
-            print("keyboard interrupt")
             self._on_exit(win32con.CTRL_C_EVENT)
         # self.klavye_dinleyici.join()

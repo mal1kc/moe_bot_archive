@@ -80,6 +80,11 @@ class MainGui:
         title: str = "window_title_main",
         geometry: str = "500x600",
     ):
+        self.interaction_variables = {
+            "mod_name": None,
+            "mod_settings": None,
+            "server": None,
+        }
         if root is None:
             root = Tk()
         self.root = root
@@ -111,11 +116,11 @@ class MainGui:
                 self.interaction_variables = {
                     "mod_name": self.pageshow.name,
                     "mod_settings": self.pageshow.get_settings(),  # type: ignore
+                    "server": self.interaction_variables["server"],
                 }
             except Hata as exc:
                 LOGGER.exception(f"Exception occured {exc} while getting settings for {self.pageshow.name=}")
                 return
-            print(self.interaction_variables)
             self.root.destroy()
             return
         raise UnExpectedPageError("Unexpected page")
@@ -198,7 +203,7 @@ class Login_Page:
 
     def _lang_changed(self, event) -> None:
         # update language
-        Diller.aktif_dil_ayarla(DilEnum[self.select_lang_combo.get()])
+        Diller.aktif_dil_degistir(DilEnum[self.select_lang_combo.get()])  # type: ignore
         self.name_lbl.config(text=Diller.lokalizasyon("name_lbl"))
         self.pass_lbl.config(text=Diller.lokalizasyon("pass_lbl"))
         self.sbt.config(text=Diller.lokalizasyon("login_btn"))
@@ -225,6 +230,7 @@ class Login_Page:
             if (giris_sonucu := self.sunucu_islem.giris_yap()) == SunucuIslemSonucu.BASARILI:
                 # TODO: sadece kullanicinin sahip oldugu modlari goster
                 self.frame.destroy()
+                self.parent.interaction_variables["server"] = self.sunucu_islem
                 self.parent.change_page(GUIPagesEnum.MOD_SELECT)
             elif giris_sonucu == SunucuIslemSonucu.BAGLANTI_HATASI:
                 _error_msgbx("login_error_connection_error")
@@ -355,12 +361,21 @@ class Moe_Gatherer_Page:
             KaynakTipi.ALTIN: BooleanVar(),
         }
 
+        localization = (
+            "food",
+            "wood",
+            "stone",
+            "silver",
+            "iron",
+            "gold",
+        )
+
         self.resource_selection_checkbuttons = {
             resource: Checkbutton(
                 self.resource_selection_lbl,
                 onvalue=True,
                 offvalue=False,
-                text=Diller.lokalizasyon(resource.name),
+                text=Diller.lokalizasyon(localization[resource.value - 1]),
                 variable=self.resorce_variables[resource],
             )
             for resource in self.resorce_variables

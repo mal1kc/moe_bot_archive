@@ -1,33 +1,25 @@
+import functools
 import logging
 import multiprocessing
-from dataclasses import dataclass
 from functools import cache
 from glob import glob
 from pathlib import Path
 from time import sleep, time_ns
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, Self
 
 import pylightxl as xl
 from pyautogui import click, locateAllOnScreen, locateOnScreen, moveTo, press, rightClick
 from pyautogui import size as _ekranBoyutu
 from pyautogui import write, FailSafeException
 
-from .gunlukcu import Gunlukcu  # noqa
 from .hatalar import Hata, KullaniciHatasi
 from .sabilter import TaramaSabitleri, BASE_PATH, UYUMA_SURESI
 from .temel_fonksiyonlar import ifItsNone, tipVeyaNone
-from .temel_siniflar import EkranBoyut, IslemSinyalleri, Kare, KaynakKare, KaynakTipi, Koordinat2D
+from .enumlar import ModSinyal
+from .temel_siniflar import EkranBoyut, Kare, KaynakKare, KaynakTipi, Koordinat2D
 
-# TODO : pyautogui -> locateOnScreen ' e wrapper yaz (engeltarayici arada çalışsın)
-# def _ekranTara(locateOnScreen:Callable,*args,**kwargs):
-#     '''
-#     wraps pyautogui.locateOnScreen
-#     '''
-#     if EngelTarayici().engelKontrol():
 
-# TODO : secili_svyler [11,12,13] -> dler = [kaynak_svy_11,kaynak_svy_12,kaynak_svy_13]
-
-_gunlukcu = logging.getLogger()
+_GUNLUKCU = logging.getLogger()
 
 
 def ekranBoyutuEtiketi(EkranBoyut: EkranBoyut) -> str:
@@ -51,81 +43,139 @@ def _glob_dsn_sozluk_olustur(ekran_boyut_etiket: str) -> dict[str, str]:
     return {K: f"{TaramaSabitleri.DOSYA_YOLLARI[1]}/{ekran_boyut_etiket}/{V}" for K, V in TaramaSabitleri.GLOB_DSNLER.items()}
 
 
-@dataclass(frozen=True)
 class Varsayilanlar:
     """
     çalışma başlangıcında belirlenen varsayılan değerler
     dinamik olarak değişir (sadece ilk çalışmada)
     """
 
-    @classmethod
-    def olustur(cls):
-        cls.EKRAN_BOYUT_ETIKETI = ekranBoyutuEtiketi(aktifEkranBoyutu())
+    __slots__ = (
+        "_EKRAN_BOYUT_ETIKETI",
+        "_GLOB_DSNLER",
+        "_TARAMA_BOLGELERI",
+        "_TIKLAMA_KISITLAMALARI",
+        "_TIKLAMA_NOKTALARI",
+        "_EMINLIKLER",
+        "_PROCESS_OLARAK_CALISMA",
+    )
 
-        cls.GLOB_DSNLER = _glob_dsn_sozluk_olustur(cls.EKRAN_BOYUT_ETIKETI)
+    _instance = None
 
-        cls.TARAMA_BOLGELERI = TaramaSabitleri.TARAMA_BOLGELERI[cls.EKRAN_BOYUT_ETIKETI]
+    def __new__(cls) -> Self:
+        if not cls._instance:
+            cls._instance = super().__new__(cls)
+        return cls._instance
 
-        cls.TIKLAMA_KISITLAMALARI = TaramaSabitleri.TIKLAMA_KISITLAMALARI[cls.EKRAN_BOYUT_ETIKETI]
+    def olustur(self) -> None:
+        self._EKRAN_BOYUT_ETIKETI = aktifEkranBoyutuEtiketi()
 
-        cls.TIKLAMA_NOKTALARI = TaramaSabitleri.TIKLAMA_NOKTALARI[cls.EKRAN_BOYUT_ETIKETI]
+        self._GLOB_DSNLER = _glob_dsn_sozluk_olustur(self.EKRAN_BOYUT_ETIKETI)
 
-        cls.EMINLIKLER = TaramaSabitleri.EMINLIKLER[cls.EKRAN_BOYUT_ETIKETI]
+        self._TARAMA_BOLGELERI = TaramaSabitleri.TARAMA_BOLGELERI[self.EKRAN_BOYUT_ETIKETI]
 
-        cls.PROCESS_OLARAK_CALISMA = True  # hardcoded , belki ilerde toggle edilebilir olur
+        self._TIKLAMA_KISITLAMALARI = TaramaSabitleri.TIKLAMA_KISITLAMALARI[self.EKRAN_BOYUT_ETIKETI]
 
-        _gunlukcu.debug("varsayilanlar oluşturuldu.")
+        self._TIKLAMA_NOKTALARI = TaramaSabitleri.TIKLAMA_NOKTALARI[self.EKRAN_BOYUT_ETIKETI]
 
-    EKRAN_BOYUT_ETIKETI = ekranBoyutuEtiketi(aktifEkranBoyutu())
+        self._EMINLIKLER = TaramaSabitleri.EMINLIKLER[self.EKRAN_BOYUT_ETIKETI]
 
-    GLOB_DSNLER = _glob_dsn_sozluk_olustur(EKRAN_BOYUT_ETIKETI)
+        self._PROCESS_OLARAK_CALISMA = True  # hardcoded , belki ilerde toggle edilebilir olur
 
-    TARAMA_BOLGELERI = TaramaSabitleri.TARAMA_BOLGELERI[EKRAN_BOYUT_ETIKETI]
+        _GUNLUKCU.debug("varsayilanlar oluşturuldu.")
 
-    TIKLAMA_KISITLAMALARI = TaramaSabitleri.TIKLAMA_KISITLAMALARI[EKRAN_BOYUT_ETIKETI]
+    @functools.cached_property
+    def EKRAN_BOYUT_ETIKETI(self) -> str:
+        if not hasattr(self, "_EKRAN_BOYUT_ETIKETI"):
+            self.olustur()
+        return self._EKRAN_BOYUT_ETIKETI
 
-    TIKLAMA_NOKTALARI = TaramaSabitleri.TIKLAMA_NOKTALARI[EKRAN_BOYUT_ETIKETI]
+    @functools.cached_property
+    def GLOB_DSNLER(self) -> dict[str, str]:
+        if not hasattr(self, "_GLOB_DSNLER"):
+            self.olustur()
+        return self._GLOB_DSNLER
 
-    EMINLIKLER = TaramaSabitleri.EMINLIKLER[EKRAN_BOYUT_ETIKETI]
+    @functools.cached_property
+    def TARAMA_BOLGELERI(self) -> dict[str, Kare]:
+        if not hasattr(self, "_TARAMA_BOLGELERI"):
+            self.olustur()
+        return self._TARAMA_BOLGELERI
 
-    PROCESS_OLARAK_CALISMA = True  # hardcoded , belki ilerde toggle edilebilir olur
+    @functools.cached_property
+    def TIKLAMA_KISITLAMALARI(self) -> list[dict[str, int]]:
+        if not hasattr(self, "_TIKLAMA_KISITLAMALARI"):
+            self.olustur()
+        return self._TIKLAMA_KISITLAMALARI
 
-    _gunlukcu.debug("varsayilanlar oluşturuldu.")
+    @functools.cached_property
+    def TIKLAMA_NOKTALARI(self) -> dict[str, Koordinat2D]:
+        if not hasattr(self, "_TIKLAMA_NOKTALARI"):
+            self.olustur()
+        return self._TIKLAMA_NOKTALARI
+
+    @functools.cached_property
+    def EMINLIKLER(self) -> dict[str, float] | dict[str, list[float]]:
+        if not hasattr(self, "_EMINLIKLER"):
+            self.olustur()
+        return self._EMINLIKLER
+
+    @functools.cached_property
+    def PROCESS_OLARAK_CALISMA(self) -> bool:
+        if not hasattr(self, "_PROCESS_OLARAK_CALISMA"):
+            self.olustur()
+        return self._PROCESS_OLARAK_CALISMA
+
+    def tiklamaNoktasiGetir(self, nokta_adi: str) -> Koordinat2D:
+        return self.TIKLAMA_NOKTALARI[nokta_adi]
+
+    def eminlikGetir(self, eminlik_adi: str) -> float | list[float]:
+        return self.EMINLIKLER[eminlik_adi]
+
+    def eminlikleriGetir(self, key_baslangic: str, sirala) -> tuple[float, ...]:
+        eminlikler = []
+        for eminlik in self.EMINLIKLER.keys():
+            if eminlik.startswith(key_baslangic):
+                eminlikler.append(self.EMINLIKLER[eminlik])
+
+        if sirala:
+            eminlikler.sort(reverse=True)
+
+        return tuple(eminlikler)
+
+    def taramaBolgesiGetir(self, bolge_adi: str) -> Kare:
+        return self.TARAMA_BOLGELERI[bolge_adi]
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}()"
 
 
 class Klavye:
     @staticmethod
     def tus_tek(tus: str):
-        # _gunlukcu.info(f"{tus} tuşuna basılıyor.")
         press(tus)
         sleep(UYUMA_SURESI / 1.5)
 
     @staticmethod
     def tuslar(tuslar: list[str] | str):
-        # _gunlukcu.info(f"{tuslar} tuşlarına basılıyor.")
         if isinstance(tuslar, int):
             tuslar = str(tuslar)
         write(tuslar, interval=UYUMA_SURESI / 1.5)
 
 
 def tiklamaNoktasiGetir(nokta_adi: str) -> Koordinat2D:
-    return Varsayilanlar.TIKLAMA_NOKTALARI[nokta_adi]
+    return Varsayilanlar().tiklamaNoktasiGetir(nokta_adi)
 
 
-def eminlikGetir(eminlik_adi: str) -> float:
-    return Varsayilanlar.EMINLIKLER[eminlik_adi]
+def eminlikGetir(eminlik_adi: str) -> float | list[float]:
+    return Varsayilanlar().eminlikGetir(eminlik_adi)
 
 
-def eminlikleriGetir(key_baslangic: str) -> tuple[float, ...]:
-    eminlikler = []
-    for eminlik in Varsayilanlar.EMINLIKLER.keys():
-        if eminlik.startswith(key_baslangic):
-            eminlikler.append(eminlikGetir(eminlik))
-    return tuple(eminlikler)
+def eminlikleriGetir(key_baslangic: str, sirala=True) -> tuple[float, ...]:
+    return Varsayilanlar().eminlikleriGetir(key_baslangic, sirala=sirala)
 
 
 def taramaBolgesiGetir(bolge_adi: str) -> Kare:
-    return Varsayilanlar.TARAMA_BOLGELERI[bolge_adi]
+    return Varsayilanlar().taramaBolgesiGetir(bolge_adi)
 
 
 # global gerektiren fonksiyonlar
@@ -161,7 +211,7 @@ class BolgeTablosu:
     bolge_sayisi: int
 
     def excelOku(self, dosya_yolu: str | Path = Path("./coordinates/regions.xlsx")) -> None:
-        _gunlukcu.info("bolge tablosu okunuyor.")
+        _GUNLUKCU.info("bolge tablosu okunuyor.")
         try:
             self.bolgeler = []
             bolge_excel = xl.readxl(fn=dosya_yolu)
@@ -193,8 +243,8 @@ class BolgeTablosu:
 
                 self.bolgeler.append(Koordinat2D(bolge_x, bolge_y))
 
-            _gunlukcu.info("bolge tablosu okundu.")
-            _gunlukcu.debug(f"bolge tablosu: {self.bolgeler}")
+            _GUNLUKCU.info("bolge tablosu okundu.")
+            _GUNLUKCU.debug(f"bolge tablosu: {self.bolgeler}")
         except Exception as e:
             raise Hata(f"{e}: bolge tablosu okunamadı")
 
@@ -232,7 +282,7 @@ class DosyaIslemleri:
         sirala : bool = False
             -> uzanti olmadan , tersten sıralar
         """
-        glob_dsn = Varsayilanlar.GLOB_DSNLER[gorsel_id]
+        glob_dsn = Varsayilanlar().GLOB_DSNLER[gorsel_id]
         dosyalar = DosyaIslemleri.globCoz(glob_dsn)
 
         if len(dosyalar) == 0:
@@ -248,14 +298,14 @@ class DosyaIslemleri:
 class Fare:
     @staticmethod
     def sagTikla(uyuma_suresi=UYUMA_SURESI):
-        _gunlukcu.debug("sağ tıklandı")
+        _GUNLUKCU.debug("sağ tıklandı")
         sleep(uyuma_suresi)
         rightClick()
         sleep(uyuma_suresi)
 
     @staticmethod
     def solTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi=UYUMA_SURESI):
-        _gunlukcu.debug(f"sol tıklanıyor , konum: {str(konum)}")
+        _GUNLUKCU.debug(f"sol tıklanıyor , konum: {str(konum)}")
         sleep(uyuma_suresi)
         click(konum)
         sleep(uyuma_suresi)
@@ -330,7 +380,7 @@ class CokluTarayici:
     def __init__(
         self,
         bolge: Optional[Kare],
-        eminlik: float,
+        eminlikler: tuple[float, ...],
         gri_tarama: bool,
         ornek_dler: list[str],
         isim: str = "İsimsiz",
@@ -344,7 +394,7 @@ class CokluTarayici:
         # self.isim = isim + f"_{self.__class__.__name__}_" + str(id(self))
         self.isim = isim + "_" + str(id(self))
         self.bolge = bolge
-        self.eminlik = eminlik
+        self.eminlikler = eminlikler
         self.gri_tarama = gri_tarama
         self.ornek_dler = ornek_dler
         gunlukcuGetir().debug(f"{self.__str__()}__init__ -> {self.__repr__()}")
@@ -357,12 +407,12 @@ class CokluTarayici:
         gunlukcuGetir().debug(f"{self.__str__}._ekranTara -> {self.__repr__()}")
         for i, ornek_d in enumerate(self.ornek_dler):
             if self.bolge is None:
-                kare = locateOnScreen(ornek_d, confidence=self.eminlik, grayscale=self.gri_tarama)
+                kare = locateOnScreen(ornek_d, confidence=self.eminlikler[i], grayscale=self.gri_tarama)
             else:
                 kare = locateOnScreen(
                     ornek_d,
                     region=self.bolge,
-                    confidence=self.eminlik,
+                    confidence=self.eminlikler[i],
                     grayscale=self.gri_tarama,
                 )
             if kare is not None:
@@ -376,11 +426,18 @@ class CokluTarayici:
         return self.isim
 
     def __repr__(self) -> str:
-        return f"{self.isim} bolge:{self.bolge} eminlik:{self.eminlik} gri_tarama:{self.gri_tarama} ornek_dler:{self.ornek_dler}"
+        return f"{self.isim} bolge:{self.bolge} eminlik:{self.eminlikler} gri_tarama:{self.gri_tarama} ornek_dler:{self.ornek_dler}"
 
 
 class SvyTarayici(CokluTarayici):
-    def __init__(self, eminlik=eminlikGetir("svy"), bolge: Optional[Kare] = None, kaynak_tipi: Optional[KaynakTipi] = None) -> None:
+    def __init__(
+        self,
+        eminlikler: tuple[float, ...] = None,  # type:ignore
+        bolge: Optional[Kare] = None,
+        kaynak_tipi: Optional[KaynakTipi] = None,
+    ) -> None:
+        if eminlikler is None:
+            eminlikler = eminlikleriGetir("svy", sirala=True)
         if type(kaynak_tipi) is KaynakTipi:
             self.ornek_dler: list[str] = DosyaIslemleri.gorselleriGetir(
                 gorsel_id=str(kaynak_tipi.name + "_svy"), sirala=True
@@ -392,8 +449,8 @@ class SvyTarayici(CokluTarayici):
         if bolge is not None and Kare.gecersizMi(bolge):
             bolge = taramaBolgesiGetir("svy")
 
-        self.eminlik = eminlik
-        super().__init__(bolge=bolge, eminlik=eminlik, gri_tarama=False, ornek_dler=self.ornek_dler, isim="SvyTarayici")
+        self.eminlikler = eminlikler
+        super().__init__(bolge=bolge, eminlikler=eminlikler, gri_tarama=False, ornek_dler=self.ornek_dler, isim="SvyTarayici")
         self.ekranTara = self._ekranTara
 
 
@@ -401,14 +458,14 @@ class SeferTarayici(CokluTarayici):
     def __init__(
         self,
         maks_sefer_sayisi: int,
-        eminlik: Optional[float] = None,
+        eminlikler: tuple[float, ...] | None = None,
         bolge: Optional[Kare] = None,
     ) -> None:
         if bolge is not None and Kare.gecersizMi(bolge):
             bolge = taramaBolgesiGetir("sefer")
         super().__init__(
             bolge=ifItsNone(bolge, taramaBolgesiGetir("sefer")),
-            eminlik=ifItsNone(eminlik, eminlikGetir("sefer")),
+            eminlikler=ifItsNone(eminlikler, eminlikGetir("sefer")),
             gri_tarama=True,  # FIXME gri_tarama icin varsayılanlar sozlugu
             ornek_dler=DosyaIslemleri.gorselleriGetir("sefer"),
             isim="SeferTarayici",
@@ -460,22 +517,13 @@ class KaynakFare(Fare):
     def __init__(self, maks_sefer_sayisi: Optional[int] = None, svyler: tuple[int, ...] = ()) -> None:
         super().__init__()
 
-        self.tiklama_kisitlamalari = Varsayilanlar.TIKLAMA_KISITLAMALARI
-        # self.svy_tarayici = SvyTarayici(bolge=taramaBolgesiGetir("svy"))
+        self.tiklama_kisitlamalari = Varsayilanlar().TIKLAMA_KISITLAMALARI
         self.isgal_durumu = Tarayici(
             DosyaIslemleri.gorselGetir("isgal_durumu"),
             bolge=taramaBolgesiGetir("isgal_durumu"),
-            eminlik=eminlikGetir("isgal_durumu"),
+            eminlik=eminlikGetir("isgal_durumu"),  # type:ignore
             gri_tarama=True,
         )
-
-        # FIXME geçici olarak iptal edilmiştir.
-
-        # self.sehir_ikon_tarayici = Tarayici(
-        #     DosyaIslemleri.gorselGetir("sehir_ikonu"),
-        #     bolge=taramaBolgesiGetir("sehir_ikonu"),
-        #     eminlik=eminlikGetir("sehir_ikonu"),
-        # )
 
         self.isgal_butonu_konumu = tiklamaNoktasiGetir("isgal_1")
         self.isgal_butonu2_konumu = tiklamaNoktasiGetir("isgal_2")
@@ -484,8 +532,6 @@ class KaynakFare(Fare):
             self.sefer_tarayici = SeferTarayici(maks_sefer_sayisi)
 
         self.svyler = svyler
-
-    #  __tarama_islemi_gunlukcu().debug(f'KaynakFare.__init__ -> {self.__repr__()}')
 
     def _bolge_kisitlimi(self, tıklama_konumu: Koordinat2D) -> bool:
         """
@@ -778,7 +824,7 @@ class TaramaIslem:
         """
         # -> secili kaynaklara göre kaynak tarayici oluştur
         """
-        Varsayilanlar.olustur()
+        Varsayilanlar().olustur()
         self.acikmi_event = multiprocessing.Event()
         self.kaynak_yonetici: TarayiciYonetim = TarayiciYonetim(
             tipler=kaynak_tipleri,
@@ -799,29 +845,29 @@ class TaramaIslem:
                 self.kaynak_yonetici.ekranTara(0.7)
             except FailSafeException as pyautogui_failsafe_exc:
                 gunlukcuGetir().debug(f"FailSafeException yakalandı, {pyautogui_failsafe_exc}")
-                self._sinyal_gonderme.value = IslemSinyalleri.FAILSAFE_SONLANDIR
+                self._sinyal_gonderme.value = ModSinyal.FailSafe
             except OSError as os_err:
                 gunlukcuGetir().debug(f"OSError yakalandı, {os_err}")
                 sleep(5)  # 5 saniye bekle ve tekrar dene
             except Exception as exc:
                 gunlukcuGetir().debug(f"Exception yakalandı, {exc}")
-                self._sinyal_gonderme.value = IslemSinyalleri.DUR
+                self._sinyal_gonderme.value = ModSinyal.Bekle
 
     def acikmi(self) -> bool:
         #  __tarama_islemi_gunlukcu().debug(
         #     f'tarama işlemi çalışmaya devam edecek mi kontrol edildi: {not self.acikmi_event.is_set()=}'
         # )   # type: ignore
         gunlukcuGetir().debug(f"sinyal kontrol : {self._sinyal_alma.value=} {self._sinyal_gonderme.value=}")
-        while self._sinyal_alma.value == IslemSinyalleri.DUR:
-            self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
+        while self._sinyal_alma.value == ModSinyal.Bekle:
+            self._sinyal_gonderme.value = ModSinyal.MesajUlasti
             sleep(3)
-            if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
-                self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
+            if self._sinyal_alma.value == ModSinyal.DevamEt:
+                self._sinyal_gonderme.value = ModSinyal.MesajUlasti
                 break
-        if self._sinyal_alma.value == IslemSinyalleri.DEVAM_ET:
-            self._sinyal_gonderme.value = IslemSinyalleri.MESAJ_ULASTI
-        if self._sinyal_alma.value == IslemSinyalleri.SONLANDIR:
-            self._sinyal_gonderme.value = IslemSinyalleri.SONLANDIR
+        if self._sinyal_alma.value == ModSinyal.DevamEt:
+            self._sinyal_gonderme.value = ModSinyal.MesajUlasti
+        if self._sinyal_alma.value == ModSinyal.Sonlandir:
+            self._sinyal_gonderme.value = ModSinyal.Sonlandir
             self.kapat()
             return False
         if self.acikmi_event.is_set():  # type: ignore

@@ -340,16 +340,16 @@ class TaramaSabitleri:
 
     EMINLIKLER = {
         "_3840": {
-            "svy": 0.9,
-            "sefer": 0.9,
+            "svy": [0.8 for _ in range(1, 12)],  # must be count of svy
+            "sefer": [0.8 for _ in range(0, 7)],  # must be count of sefer
         },
         "_1920": {
-            "svy": 0.8,
-            "sefer": 0.9,
+            "svy": [0.8 for _ in range(1, 12)],
+            "sefer": [0.8 for _ in range(0, 7)],
         },
         "_1366": {
-            "svy": 0.8,
-            "sefer": 0.8,
+            "svy": [0.8 for _ in range(1, 12)],
+            "sefer": [0.8 for _ in range(0, 7)],
         },
     }
 

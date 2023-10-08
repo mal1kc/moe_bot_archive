@@ -21,6 +21,8 @@ URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint
 LOGIN_CACHE_LOCATION = "login_cache.json"  # login bilgilerinin kaydedileceği dosya
 # TODO: implement login_cache_location dosyası ve login bilgilerinin kaydedilmesi , geri yüklenmesi
 
+SUNUCU_OTURUM_SURESI = 240  # saniye -> 4 dk
+
 
 class SunucuIslemSonucu(IntEnum):
     BASARILI = auto()
@@ -66,9 +68,8 @@ class _URLS:
 API_ENDPOINTS = _URLS(ULogin=URL_ONEKI + "/login", UInfo=URL_ONEKI + "/info")
 
 
-# TODO: singleton yap
 class SunucuIslem:
-    __slots__ = ["kullanici_giris_verisi", "kullanici_verisi", "_urls"]  # instance variables
+    __slots__ = ["kullanici_giris_verisi", "kullanici_verisi", "_urls"]
 
     def __init__(self, kullanici_giris_verisi: KullaniciGirisVerisi) -> None:
         self._urls = API_ENDPOINTS

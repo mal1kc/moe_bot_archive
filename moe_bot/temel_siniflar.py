@@ -1,24 +1,28 @@
 import logging
-import importlib
 
 from collections import namedtuple
-from enum import Enum, IntEnum, auto, StrEnum
-from typing import NamedTuple, Optional
+from enum import Enum, auto
+
+# -- typing
+from multiprocessing.sharedctypes import SynchronizedBase
+from typing import Callable, Optional, Self, Protocol, NamedTuple
+from multiprocessing.synchronize import Event
+from threading import Timer
+
+# -- end typing
+
+import multiprocessing
+import functools
+
+from moe_bot.enumlar import DilEnum
+
 
 from .hatalar import Hata
+
 
 Koordinat2D = namedtuple("Koordinat2D", ["x", "y"], defaults=[0, 0])
 
 _GUNLUKCU = logging.getLogger()
-
-
-class IslemSinyalleri(IntEnum):
-    DEVAM_ET = auto()
-    DUR = auto()
-    SONLANDIR = auto()
-    MESAJ_ULASMADI = auto()
-    MESAJ_ULASTI = auto()
-    FAILSAFE_SONLANDIR = auto()
 
 
 class KaynakTipi(Enum):
@@ -143,104 +147,92 @@ class KaynakKare(Kare):
         )
 
 
-# lazy loader
-class AyarYukleyici(object):
-    _yuklenebilir_ayarlar = ["lokalizasyon.tr", "lokalizasyon.en", "ayarlar.moe_gatherer", "ayarlar.ui", "ayarlar.moe_genel"]
+class BotModu(Protocol):
+    _instance = None
+    _process = None
+    _aktif: Event = multiprocessing.Event()
+    _mod_ad: str
+    _sinyal_alma_knl: SynchronizedBase
+    _sinyal_gonderme_knl: SynchronizedBase
+
+    def __new__(cls) -> Self:
+        ...
+
+    @functools.cached_property
+    def _gunlukcu(self) -> logging.Logger:
+        ...
+
+    @functools.cached_property
+    def _ayarlar(self) -> dict[str, str]:
+        ...
 
     def __init__(self) -> None:
-        self.aktif_ayarlar = None
+        ...
 
-    def ayar_yukle(self, ayar_dosyasi_adi):
-        if ayar_dosyasi_adi not in self._yuklenebilir_ayarlar:
-            raise Hata(f"Yüklenemeyen ayar dosyası: {ayar_dosyasi_adi}")
-        ayar_dosyasi_adi = "." + ayar_dosyasi_adi
-        self.ayarlar = importlib.import_module(ayar_dosyasi_adi, __package__).__dict__
-        return self.ayarlar
+    def _aktifmi(self) -> bool:
+        ...
 
+    def _sinyal_yolla(self, sinyal: int) -> None:
+        ...
 
-class DilEnum(StrEnum):
-    TR = auto()
-    EN = auto()
+    def _sinyal_bekle(self) -> None:
+        ...
+
+    def _sinyal_kontrol(self) -> None:
+        ...
+
+    def __repr__(self) -> str:
+        ...
+
+    def process_olustur(self) -> multiprocessing.Process:
+        ...
+
+    def kapali(self) -> bool:
+        ...
 
 
 class Diller(object):
     __slots__ = []
     _instance = None
-    _EN_DICT = None
-    _TR_DICT = None
-    _aktif_dil = None
+    _dil_kitapliklari = {}
+    _aktif_dil: DilEnum | None = None
 
-    def __new__(cls) -> "Diller":
+    def __new__(cls, dil: DilEnum | None = None) -> "Diller":
         if cls._instance is None:
+            if dil is None:
+                dil = DilEnum.TR
             cls._instance = super().__new__(cls)
+        if dil is not None:
+            cls.aktif_dil_degistir(dil)
         return cls._instance
 
-    def __init__(self, aktif_dil: DilEnum = DilEnum.TR) -> None:
-        Diller.aktif_dil_ayarla(aktif_dil)
+    @classmethod
+    def aktif_dil_getir(cls) -> DilEnum:
+        return Diller._aktif_dil if Diller._aktif_dil is not None else DilEnum.TR
 
-    @property
-    def aktif_dil(self):
-        return Diller._aktif_dil
+    @staticmethod
+    def aktif_dil_degistir(dil: DilEnum):
+        Diller._aktif_dil = dil
+        Diller._dil_yukle()
 
     @staticmethod
     def _dil_yukle(dil: DilEnum | None = None):
         if dil is None:
             dil = Diller._aktif_dil
-        if dil == DilEnum.TR:
-            return Diller.TR
-        elif dil == DilEnum.EN:
-            return Diller.EN
-        else:
-            raise Hata("Dil bulunamadı.")
-
-    @staticmethod
-    def aktif_dil_ayarla(dil: DilEnum):
-        Diller._aktif_dil = dil
-        Diller._dil_yukle()
-
-    @property
-    def TR(self) -> dict[str, dict[str, str]]:
-        if not hasattr(self, "_TR_DICT"):
-            Diller._TR_DICT = None
-        if Diller._TR_DICT is None:
-            _GUNLUKCU.debug("TR_DICT oluşturuluyor.")
-            Diller._TR_DICT = AyarYukleyici().ayar_yukle("lokalizasyon.tr")
-
-        if not hasattr(self, "_EN_DICT"):
-            Diller._EN_DICT = None
-        else:
-            if Diller._EN_DICT is not None:
-                _GUNLUKCU.debug("EN_DICT siliniyor.")
-                del Diller._EN_DICT
-
-        return Diller._TR_DICT
-
-    @property
-    def EN(self) -> dict[str, dict[str, str]]:
-        if not hasattr(self, "_EN_DICT"):
-            Diller._EN_DICT = None
-        if Diller._EN_DICT is None:
-            _GUNLUKCU.debug("EN_DICT oluşturuluyor.")
-            Diller._EN_DICT = AyarYukleyici().ayar_yukle("lokalizasyon.en")
-
-        if not hasattr(self, "_TR_DICT"):
-            Diller._TR_DICT = None
-        else:
-            if Diller._TR_DICT is not None:
-                _GUNLUKCU.debug("TR_DICT siliniyor.")
-                del Diller._TR_DICT
-
-        return Diller._EN_DICT
+        if dil not in Diller._dil_kitapliklari:
+            if dil == DilEnum.TR:
+                from .lokalizasyon import tr as lokalizasyon_kitapligi
+            elif dil == DilEnum.EN:
+                from .lokalizasyon import en as lokalizasyon_kitapligi
+            else:
+                raise Hata("Dil bulunamadı.")
+            Diller._dil_kitapliklari[dil] = lokalizasyon_kitapligi.to_dict()
 
     @staticmethod
     def dil_kitapligi(dil: DilEnum) -> dict[str, dict[str, str]]:
-        diller_instance = Diller()
-        if dil == DilEnum.TR:
-            return diller_instance.TR
-        elif dil == DilEnum.EN:
-            return diller_instance.EN
-        else:
-            raise Hata("Dil bulunamadı.")
+        Diller.aktif_dil = dil
+        Diller._dil_yukle(dil)
+        return Diller._dil_kitapliklari[dil]
 
     @staticmethod
     def lokalizasyon(kelime_anahtari, kitaplik="UI", dil: DilEnum | None = None):
@@ -253,3 +245,49 @@ class Diller(object):
             if kelime_anahtari in dil_kitapligi[kitaplik]:
                 return dil_kitapligi[kitaplik][kelime_anahtari]
         return "{}.{}".format(kitaplik, kelime_anahtari)
+
+    @staticmethod
+    def lang_cache_clear():
+        """
+        clear cache of to_dict function in lokalizasyon modules
+        if they are imported
+        """
+        import sys
+
+        # WARNING: del statement is not enough it seems to unimport modules
+        if "moe_bot.lokalizasyon.tr" in sys.modules:
+            module = sys.modules["moe_bot.lokalizasyon.tr"]
+            if hasattr(module, "to_dict"):
+                module.to_dict.cache_clear()
+            del sys.modules["moe_bot.lokalizasyon.tr"]
+        if "moe_bot.lokalizasyon.en" in sys.modules:
+            module = sys.modules["moe_bot.lokalizasyon.en"]
+            if hasattr(module, "to_dict"):
+                module.to_dict.cache_clear()
+            del sys.modules["moe_bot.lokalizasyon.en"]
+
+
+class RepeatedTimer(object):
+    def __init__(self, interval: int | float, function: Callable, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
+
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
+
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
+
+    def stop(self):
+        self._timer.cancel()  # type: ignore
+        self.is_running = False

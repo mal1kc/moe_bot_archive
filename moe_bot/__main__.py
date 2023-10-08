@@ -1,4 +1,4 @@
-from .moe_gatherer import main
+from .moe_bot import main
 
 if __name__ == "__main__":
     main()
