@@ -1,7 +1,13 @@
+[project]
+name = "moe_bot"
+version = "0.8.1"
+description = "moe helper bot"
+
+
 [tool.poetry]
-name = "moe_gatherer"
-version = "0.7.5"
-description = "march of empires gatherer"
+name = "moe_bot"
+version = "0.8.1"
+description = "moe helper bot"
 authors = ["a a <a@example.com>"]
 readme = "readme.md"
 packages = []
@@ -21,7 +27,6 @@ ruff-lsp = ">=0.0.38"
 isort = ">=5.12.0"
 black = ">=23.7.0"
 pyinstaller = {  version = "^5.12",python = ">=3.11,<3.12"}
-# pywin32-ctype = "^0.2.2" # already satisfied by pywin32 ,i think
 pre-commit = ">=3.4"
 
 [tool.black]
@@ -44,6 +49,12 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 moe_gatherer = "moe_gatherer.__main__:main"
-program_ac = "program_ac:main"
-anahtar_olustur = "anahtar_olustur:main"
-exe_olustur = "exe_olustur:main"
+moe_bot_program = "moe_bot_program:main"
+exe_olustur_pyinstaller = "exe_olustur_pyinstaller:main"
+
+[tool.distutils.build_exe]
+excludes = ["unittest"]
+zip_include_packages = ["encodings", "PySide6"]
+optimize = 2
+bin_includes = ["imgs"]
+include_files = ["imgs"]

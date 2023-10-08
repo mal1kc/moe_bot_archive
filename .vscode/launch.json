@@ -8,7 +8,7 @@
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "moe_gatherer",
+            "module": "moe_bot",
             "justMyCode": true,
             "console": "integratedTerminal",
             "python": "${command:python.interpreterPath}"

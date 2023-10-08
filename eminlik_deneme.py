@@ -1,7 +1,7 @@
 from pprint import pprint
 
-from moe_gatherer.kaynakislem import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
-from moe_gatherer.temel_siniflar import KaynakTipi
+from moe_bot.kaynakislem import KaynakTarayici, SvyTarayici, SeferTarayici, taramaBolgesiGetir
+from moe_bot.temel_siniflar import KaynakTipi
 
 if __name__ == "__main__":
     # sleep(2)
@@ -27,10 +27,10 @@ if __name__ == "__main__":
         bulunan_kareler = tarayici.ekranTara(kaynak_tarama_eminlik, liste_don=True)
         print(bulunan_kareler)
     if svy_tarama:
-        tarayici = SvyTarayici(eminlik=svy_tarama_eminlik, kaynak_tipi=tip, bolge=svy_tarama_bolgesi)
+        tarayici = SvyTarayici(eminlikler=svy_tarama_eminlik, kaynak_tipi=tip, bolge=svy_tarama_bolgesi)
         bulunan_kareler = tarayici.ekranTara()
         pprint(bulunan_kareler)
     if sefer_tarama:
-        tarayici = SeferTarayici(eminlik=sefer_tarama_eminlik, maks_sefer_sayisi=max_sefer_sayisii, bolge=sefer_tarama_bolgesi)
+        tarayici = SeferTarayici(eminlikler=sefer_tarama_eminlik, maks_sefer_sayisi=max_sefer_sayisii, bolge=sefer_tarama_bolgesi)
         bulunan_kareler = tarayici._ekranTara()
         pprint(bulunan_kareler)
