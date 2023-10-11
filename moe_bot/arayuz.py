@@ -355,8 +355,8 @@ class Moe_Gatherer_Page:
             KaynakTipi.EKMEK: BooleanVar(),
             KaynakTipi.ODUN: BooleanVar(),
             KaynakTipi.TAS: BooleanVar(),
-            KaynakTipi.GUMUS: BooleanVar(),
             KaynakTipi.DEMIR: BooleanVar(),
+            KaynakTipi.GUMUS: BooleanVar(),
             KaynakTipi.ALTIN: BooleanVar(),
         }
 
@@ -364,8 +364,8 @@ class Moe_Gatherer_Page:
             "food",
             "wood",
             "stone",
-            "silver",
             "iron",
+            "silver",
             "gold",
         )
 
@@ -579,9 +579,10 @@ class Moe_Gatherer_Page:
         if not any([self.lvl_selection_variables[lvl_num - 1].get() for lvl_num in range(1, len(self.lvl_selection_variables) + 1)]):
             LOGGER.debug("Seviye seçimi yapılmadı. Uyarı mesajı gösteriliyor.")
             _warning_msgbx("level_selection_warning")
-            self.lvl_select_all_chkbx_var.set(True)
+            raise Hata("Seviye seçimi yapılmadı.")
+
         return {
-            "march_count": str(self.march_selection_combo.get()),
+            "march_count": int(self.march_selection_combo.get()),
             "resources": [resource for resource in self.resorce_variables if self.resorce_variables[resource].get()],
             "lvls": [
                 lvl_num

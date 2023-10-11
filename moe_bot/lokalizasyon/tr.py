@@ -46,7 +46,7 @@ def to_dict() -> dict[str, dict[str, str]]:
             "login_error_unsuccessful_login": "Giriş başarısız.",
             "login_error_unknown_error": "Bilinmeyen bir hata meydana geldi.",
             "resource_selection_error": "Kaynak seçimi yapmadınız.\nLütfen kaynak seçimi yapınız.",
-            "level_selection_warning": "Seviye seçimi yapmadınız.Tüm seviyeler seçilecek.",
+            "level_selection_warning": "Seviye seçimi yapmadınız.",
             # -- Bilgi mesajları
             "bot_start_info": "s: Bot başlat.\nd : Bot durdur. (Ekran taramasi bittikten sonra duracaktir)",
         }

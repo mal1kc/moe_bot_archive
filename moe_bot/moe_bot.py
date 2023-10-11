@@ -18,7 +18,7 @@ def main():
     moe_gatherer_arayuz = arayuz.MainGui()
     moe_gatherer_arayuz.mainloop()
 
-    if len(moe_gatherer_arayuz.interaction_variables.items()) == 0:
+    if len(moe_gatherer_arayuz.interaction_variables.items()) != 3:
         return exit()
 
     print(moe_gatherer_arayuz.interaction_variables)

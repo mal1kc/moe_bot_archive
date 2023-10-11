@@ -12,7 +12,7 @@ from .temel_siniflar import KullaniciGirisVerisi
 LOGGER = getLogger(__name__)
 
 # TODO: bunu ayarlar dosyasına taşı
-SUNUCU_BASE_URL = "http://127.0.0.1:8080"  # sunucu adresi # FIXME: sunucu adresi degisecek
+SUNUCU_BASE_URL = "http://37.247.101.246:8080"  # sunucu adresi # FIXME: sunucu adresi degisecek
 
 # TODO: bunu ayarlar dosyasına taşı
 URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint
@@ -21,7 +21,7 @@ URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint
 LOGIN_CACHE_LOCATION = "login_cache.json"  # login bilgilerinin kaydedileceği dosya
 # TODO: implement login_cache_location dosyası ve login bilgilerinin kaydedilmesi , geri yüklenmesi
 
-SUNUCU_OTURUM_SURESI = 240  # saniye -> 4 dk
+SUNUCU_OTURUM_SURESI = 30  # sunucu oturum süresi (saniye)
 
 
 class SunucuIslemSonucu(IntEnum):

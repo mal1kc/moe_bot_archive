@@ -11,10 +11,10 @@ try:
 except Exception:
     BASE_PATH = os.path.abspath(".")
 
-UYUMA_SURESI = 2  # Saniye
+UYUMA_SURESI = 0.5  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = logging.DEBUG
-ENGEL_KONTROL_SURESI = 2  # Saniye
+GUNLUK_SEVIYESI = logging.INFO
+ENGEL_KONTROL_SURESI = 1  # Saniye
 
 
 @dataclass(frozen=True, order=True)
@@ -340,16 +340,16 @@ class TaramaSabitleri:
 
     EMINLIKLER = {
         "_3840": {
-            "svy": [0.8 for _ in range(1, 12)],  # must be count of svy
-            "sefer": [0.8 for _ in range(0, 7)],  # must be count of sefer
+            "svy": 0.9,
+            "sefer": 0.9,
         },
         "_1920": {
-            "svy": [0.8 for _ in range(1, 12)],
-            "sefer": [0.8 for _ in range(0, 7)],
+            "svy": 0.8,
+            "sefer": 0.9,
         },
         "_1366": {
-            "svy": [0.8 for _ in range(1, 12)],
-            "sefer": [0.8 for _ in range(0, 7)],
+            "svy": 0.8,
+            "sefer": 0.9,
         },
     }
 

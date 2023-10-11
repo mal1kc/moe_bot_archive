@@ -13,4 +13,10 @@ $PYTHON_PATH = Join-Path $VENV_PATH "Scripts\python.exe"
 echo "using python : $PYTHON_PATH"
 
 # Create the exe file with Nuitka using the virtual environment Python
-& "$PYTHON_PATH" -m nuitka --standalone --enable-plugin=tk-inter --include-plugin-directory=moe_bot\lokalizasyon --include-plugin-directory=moe_bot\ayarlar --include-data-dir=imgs=imgs --include-data-dir=arayuz=arayuz --nofollow-import-to='*.tests' --windows-icon-from-ico=arayuz\moe_icon.ico moe_bot_program.py
+& "$PYTHON_PATH" -m nuitka --standalone `
+ --enable-plugin=tk-inter `
+ --include-plugin-directory=moe_bot\lokalizasyon `
+ --include-data-dir=imgs=imgs `
+ --include-data-dir=arayuz=arayuz `
+ --nofollow-import-to='*.tests' `
+ --windows-icon-from-ico=arayuz\moe_icon.ico moe_bot_program.py

@@ -80,7 +80,7 @@ class BotIslemYonetici:
         --> baslatma tuşuna basıldığında tarama başlat\n
         --> bitirme tuşuna basıldığında tarama durdur\n
         """
-        sleep(0.2)
+        sleep(0.1)
         self.gunlukcu.debug(f"tus basıldı {key}")
         with self._process_olusturma_kilidi:
             if key == pynput.keyboard.KeyCode.from_char("s"):

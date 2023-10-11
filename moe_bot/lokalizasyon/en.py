@@ -46,7 +46,7 @@ def to_dict() -> dict[str, dict[str, str] | str]:
             "login_error_unsuccessful_login": "Login failed.",
             "login_error_unknown_error": "An unknown error has occurred.",
             "resource_selection_error": "You did not make a resource selection.\nPlease make a resource selection.",
-            "level_selection_warning": "You did not make a level selection. All levels will be selected.",
+            "level_selection_warning": "You did not make a level selection.",
             # -- Information messages
             "bot_start_info": "s: Start bot.\nd : Stop bot. (It will stop after the screen scan is finished)",
         },

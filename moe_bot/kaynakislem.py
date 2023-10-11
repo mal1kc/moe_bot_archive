@@ -114,7 +114,7 @@ class Varsayilanlar:
         return self._TIKLAMA_NOKTALARI
 
     @functools.cached_property
-    def EMINLIKLER(self) -> dict[str, float] | dict[str, list[float]]:
+    def EMINLIKLER(self) -> dict[str, float]:
         if not hasattr(self, "_EMINLIKLER"):
             self.olustur()
         return self._EMINLIKLER
@@ -128,19 +128,8 @@ class Varsayilanlar:
     def tiklamaNoktasiGetir(self, nokta_adi: str) -> Koordinat2D:
         return self.TIKLAMA_NOKTALARI[nokta_adi]
 
-    def eminlikGetir(self, eminlik_adi: str) -> float | list[float]:
+    def eminlikGetir(self, eminlik_adi: str) -> float:
         return self.EMINLIKLER[eminlik_adi]
-
-    def eminlikleriGetir(self, key_baslangic: str, sirala) -> tuple[float, ...]:
-        eminlikler = []
-        for eminlik in self.EMINLIKLER.keys():
-            if eminlik.startswith(key_baslangic):
-                eminlikler.append(self.EMINLIKLER[eminlik])
-
-        if sirala:
-            eminlikler.sort(reverse=True)
-
-        return tuple(eminlikler)
 
     def taramaBolgesiGetir(self, bolge_adi: str) -> Kare:
         return self.TARAMA_BOLGELERI[bolge_adi]
@@ -166,12 +155,8 @@ def tiklamaNoktasiGetir(nokta_adi: str) -> Koordinat2D:
     return Varsayilanlar().tiklamaNoktasiGetir(nokta_adi)
 
 
-def eminlikGetir(eminlik_adi: str) -> float | list[float]:
+def eminlikGetir(eminlik_adi: str) -> float:
     return Varsayilanlar().eminlikGetir(eminlik_adi)
-
-
-def eminlikleriGetir(key_baslangic: str, sirala=True) -> tuple[float, ...]:
-    return Varsayilanlar().eminlikleriGetir(key_baslangic, sirala=sirala)
 
 
 def taramaBolgesiGetir(bolge_adi: str) -> Kare:
@@ -374,7 +359,7 @@ class CokluTarayici:
     def __init__(
         self,
         bolge: Optional[Kare],
-        eminlikler: tuple[float, ...],
+        eminlik: float,
         gri_tarama: bool,
         ornek_dler: list[str],
         isim: str = "İsimsiz",
@@ -388,7 +373,7 @@ class CokluTarayici:
         # self.isim = isim + f"_{self.__class__.__name__}_" + str(id(self))
         self.isim = isim + "_" + str(id(self))
         self.bolge = bolge
-        self.eminlikler = eminlikler
+        self.eminlik = eminlik
         self.gri_tarama = gri_tarama
         self.ornek_dler = ornek_dler
         gunlukcuGetir().debug(f"{self.__str__()}__init__ -> {self.__repr__()}")
@@ -401,12 +386,12 @@ class CokluTarayici:
         gunlukcuGetir().debug(f"{self.__str__}._ekranTara -> {self.__repr__()}")
         for i, ornek_d in enumerate(self.ornek_dler):
             if self.bolge is None:
-                kare = locateOnScreen(ornek_d, confidence=self.eminlikler[i], grayscale=self.gri_tarama)
+                kare = locateOnScreen(ornek_d, confidence=self.eminlik, grayscale=self.gri_tarama)
             else:
                 kare = locateOnScreen(
                     ornek_d,
                     region=self.bolge,
-                    confidence=self.eminlikler[i],
+                    confidence=self.eminlik,
                     grayscale=self.gri_tarama,
                 )
             if kare is not None:
@@ -420,18 +405,18 @@ class CokluTarayici:
         return self.isim
 
     def __repr__(self) -> str:
-        return f"{self.isim} bolge:{self.bolge} eminlik:{self.eminlikler} gri_tarama:{self.gri_tarama} ornek_dler:{self.ornek_dler}"
+        return f"{self.isim} bolge:{self.bolge} eminlik:{self.eminlik} gri_tarama:{self.gri_tarama} ornek_dler:{self.ornek_dler}"
 
 
 class SvyTarayici(CokluTarayici):
     def __init__(
         self,
-        eminlikler: tuple[float, ...] = None,  # type:ignore
+        eminlik: float = None,  # type:ignore
         bolge: Optional[Kare] = None,
         kaynak_tipi: Optional[KaynakTipi] = None,
     ) -> None:
-        if eminlikler is None:
-            eminlikler = eminlikleriGetir("svy", sirala=True)
+        if eminlik is None:
+            eminlik = eminlikGetir("svy")
         if type(kaynak_tipi) is KaynakTipi:
             self.ornek_dler: list[str] = DosyaIslemleri.gorselleriGetir(
                 gorsel_id=str(kaynak_tipi.name + "_svy"), sirala=True
@@ -443,8 +428,7 @@ class SvyTarayici(CokluTarayici):
         if bolge is not None and Kare.gecersizMi(bolge):
             bolge = taramaBolgesiGetir("svy")
 
-        self.eminlikler = eminlikler
-        super().__init__(bolge=bolge, eminlikler=eminlikler, gri_tarama=False, ornek_dler=self.ornek_dler, isim="SvyTarayici")
+        super().__init__(bolge=bolge, eminlik=eminlik, gri_tarama=False, ornek_dler=self.ornek_dler, isim="SvyTarayici")
         self.ekranTara = self._ekranTara
 
 
@@ -452,14 +436,14 @@ class SeferTarayici(CokluTarayici):
     def __init__(
         self,
         maks_sefer_sayisi: int,
-        eminlikler: tuple[float, ...] | None = None,
+        eminlik: float | None = None,
         bolge: Optional[Kare] = None,
     ) -> None:
         if bolge is not None and Kare.gecersizMi(bolge):
             bolge = taramaBolgesiGetir("sefer")
         super().__init__(
             bolge=ifItsNone(bolge, taramaBolgesiGetir("sefer")),
-            eminlikler=ifItsNone(eminlikler, eminlikGetir("sefer")),
+            eminlik=ifItsNone(eminlik, eminlikGetir("sefer")),
             gri_tarama=True,  # FIXME gri_tarama icin varsayılanlar sozlugu
             ornek_dler=DosyaIslemleri.gorselleriGetir("sefer"),
             isim="SeferTarayici",
@@ -485,7 +469,7 @@ class SeferTarayici(CokluTarayici):
         while sefer_sayisi is None and sayac < 3:
             gunlukcuGetir().debug(f"sefer sayisi bulunamadi tekrar bakılıyor , deneme:{sayac}")
             self._seferMenusuAcKapat()
-            # sleep(UYUMA_SURESI)
+            sleep(UYUMA_SURESI)
             sefer_sayisi = self._ekranTara()
             sayac += 1
 
@@ -840,7 +824,7 @@ class TaramaIslem:
                 gunlukcuGetir().debug(f"OSError yakalandı, {os_err}")
                 sleep(5)  # 5 saniye bekle ve tekrar dene
             except Exception as exc:
-                gunlukcuGetir().debug(f"Exception yakalandı, {exc}")
+                gunlukcuGetir().debug(f"Exception yakalandı, {exc}", exc_info=True, stack_info=True, stacklevel=2)
                 self._sinyal_gonderme.value = ModSinyal.Bekle
 
     def acikmi(self) -> bool:

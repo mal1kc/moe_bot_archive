@@ -27,10 +27,10 @@ if __name__ == "__main__":
         bulunan_kareler = tarayici.ekranTara(kaynak_tarama_eminlik, liste_don=True)
         print(bulunan_kareler)
     if svy_tarama:
-        tarayici = SvyTarayici(eminlikler=svy_tarama_eminlik, kaynak_tipi=tip, bolge=svy_tarama_bolgesi)
+        tarayici = SvyTarayici(eminlik=svy_tarama_eminlik, kaynak_tipi=tip, bolge=svy_tarama_bolgesi)
         bulunan_kareler = tarayici.ekranTara()
         pprint(bulunan_kareler)
     if sefer_tarama:
-        tarayici = SeferTarayici(eminlikler=sefer_tarama_eminlik, maks_sefer_sayisi=max_sefer_sayisii, bolge=sefer_tarama_bolgesi)
+        tarayici = SeferTarayici(eminlik=sefer_tarama_eminlik, maks_sefer_sayisi=max_sefer_sayisii, bolge=sefer_tarama_bolgesi)
         bulunan_kareler = tarayici._ekranTara()
         pprint(bulunan_kareler)
