@@ -58,3 +58,6 @@
     + geçici çözüm olarak k.hata fırlatılacak ve program kapatılacak
 - durma durumunda giriş yenileme yapılacak mı?
     + geçici çözüm olarak hiçbir şey yapılmayacak
+
+- çoklu dil desteği
+  - görsellerde dil desteği
