@@ -1,7 +1,7 @@
 import functools
 import logging
 import multiprocessing
-from functools import cache
+from functools import cache, lru_cache
 from glob import glob
 from pathlib import Path
 import threading
@@ -15,9 +15,9 @@ from pyautogui import write, FailSafeException
 
 from .hatalar import Hata, KullaniciHatasi
 from .sabilter import MESAJ_GECIKMESI, TaramaSabitleri, BASE_PATH, UYUMA_SURESI
-from .temel_fonksiyonlar import ifItsNone, tipVeyaNone
+from .temel_fonksiyonlar import ifItsNone, tipVeyaNone, getValIfKeyExist
 from .enumlar import ModSinyal
-from .temel_siniflar import EkranBoyut, Kare, KaynakKare, KaynakTipi, Koordinat2D
+from .temel_siniflar import Diller, EkranBoyut, Kare, KaynakKare, KaynakTipi, Koordinat2D
 
 
 _GUNLUKCU = logging.getLogger()
@@ -40,8 +40,24 @@ def aktifEkranBoyutuEtiketi():
     return ekranBoyutuEtiketi(aktifEkranBoyutu())
 
 
+# @lru_cache(maxsize=1)
+# def _glob_dsn_sozluk_olustur_no_comprehension(ekran_boyut_etiket: str) -> dict[str, str]:
+#     glob_dsn_sozluk = dict()
+#     for gorsel_anahtr, gorsel_dsn in TaramaSabitleri.GLOB_DSNLER.items():
+#         if getValIfKeyExist(TaramaSabitleri.GORSEL_YL_DIL_BEYANLARI,gorsel_anahtr,False):
+#             dil_klasor = Diller.aktif_dil_getir().name.lower()
+#         else:
+#             dil_klasor = "no_lang"
+#         glob_dsn_sozluk[gorsel_anahtr] = f"{TaramaSabitleri.DOSYA_YOLLARI[1]}/{dil_klasor}/{ekran_boyut_etiket}/{gorsel_dsn}"
+#     return glob_dsn_sozluk
+
+
+@lru_cache(maxsize=1)
 def _glob_dsn_sozluk_olustur(ekran_boyut_etiket: str) -> dict[str, str]:
-    return {K: f"{TaramaSabitleri.DOSYA_YOLLARI[1]}/{ekran_boyut_etiket}/{V}" for K, V in TaramaSabitleri.GLOB_DSNLER.items()}
+    return {
+        gorsel_anahtr: f"{TaramaSabitleri.DOSYA_YOLLARI[1]}/{Diller.aktif_dil_getir().name.lower() if getValIfKeyExist(TaramaSabitleri.GORSEL_YL_DIL_BEYANLARI,gorsel_anahtr,False) else 'no_lang'}/{ekran_boyut_etiket}/{gorsel_dsn}"  # noqa
+        for gorsel_anahtr, gorsel_dsn in TaramaSabitleri.GLOB_DSNLER.items()
+    }
 
 
 class Varsayilanlar:
@@ -246,9 +262,8 @@ class DosyaIslemleri:
     def globCoz(glob_dsn: str) -> list[str]:
         """
         glob_dsn : str
-        sirala : bool = False
-            -> uzanti olmadan , tersten sıralar
         """
+
         dosyalar = glob(glob_dsn)
         return dosyalar
 

@@ -9,14 +9,14 @@ def load_diller():
 
 
 def test_varsayilan_dil():
-    assert Diller.aktif_dil is DilEnum.TR
+    assert Diller.aktif_dil_getir() is DilEnum.TR
 
 
 def test_dil_degistir():
-    Diller.aktif_dil = DilEnum.EN  # type: ignore
-    assert Diller.aktif_dil is DilEnum.EN
-    Diller.aktif_dil = DilEnum.TR  # type: ignore
-    assert Diller.aktif_dil is DilEnum.TR
+    Diller.aktif_dil_degistir(DilEnum.EN)  # type: ignore
+    assert Diller.aktif_dil_getir() is DilEnum.EN
+    Diller.aktif_dil_degistir(DilEnum.TR)  # type: ignore
+    assert Diller.aktif_dil_getir() is DilEnum.TR
 
 
 def test_dil_kitapligi():
@@ -37,6 +37,6 @@ def test_lang_cache_clear():
     Diller.lang_cache_clear()
     assert Diller.dil_kitapligi(DilEnum.EN) == en.to_dict()
     assert Diller.dil_kitapligi(DilEnum.TR) == tr.to_dict()
-    Diller.aktif_dil_ayarla = DilEnum.EN
+    Diller.aktif_dil_degistir(DilEnum.EN)
     assert Diller.dil_kitapligi(DilEnum.EN) == en.to_dict()
     Diller.lang_cache_clear()

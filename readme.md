@@ -61,3 +61,31 @@
 
 - çoklu dil desteği
   - görsellerde dil desteği
+    + dile bağımlı görseller dile ait `imgs` alt klasörüne konulacak
+    + dile bağımlı olmayan görseller `imgs` ' in altına no_lang klasörüne konulacak
+    + eğer dil bağımlı ise `sabitler.TaramaSabitleri.GORSEL_YL_DIL_BEYANLARI` anahtar sözlüğüne True olarak eklenecek
+    + olması beklenen dosya yapısı
+    ```
+    ├─ imgs/
+    │  ├─ en/
+	│  │  ├─ _1920/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _3840/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _1366/
+	│  │  │  ├─ img_file.png
+	│  ├─ tr/
+	│  │  ├─ _1920/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _3840/
+	│  │  │  ├─ img_file.png
+    │  │  ├─ _1366/
+    │  │  │  ├─ img_file.png
+	│  ├─ no_lang/
+	│  │  ├─ _1920/
+	│  │  │  ├─ no_lang_img_file.png
+	│  │  ├─ _3840/
+    │  │  │  ├─ no_lang_img_file.png
+    │  │  ├─ _1366/
+    │  │  │  ├─ no_lang_img_file.png
+    ```

@@ -2,6 +2,7 @@ import logging
 
 from collections import namedtuple
 from enum import Enum, auto
+import threading
 
 # -- typing
 from typing import Callable, Optional, NamedTuple
@@ -146,14 +147,19 @@ class KaynakKare(Kare):
 class Diller(object):
     __slots__ = []
     _instance = None
+    _instance_kilit = threading.Lock()
     _dil_kitapliklari = {}
     _aktif_dil: DilEnum | None = None
 
     def __new__(cls, dil: DilEnum | None = None) -> "Diller":
         if cls._instance is None:
-            if dil is None:
-                dil = DilEnum.TR
-            cls._instance = super().__new__(cls)
+            with cls._instance_kilit:
+                # Another thread could have created the instance
+                # before we acquired the lock. So check that the
+                # instance is still nonexistent.
+                if not cls._instance:
+                    dil = DilEnum.TR
+                    cls._instance = super().__new__(cls)
         if dil is not None:
             cls.aktif_dil_degistir(dil)
         return cls._instance
@@ -164,8 +170,9 @@ class Diller(object):
 
     @staticmethod
     def aktif_dil_degistir(dil: DilEnum):
-        Diller._aktif_dil = dil
-        Diller._dil_yukle()
+        with Diller._instance_kilit:
+            Diller._aktif_dil = dil
+            Diller._dil_yukle()
 
     @staticmethod
     def _dil_yukle(dil: DilEnum | None = None):

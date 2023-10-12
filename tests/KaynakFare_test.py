@@ -3,7 +3,7 @@ from moe_bot.temel_siniflar import Koordinat2D
 
 
 def test_kisitli_bolgeler():
-    for tiklama_kistilamasi in Varsayilanlar.TIKLAMA_KISITLAMALARI:
+    for tiklama_kistilamasi in Varsayilanlar().TIKLAMA_KISITLAMALARI:
         for k, v in tiklama_kistilamasi.items():
             assert isinstance(v, int)
             assert v >= 0

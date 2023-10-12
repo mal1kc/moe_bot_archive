@@ -44,11 +44,11 @@ class TaramaSabitleri:
 
     kaynak_gorsel_yl_dsn = {
         KaynakTipi.EKMEK.name: "ek_*.png",
-        KaynakTipi.ALTIN.name: "al_*.png",
+        KaynakTipi.ODUN.name: "od_*.png",
+        KaynakTipi.TAS.name: "ta_*.png",
         KaynakTipi.DEMIR.name: "de_*.png",
         KaynakTipi.GUMUS.name: "gu_*.png",
-        KaynakTipi.TAS.name: "ta_*.png",
-        KaynakTipi.ODUN.name: "od_*.png",
+        KaynakTipi.ALTIN.name: "al_*.png",
     }
 
     engel_gorsel_yl_dsn = {
@@ -100,9 +100,21 @@ class TaramaSabitleri:
         engel_gorsel_yl_dsn,
     )
 
-    # SVY_GORSEL_YL = [ 'svy_' + str(i) + '.png' for i in range(1, 12)]
+    # eğer oyun dili görsel diline etki ediyorsa True
+    # etki etmiyorsa False
 
-    # SEFER_GORSEL_YL = [ 'sefer_' + str(i) + '.png' for i in range(0, 7)]
+    # böylece çalışma sırasında etki etmeyenleri imgs/no_lang/{çöz}/{img_desen} yolundan alır
+    # etki edenleri ise imgs/{dil}/{çöz}/{img_desen} yolundan alır
+    # eğer dict içinde bulunmuyorsa False kabul edilir
+
+    GORSEL_YL_DIL_BEYANLARI = {
+        "ODUN": False,
+        "TAS": False,
+        "EKMEK": False,
+        "ALTIN": False,
+        "DEMIR": False,
+        "GUMUS": False,
+    }
 
     EKRAN_BOYUTLARI = {
         "_1366": EkranBoyut(1366, 768),
