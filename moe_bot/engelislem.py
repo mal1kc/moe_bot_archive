@@ -2,6 +2,8 @@ import logging
 import multiprocessing
 from time import sleep
 
+from moe_bot.temel_siniflar import Kare
+
 from .enumlar import ModSinyal
 from .sabilter import ENGEL_KONTROL_SURESI
 from .kaynakislem import (
@@ -17,7 +19,7 @@ from .kaynakislem import (
 class EngelTarayiciİslem:
     def __init__(self) -> None:
         self._gunlukcuBaslat()
-        dler = (
+        dler: tuple[str, ...] = (
             DosyaIslemleri.gorselGetir("sehir_ikonu"),
             DosyaIslemleri.gorselGetir("moe_logo"),
             DosyaIslemleri.gorselGetir("hizmet_basarisiz"),
@@ -53,7 +55,7 @@ class EngelTarayiciİslem:
             # eminlikGetir("devre_disi"),
             # eminlikGetir("devam_buton"),
         )
-        bolgeler = (
+        bolgeler: tuple[Kare, ...] = (
             taramaBolgesiGetir("sehir_ikonu"),
             taramaBolgesiGetir("moe_logo"),
             taramaBolgesiGetir("hizmet_basarisiz"),
@@ -190,6 +192,7 @@ class EngelTarayiciİslem:
             if _geriok_kare is not None:
                 self._sinyalYolla(ModSinyal.Bekle)
                 Fare.solTikla(_geriok_kare.merkez())
+                _geriOkTara()
             self.gunlukcu.debug("geri ok tarama bitti")
 
         def _sehirYoksa() -> None:
@@ -215,7 +218,7 @@ class EngelTarayiciİslem:
         def _baglantiKesildiTara():
             if self.baglantiKesildi_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("baglanti kesildi uyarisi algilandi.")
-                # exit sinyali
+                # kapama sinyali gönder
                 self._sinyalYolla(ModSinyal.Sonlandir)
 
         def _maksSeferUyariTara():
@@ -318,9 +321,13 @@ class EngelTarayiciİslem:
         self.gunlukcu.debug("sinyal ulasti")
 
     def _sinyalDurKontrol(self) -> None:
+        """
+        sinyal dur kontrol
+        """
+
         if self._sinyal_alma.value == ModSinyal.Bekle:
             self.gunlukcu.debug("sinyal dur kontrol")
-            sleep(ENGEL_KONTROL_SURESI * 2)
+            sleep(ENGEL_KONTROL_SURESI / 2)
             self.gunlukcu.debug("sinyal dur kontrol bitti")
         elif self._sinyal_alma == (ModSinyal.Sonlandir, ModSinyal.FailSafe):
             self.gunlukcu.debug("sinyal dur kontrol")
@@ -332,6 +339,8 @@ class EngelTarayiciİslem:
         return f"{self.__class__.__name__}"  # type: ignore
 
     def _acikmi(self) -> bool:
+        if not hasattr(self, "_acik_event"):
+            self._acik_event = multiprocessing.Event()
         return not self._acik_event.is_set()
 
     def processOlustur(self, sinyal_gonderme, sinyal_alma) -> multiprocessing.Process:
@@ -342,4 +351,5 @@ class EngelTarayiciİslem:
         return multiprocessing.Process(target=self.engelKontrol)
 
     def kapat(self):
-        self._acik_event.set()
+        if hasattr(self, "_acik_event"):
+            self._acik_event.set()

@@ -1,4 +1,3 @@
-# circular import hatası alabiliriz
 from typing import Any
 
 import win32api  # noqa: F401
@@ -21,20 +20,16 @@ class BaglantiHatasi(Hata):
 
 class KullaniciHatasi(Hata):
     """
-    belki kullanıcıdan kaynaklı hatalar için
-    kullanılabilir
-
-    Todo:
-        - belki oluşturulabilir
-        - msgbox vs ile hatalar kullanıcıya gösterilebilir
+    Kullaniciya msg box ile gösterilen hata sınıfı
     """
 
-    def __init__(self, *args: Any) -> None:
-        self.hata_mesaji = args
+    def __init__(self, msg: str, *args, **kwargs) -> None:
+        self.hata_mesaji = msg
         win32api.MessageBox(
             None,
-            args[0],
-            "Kullanıcı Hatası",
+            self.hata_mesaji,
+            "❌ Kullanıcı Hatası ❌",
             win32con.MB_OK | win32con.MB_ICONERROR,
         )  # type: ignore
+        super().__init__(*args, **kwargs)
         exit(1)

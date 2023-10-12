@@ -4,7 +4,7 @@ import multiprocessing
 import os
 
 from moe_bot.hatalar import BaglantiHatasi, Hata
-from moe_bot.sabilter import BASE_PATH
+from moe_bot.sabilter import CRED_PATH, GUI_LOGO_PATH, GUI_ICON_PATH, GUI_ENTRY_WIDTH
 
 from moe_bot.sifremele import sifre_hash_olustur
 from moe_bot.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
@@ -31,11 +31,31 @@ from moe_bot.gunlukcu import gunlukcuGetir
 multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
 
-LOGO_PATH = os.path.join(BASE_PATH, "arayuz/moe_logo.png")
+LOGO_PATH = GUI_LOGO_PATH
 
-ENTRY_WIDTH = 30
+ENTRY_WIDTH = GUI_ENTRY_WIDTH
 
-# ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
+ICON_PATH = GUI_ICON_PATH
+
+
+def _load_credentials() -> tuple[str, str]:
+    if not os.path.exists(CRED_PATH):
+        return ("", "")
+    try:
+        with open(CRED_PATH, "r") as f:
+            name = f.readline().strip()
+            password = f.readline().strip()
+            return (name, password)
+    except Exception as exc:
+        LOGGER.exception(f"Exception occured {exc} while loading credentials")
+        _error_msgbx("login_error_credential_load_error")
+    return ("", "")
+
+
+def _save_credentials(credentials: tuple[str, str]) -> None:
+    with open("credentials.txt", "w") as f:
+        f.write(credentials[0] + "\n")
+        f.write(credentials[1] + "\n")
 
 
 def _error_msgbx(error: str) -> None:
@@ -89,7 +109,7 @@ class MainGui:
         self.root = root
         self.root.resizable(False, False)
         self.root.geometry(geometry)
-        # self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
+        self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
         self.change_title(title)
         self.interaction_variables = {}
         self.pageshow = Login_Page(self, self.root)
@@ -194,20 +214,38 @@ class Login_Page:
         self.pass_entry.bind("<Return>", _focus_next_widget)
         self.pass_entry.grid(row=2, column=1)
 
+        self.rem_me_var = BooleanVar()
+        self.rem_me_chkbx = Checkbutton(
+            self.frame,
+            text=Diller.lokalizasyon("rem_me_chkbx"),
+            variable=self.rem_me_var,
+        )
+        self.rem_me_chkbx.grid(row=3, column=1)
+
         self.sbt = Button(self.frame, text=Diller.lokalizasyon("login_btn"), command=self.clicked)
         self.sbt.bind("<Return>", _press_btn)
         self.sbt.grid(row=4, column=1)
 
         # -- login --
 
+        # -- save credentials --
+        if (credentials := _load_credentials()) != ("", ""):
+            self.name_entry.insert(0, credentials[0])
+            self.pass_entry.insert(0, credentials[1])
+            self.rem_me_var.set(True)
+
+        # -- save credentials --
+
     def _lang_changed(self, event) -> None:
         # update language
         Diller.aktif_dil_degistir(DilEnum[self.select_lang_combo.get()])  # type: ignore
         self.name_lbl.config(text=Diller.lokalizasyon("name_lbl"))
         self.pass_lbl.config(text=Diller.lokalizasyon("pass_lbl"))
+        self.rem_me_chkbx.config(text=Diller.lokalizasyon("rem_me_chkbx"))
         self.sbt.config(text=Diller.lokalizasyon("login_btn"))
         self.select_lang_lbl.config(text=Diller.lokalizasyon("select_lang_lbl"))
         self.login_lbl.config(text=Diller.lokalizasyon("login_lbl"))
+        self.parent.change_title(Diller.lokalizasyon("window_title_login"))
 
     def clicked(self):
         user_data = (self.name_entry.get(), self.pass_entry.get())
@@ -227,10 +265,10 @@ class Login_Page:
             )
             self.sunucu_islem = SunucuIslem(self.user_login_data)
             if (giris_sonucu := self.sunucu_islem.giris_yap()) == SunucuIslemSonucu.BASARILI:
+                if self.rem_me_var.get():
+                    _save_credentials(user_data)
                 self.frame.destroy()
                 self.parent.interaction_variables["server"] = self.sunucu_islem
-                # TODO: kullanicinin sahip oldugu modlari al ve ona göre mod secim sayfasi olustur (tek mod var suan)
-                # TODO: MOD_SELECT sayfasina gecis yap
                 self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
             elif giris_sonucu == SunucuIslemSonucu.BAGLANTI_HATASI:
                 _error_msgbx("login_error_connection_error")
@@ -285,7 +323,6 @@ class Mod_Select_Page:
 
     def clicked(self):
         self.frame.destroy()
-        # TODO: secilen modu al ve ona göre sayfa olustur
         self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
 
 

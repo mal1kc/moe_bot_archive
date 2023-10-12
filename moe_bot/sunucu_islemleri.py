@@ -1,7 +1,7 @@
 from __future__ import annotations
 from enum import IntEnum, StrEnum, auto
+from functools import lru_cache
 
-# from .temel_fonksiyonlar import # noqa
 from logging import getLogger
 import requests
 from .hatalar import BaglantiHatasi, Hata
@@ -11,15 +11,9 @@ from .temel_siniflar import KullaniciGirisVerisi
 
 LOGGER = getLogger(__name__)
 
-# TODO: bunu ayarlar dosyasına taşı
-SUNUCU_BASE_URL = "http://37.247.101.246:8080"  # sunucu adresi # FIXME: sunucu adresi degisecek
+SUNUCU_BASE_URL = "http://37.247.101.246:8080"  # sunucu adresi
 
-# TODO: bunu ayarlar dosyasına taşı
 URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint
-
-# TODO: bunu ayarlar dosyasına taşı
-LOGIN_CACHE_LOCATION = "login_cache.json"  # login bilgilerinin kaydedileceği dosya
-# TODO: implement login_cache_location dosyası ve login bilgilerinin kaydedilmesi , geri yüklenmesi
 
 SUNUCU_OTURUM_SURESI = 30  # sunucu oturum süresi (saniye)
 
@@ -117,6 +111,7 @@ class SunucuIslem:
         except Exception:
             return SunucuIslemSonucu.BAGLANTI_HATASI
 
+    @lru_cache(maxsize=1)
     def _kullanici_bilgilerini_al(self) -> SunucuIslemSonucu:
         try:
             LOGGER.debug(f"kullanici_verisi: {self.kullanici_verisi}")

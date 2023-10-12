@@ -13,8 +13,18 @@ except Exception:
 
 UYUMA_SURESI = 0.5  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
-GUNLUK_SEVIYESI = logging.INFO
+GUNLUK_SEVIYESI = logging.DEBUG
 ENGEL_KONTROL_SURESI = 1  # Saniye
+MESAJ_GECIKMESI = ENGEL_KONTROL_SURESI + 0.2  # Saniye
+
+CRED_PATH = os.path.join(BASE_PATH, "credentials.txt")
+
+GUI_LOGO_PATH = os.path.join(BASE_PATH, "arayuz\\moe_logo.png")
+# GUI_ICON_PATH = os.path.join(BASE_PATH, "arayuz\\moe_icon.ico")
+GUI_ICON_PATH = GUI_LOGO_PATH
+
+
+GUI_ENTRY_WIDTH = 30
 
 
 @dataclass(frozen=True, order=True)
@@ -237,30 +247,28 @@ class TaramaSabitleri:
 
     kaynak_eminlikler = {
         "_3840": {
-            "FOOD": 0.8,
-            "WOOD": 0.8,
-            "STONE": 0.8,
-            "IRON": 0.8,
-            "SILVER": 0.8,
-            "GOLD": 0.8,
+            "EKMEK": 0.8,
+            "ODUN": 0.8,
+            "TAS": 0.8,
+            "DEMIR": 0.8,
+            "GUMUS": 0.8,
+            "ALTIN": 0.8,
         },
         "_1920": {
-            # geçici değerler
-            "WOOD": 0.7,
-            "FOOD": 0.7,
-            "STONE": 0.7,
-            "IRON": 0.7,
-            "SILVER": 0.7,
-            "GOLD": 0.7,
+            "EKMEK": 0.7,
+            "ODUN": 0.7,
+            "TAS": 0.7,
+            "DEMIR": 0.7,
+            "GUMUS": 0.7,
+            "ALTIN": 0.7,
         },
         "_1366": {
-            # geçici değerler
-            "WOOD": 0.7,
-            "FOOD": 0.7,
-            "STONE": 0.7,
-            "IRON": 0.7,
-            "SILVER": 0.7,
-            "GOLD": 0.7,
+            "EKMEK": 0.7,
+            "ODUN": 0.7,
+            "TAS": 0.7,
+            "DEMIR": 0.7,
+            "GUMUS": 0.7,
+            "ALTIN": 0.7,
         },
     }
 

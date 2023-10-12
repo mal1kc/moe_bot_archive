@@ -4,8 +4,9 @@ import multiprocessing
 from functools import cache
 from glob import glob
 from pathlib import Path
+import threading
 from time import sleep, time_ns
-from typing import Any, Callable, Optional, Self
+from typing import Any, Callable, Optional
 
 import pylightxl as xl
 from pyautogui import click, locateAllOnScreen, locateOnScreen, moveTo, press, rightClick
@@ -13,7 +14,7 @@ from pyautogui import size as _ekranBoyutu
 from pyautogui import write, FailSafeException
 
 from .hatalar import Hata, KullaniciHatasi
-from .sabilter import TaramaSabitleri, BASE_PATH, UYUMA_SURESI
+from .sabilter import MESAJ_GECIKMESI, TaramaSabitleri, BASE_PATH, UYUMA_SURESI
 from .temel_fonksiyonlar import ifItsNone, tipVeyaNone
 from .enumlar import ModSinyal
 from .temel_siniflar import EkranBoyut, Kare, KaynakKare, KaynakTipi, Koordinat2D
@@ -60,10 +61,16 @@ class Varsayilanlar:
     }
 
     _instance = None
+    _instance_lock = threading.Lock()
 
-    def __new__(cls) -> Self:
-        if not cls._instance:
-            cls._instance = super().__new__(cls)
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._instance_lock:
+                # Another thread could have created the instance
+                # before we acquired the lock. So check that the
+                # instance is still nonexistent.
+                if not cls._instance:
+                    cls._instance = super().__new__(cls)
         return cls._instance
 
     def olustur(self) -> None:
@@ -444,7 +451,7 @@ class SeferTarayici(CokluTarayici):
         super().__init__(
             bolge=ifItsNone(bolge, taramaBolgesiGetir("sefer")),
             eminlik=ifItsNone(eminlik, eminlikGetir("sefer")),
-            gri_tarama=True,  # FIXME gri_tarama icin varsayılanlar sozlugu
+            gri_tarama=True,
             ornek_dler=DosyaIslemleri.gorselleriGetir("sefer"),
             isim="SeferTarayici",
         )  # type:ignore
@@ -469,7 +476,10 @@ class SeferTarayici(CokluTarayici):
         while sefer_sayisi is None and sayac < 3:
             gunlukcuGetir().debug(f"sefer sayisi bulunamadi tekrar bakılıyor , deneme:{sayac}")
             self._seferMenusuAcKapat()
-            sleep(UYUMA_SURESI)
+
+            # sleep'e kullanılmama nedeni:
+            # -> _seferMenusuAcKapat() fonksiyonu ile zaten bekliyor
+
             sefer_sayisi = self._ekranTara()
             sayac += 1
 
@@ -658,6 +668,7 @@ class KaynakTarayici:
         self.svy_tarayici = SvyTarayici(kaynak_tipi=self.tip)
         # kare * frame anlamında *
         self._dosyaTara()
+        self.eminlik = eminlikGetir(self.tip.name)
         # self.kaynak_fare._islemDevamEtsinMi = self._islemDevamEtsinMi
 
     def _dosyaTara(self) -> None:
@@ -669,7 +680,7 @@ class KaynakTarayici:
         """
         return True
 
-    def ekranTara(self, eminlik: float = 0.7, liste_don=False) -> bool | set | None:
+    def ekranTara(self, liste_don=False) -> bool | set | None:
         """
         eğer herhangi bir kaynak bulunamazsa False döndürür, bulunursa True döndürür
         liste_don = True ise bulunan kaynak karelerini döndürür
@@ -677,7 +688,7 @@ class KaynakTarayici:
         tarama_baslangic = time_ns()
         gunlukcuGetir().debug(f"{self.tip} için tarama başladı {tarama_baslangic}")
         for ornek_d in self.ornek_dler:
-            gecici_auto_kareler = locateAllOnScreen(ornek_d, confidence=eminlik)
+            gecici_auto_kareler = locateAllOnScreen(ornek_d, confidence=self.eminlik)
             for py_auto_gui_kare in gecici_auto_kareler:
                 islem_devam_etsin_mi = self._islemDevamEtsinMi()
                 if not islem_devam_etsin_mi:
@@ -771,12 +782,12 @@ class TarayiciYonetim:
         """
         return True
 
-    def ekranTara(self, eminlik: float = 0.8):
+    def ekranTara(self):
         tarama_baslangic = time_ns()
         gunlukcuGetir().debug(f" tarama başladı. {self.tarayicilar},zaman:{tarama_baslangic}")
         self.bolge_degistirici.bolgeDegistir()
         for tarayici in self.tarayicilar:
-            tarayici.ekranTara(eminlik)
+            tarayici.ekranTara()
 
         tarama_bitis = time_ns()
         gunlukcuGetir().debug(f" tarama bitti.tarama_bitis: {tarama_bitis},  gecen süre: {tarama_bitis - tarama_baslangic}")
@@ -813,16 +824,14 @@ class TaramaIslem:
     def otoKaynakToplama(self):
         """ana işlem döngüsü gerçekleştiren fonksiyon\n"""
         while True:
+            sleep(0.1)
             try:
                 if not self.acikmi():
                     break
-                self.kaynak_yonetici.ekranTara(0.7)
+                self.kaynak_yonetici.ekranTara()
             except FailSafeException as pyautogui_failsafe_exc:
                 gunlukcuGetir().debug(f"FailSafeException yakalandı, {pyautogui_failsafe_exc}")
                 self._sinyal_gonderme.value = ModSinyal.FailSafe
-            except OSError as os_err:
-                gunlukcuGetir().debug(f"OSError yakalandı, {os_err}")
-                sleep(5)  # 5 saniye bekle ve tekrar dene
             except Exception as exc:
                 gunlukcuGetir().debug(f"Exception yakalandı, {exc}", exc_info=True, stack_info=True, stacklevel=2)
                 self._sinyal_gonderme.value = ModSinyal.Bekle
@@ -834,16 +843,14 @@ class TaramaIslem:
         gunlukcuGetir().debug(f"sinyal kontrol : {self._sinyal_alma.value=} {self._sinyal_gonderme.value=}")
         while self._sinyal_alma.value == ModSinyal.Bekle:
             self._sinyal_gonderme.value = ModSinyal.MesajUlasti
-            sleep(3)
+            sleep(MESAJ_GECIKMESI)
             if self._sinyal_alma.value == ModSinyal.DevamEt:
                 self._sinyal_gonderme.value = ModSinyal.MesajUlasti
                 break
         if self._sinyal_alma.value == ModSinyal.DevamEt:
             self._sinyal_gonderme.value = ModSinyal.MesajUlasti
         if self._sinyal_alma.value == ModSinyal.Sonlandir:
-            self._sinyal_gonderme.value = ModSinyal.Sonlandir
             self.kapat()
-            return False
         if self.acikmi_event.is_set():  # type: ignore
             return False
         return True

@@ -1,12 +1,12 @@
 [project]
 name = "moe_bot"
-version = "0.8.4"
+version = "0.9"
 description = "moe helper bot"
 
 
 [tool.poetry]
 name = "moe_bot"
-version = "0.8.4"
+version = "0.9"
 description = "moe helper bot"
 authors = ["a a <a@example.com>"]
 readme = "readme.md"
@@ -48,8 +48,8 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.poetry.scripts]
-moe_gatherer = "moe_gatherer.__main__:main"
 moe_bot_program = "moe_bot_program:main"
+moe_arayuz_deneme = "moe_arayuz_deneme"
 exe_olustur_pyinstaller = "exe_olustur_pyinstaller:main"
 
 [tool.distutils.build_exe]

@@ -4,15 +4,11 @@ from collections import namedtuple
 from enum import Enum, auto
 
 # -- typing
-from multiprocessing.sharedctypes import SynchronizedBase
-from typing import Callable, Optional, Self, Protocol, NamedTuple
-from multiprocessing.synchronize import Event
+from typing import Callable, Optional, NamedTuple
 from threading import Timer
 
 # -- end typing
 
-import multiprocessing
-import functools
 
 from moe_bot.enumlar import DilEnum
 
@@ -145,50 +141,6 @@ class KaynakKare(Kare):
             self.koordinat.x + self.koordinat.genislik / 2,
             self.koordinat.y + self.koordinat.yukseklik / 2,
         )
-
-
-class BotModu(Protocol):
-    _instance = None
-    _process = None
-    _aktif: Event = multiprocessing.Event()
-    _mod_ad: str
-    _sinyal_alma_knl: SynchronizedBase
-    _sinyal_gonderme_knl: SynchronizedBase
-
-    def __new__(cls) -> Self:
-        ...
-
-    @functools.cached_property
-    def _gunlukcu(self) -> logging.Logger:
-        ...
-
-    @functools.cached_property
-    def _ayarlar(self) -> dict[str, str]:
-        ...
-
-    def __init__(self) -> None:
-        ...
-
-    def _aktifmi(self) -> bool:
-        ...
-
-    def _sinyal_yolla(self, sinyal: int) -> None:
-        ...
-
-    def _sinyal_bekle(self) -> None:
-        ...
-
-    def _sinyal_kontrol(self) -> None:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
-    def process_olustur(self) -> multiprocessing.Process:
-        ...
-
-    def kapali(self) -> bool:
-        ...
 
 
 class Diller(object):

@@ -46,7 +46,7 @@
 - login arayüzü (yapıldı)
 
 ## eklendi - test edilecek
-
+- arayuz: beni hatirla (exe ye çevirildiğindde çalışcakmı)
 
 ## FIXME Sorunlar
 
@@ -54,5 +54,7 @@
 
 ## TODO eksikler
 
-- cprofile ile performans testi yapılacak ve pympler ile memory testi yapılacak
-    + minimum 10 sefer
+- oturum yenileme hatası alınırsa ne yapılacak?
+    + geçici çözüm olarak k.hata fırlatılacak ve program kapatılacak
+- durma durumunda giriş yenileme yapılacak mı?
+    + geçici çözüm olarak hiçbir şey yapılmayacak

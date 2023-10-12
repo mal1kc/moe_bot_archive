@@ -7,14 +7,15 @@ from time import sleep
 import pynput
 import win32api
 import win32con
+from moe_bot.hatalar import KullaniciHatasi
 
-from moe_bot.sunucu_islemleri import SunucuIslem, SUNUCU_OTURUM_SURESI
+from moe_bot.sunucu_islemleri import SunucuIslem, SUNUCU_OTURUM_SURESI, SunucuIslemSonucu
 
 # from .engelislem import EngelTarayiciİslem
 from .engelislem import EngelTarayiciİslem
 from .kaynakislem import TaramaIslem
 from .enumlar import ModSinyal
-from .temel_siniflar import KaynakTipi, RepeatedTimer
+from .temel_siniflar import Diller, KaynakTipi, RepeatedTimer
 
 
 class BotIslemYonetici:
@@ -31,6 +32,7 @@ class BotIslemYonetici:
         svyler: tuple[int, ...],
         sunucu_islem: SunucuIslem,
     ) -> None:
+        self._acik_event = multiprocessing.Event()
         self.s_islem = sunucu_islem
         self.sunucu_o_kontrol_zamanlayici = RepeatedTimer(SUNUCU_OTURUM_SURESI, self._oturum_kontrol)
         self.tarama_islem_argumanları = (kaynak_tipleri, svyler, maks_sefer_sayisi)
@@ -52,6 +54,9 @@ class BotIslemYonetici:
         # --> eğer program kapatılırsa çalışacak fonksiyonu belirle (pywin32 api)
         win32api.SetConsoleCtrlHandler(self._on_exit, True)
 
+        # start sunucu oturum kontrol
+        self.sunucu_o_kontrol_zamanlayici.start()
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 
@@ -61,14 +66,16 @@ class BotIslemYonetici:
     def _engelSinyalKontrol(self):
         while True:
             sleep(0.1)  # 100 ms
+            if self._acik_event.is_set():
+                # güvenli bir şekilde botu (çocuk processleri vs kapat)
+                self.botKapat()
+                # ardından döngüyü kır
+                break
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
-                    sleep(0.1)
                     if self.engel_tarayici_islem._sinyal_gonderme.value == ModSinyal.Sonlandir:
                         return
-                # fail safe sonlandır check
                 if self.tarama_islem_process.is_alive():
-                    sleep(0.1)
                     if self.tarama_islem._sinyal_gonderme.value == ModSinyal.FailSafe:
                         self.engel_tarayici_islem._sinyal_gonderme.value = ModSinyal.Bekle
             if self._sinyal_knl1 == ModSinyal.Sonlandir:
@@ -112,28 +119,43 @@ class BotIslemYonetici:
                 )
                 self.gunlukcu.debug("tarama işlemi process i oluşturuldu")
 
-                self.engel_tarayici_islem._acik_event.set()
+                self.engel_tarayici_islem.kapat()
                 self.gunlukcu.debug("engel tarayıcı işlemi kapatıldı")
                 self.engel_tarayici_islem_process = self.engel_tarayici_islem.processOlustur(
                     sinyal_alma=self._sinyal_knl1, sinyal_gonderme=self._sinyal_knl2
                 )
                 self.gunlukcu.debug("engel tarayıcı işlemi process i oluşturuldu")
                 return
-            # FIXME : silmeyi unutma (test için sadece "q" tuşu ile çıkış)
-            elif key == pynput.keyboard.KeyCode.from_char("q"):
-                print("cikis tusuna basildi")
+            # TODO : değiştir yada sil (test için sadece "f12" tuşu ile programı kapat)
+            elif key == pynput.keyboard.Key.f12:
+                print(Diller.lokalizasyon("bot_failsafe_close", "UI"))
                 self._on_exit(win32con.CTRL_CLOSE_EVENT)
             else:
                 pass
 
     def _oturum_kontrol(self):
-        self.s_islem.giris_yenile()
+        sonuc = self.s_islem.giris_yenile()
+        # TODO : oturum yenileme hatası alınırsa ne yapılacak?
+        # - geçici çözüm olarak k.hata fırlatılacak ve program kapatılacak
+        # TODO : durma durumunda giriş yenileme yapılacak mı?
+        # - geçici çözüm olarak hiçbir şey yapılmayacak
+        self.gunlukcu.debug(f"sunucu oturum yenileme sonucu: {sonuc.name}")
+        if sonuc != SunucuIslemSonucu.BASARILI:
+            self._acik_event.set()
+            self.gunlukcu.error(f"sunucu oturum yenileme hatası: {sonuc.name}")
+            if sonuc == SunucuIslemSonucu.PAKET_BULUNAMADI:
+                raise KullaniciHatasi(Diller.lokalizasyon("server_session_renewal_error_package_not_found", "ERROR"))
+            elif sonuc == SunucuIslemSonucu.BAGLANTI_HATASI:
+                raise KullaniciHatasi(Diller.lokalizasyon("server_session_renewal_error_connection_error", "ERROR"))
+            elif sonuc == SunucuIslemSonucu.GIRIS_BILGISI_HATALI:
+                raise KullaniciHatasi(Diller.lokalizasyon("server_session_renewal_error_server_error", "ERROR"))
+            elif sonuc == SunucuIslemSonucu.MAKSIMUM_GIRIS_HATASI:
+                raise KullaniciHatasi(Diller.lokalizasyon("server_session_renewal_error_max_online_user", "ERROR"))
+            raise KullaniciHatasi(Diller.lokalizasyon("server_session_renewal_error_unknown_error", "ERROR"))
 
     def _on_exit(self, signal) -> bool:
         """
         eğer program kapatılırsa çalışacak fonksiyon\n
-        -> carpi ile kapatılırsa çalışacak fonksiyon\n
-        -> ctrl+c ile kapatılırsa çalışacak fonksiyon\n
         """
         self.gunlukcu.debug(f"program kapatılma sinyali aldı sinyal: {signal}")
         if signal in (
@@ -143,28 +165,26 @@ class BotIslemYonetici:
             win32con.CTRL_LOGOFF_EVENT,
             win32con.CTRL_SHUTDOWN_EVENT,
         ):
-            self._sinyal_knl1.value = ModSinyal.SONLANDIR  # type: ignore
-            self._sinyal_knl2.value = ModSinyal.SONLANDIR  # type: ignore
+            self.gunlukcu.debug("program kapatılıyor")
+            self._sinyal_knl1.value = ModSinyal.Sonlandir
             sleep(3)
-            if not hasattr(self, "tarama_islem_process"):
-                self.gunlukcu.info("program kapatılıyor")
-            self.tarama_islem_process.terminate()
-            self.engel_tarayici_islem_process.terminate()
+            if hasattr(self, "tarama_islem_process"):
+                if self.tarama_islem_process.is_alive():
+                    self.tarama_islem_process.terminate()
+            if hasattr(self, "engel_tarayici_islem_process"):
+                if self.engel_tarayici_islem_process.is_alive():
+                    self.engel_tarayici_islem_process.terminate()
+            self._acik_event.set()
             self.klavye_dinleyici.stop()
-            exit(0)
+            self.sunucu_o_kontrol_zamanlayici.stop()
         return False
+
+    def botKapat(self):
+        self._on_exit(win32con.CTRL_CLOSE_EVENT)
 
     def botBaslat(self):
         try:
             self.klavye_dinleyici.start()
             self._engelSinyalKontrol()
-            if self.tarama_islem_process.is_alive():
-                self.tarama_islem.kapat()
-            if self.engel_tarayici_islem_process.is_alive():
-                self.engel_tarayici_islem.kapat()
-            if self.klavye_dinleyici.is_alive():
-                self.klavye_dinleyici.stop()
-            exit(0)
         except KeyboardInterrupt:
             self._on_exit(win32con.CTRL_C_EVENT)
-        # self.klavye_dinleyici.join()
