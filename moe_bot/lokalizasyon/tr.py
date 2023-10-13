@@ -50,11 +50,14 @@ def to_dict() -> dict[str, dict[str, str] | str]:
             "level_selection_warning": "Seviye seçimi yapmadınız.",
             # -- Bilgi mesajları
             "bot_start_info": "s: Bot başlat.\nd : Bot durdur. (Ekran taramasi bittikten sonra duracaktir)",
+            # -- Beklenmeyen hata
+            "unexpected_error": "Bir hata oluştu.Programı kapatıp tekrar başlatınız.",
+            "gatherer_error_screen_resolution_error": "Ekran çözünürlüğü uygun değil. Lütfen 1366x768,1920x1080,3840x2160 çözünürlüklerinden birinde çalıştırınız.",  # noqa
         },
         "IMG_FOLDER": "tr",
         "ERROR": {
+            "server_connection_error": "Sunucuya erişilemiyor.",
             "server_session_renewal_error_package_not_found": "Kullaniciya Ait Paket bulunamadı.",
-            "server_session_renewal_error_connection_error": "Sunucuya erişilemiyor.",
             "server_session_renewal_error_server_error": "Sunucu hatası.",
             "server_session_renewal_error_unknown_error": "Bilinmeyen bir hata meydana geldi.",
             "server_session_renewal_error_max_online_user": "Kullanınıcıya ait maksimum giriş kotası doldu. Daha sonra tekrar deneyiniz.",  # noqa

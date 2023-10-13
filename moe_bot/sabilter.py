@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import os
 import sys
 import logging
+import tempfile
 
 from moe_bot.temel_fonksiyonlar import sozlukeriBirlestir
 from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
@@ -14,10 +15,16 @@ except Exception:
 UYUMA_SURESI = 0.5  # Saniye
 GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
 GUNLUK_SEVIYESI = logging.DEBUG
+if GUNLUK_SEVIYESI == logging.INFO:
+    sys.tracebacklimit = -1
+
+
 ENGEL_KONTROL_SURESI = 1  # Saniye
 MESAJ_GECIKMESI = ENGEL_KONTROL_SURESI + 0.2  # Saniye
 
-CRED_PATH = os.path.join(BASE_PATH, "credentials.txt")
+TEMP_DIR = os.path.join(tempfile.gettempdir(), "Moe_auto_bot\\")
+# CRED_PATH = os.path.join(BASE_PATH, "credentials.txt")
+CRED_PATH = os.path.join(TEMP_DIR, "creds.txt")
 
 GUI_LOGO_PATH = os.path.join(BASE_PATH, "arayuz\\moe_logo.png")
 # GUI_ICON_PATH = os.path.join(BASE_PATH, "arayuz\\moe_icon.ico")
@@ -65,9 +72,9 @@ class TaramaSabitleri:
         "tamam_buton": "tamam_buton*.png",
         "geri_buton": "geri_buton.png",
         "baglanti_yok": "baglanti_yok.png",
+        "devam_buton": "devam_buton.png",
         # "kalkan": "kalkan.png",
         # "devre_disi": "devre_disi.png",
-        # "devam_buton": "devam_buton.png",
     }
 
     oyunui_gorsel_yl_dsn = {
@@ -140,9 +147,9 @@ class TaramaSabitleri:
             "tamam_buton": Kare(1550, 1150, 1000, 500),
             "geri_buton": Kare(930, 1880, 500, 300),
             "baglanti_yok": Kare(1900, 500, 200, 200),
+            "devam_buton": Kare(430, 1600, 700, 500),
             # "kalkan": Kare(3650, 720, 160, 110),
             # "devre_disi": Kare(1780, 480, 250, 100),
-            # "devam_buton": Kare(430, 1600, 700, 500),
         },
         "_1920": {
             "svy": Kare(925, 160, 235, 140),
@@ -161,9 +168,9 @@ class TaramaSabitleri:
             "tamam_buton": Kare(825, 450, 500, 250),
             "geri_buton": Kare(490, 950, 200, 200),
             "baglanti_yok": Kare(740, 230, 470, 220),
+            "devam_buton": Kare(220, 850, 350, 220),
             # "kalkan": Kare(3650, 720, 160, 110), #değişecek
             # "devre_disi": Kare(1780, 480, 250, 100), #değişecek
-            # "devam_buton": Kare(200, 850, 550, 1030),
         },
         "_1366": {
             "svy": Kare(640, 130, 180, 70),
@@ -182,6 +189,7 @@ class TaramaSabitleri:
             "tamam_buton": Kare(610, 450, 140, 100),  #
             "geri_buton": Kare(300, 650, 200, 100),  #
             "baglanti_yok": Kare(480, 140, 410, 110),  #
+            "devam_buton": Kare(180, 660, 300, 170),
         },
     }
 
@@ -322,9 +330,9 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
             # "kalkan": 0.8,
             # "devre_disi": 0.8,
-            # "devam_buton": 0.8,
         },
         "_1920": {
             "sehir_ikonu": 0.8,
@@ -340,6 +348,7 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
         },
         "_1366": {
             "sehir_ikonu": 0.8,
@@ -355,6 +364,7 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
         },
     }
 

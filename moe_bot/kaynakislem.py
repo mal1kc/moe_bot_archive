@@ -31,7 +31,7 @@ def aktifEkranBoyutu() -> EkranBoyut:
     aktif_ekran_boyutu = _ekranBoyutu()
     aktif_ekran_boyutu = EkranBoyut(aktif_ekran_boyutu.width, aktif_ekran_boyutu.height)
     if aktif_ekran_boyutu not in TaramaSabitleri.EKRAN_BOYUTLARI.values():
-        raise KullaniciHatasi(f"aktif ekran çözünürlüğü {str(aktif_ekran_boyutu)}, bu çözünürlük desteklenmiyor.")
+        raise KullaniciHatasi("0x03 -> cannot find suitable screen size")
     return aktif_ekran_boyutu
 
 
@@ -224,7 +224,7 @@ class BolgeTablosu:
                 bolge_tablosu.address(f"{self.baslangic_konumlari.x[0]}{str(baslangic - 2 )}"),
             )  # type: ignore
             if self.bolge_sayisi is None:
-                raise KullaniciHatasi("bolge sayısı okunamadı", "bolge tablosu")
+                raise KullaniciHatasi("0x05 -> cannot read coordinates file")
 
             bitis = baslangic + self.bolge_sayisi
 
@@ -234,14 +234,14 @@ class BolgeTablosu:
                     bolge_tablosu.address(f"{self.baslangic_konumlari.x[0]}{adim}"),
                 )
                 if bolge_x is None:
-                    raise KullaniciHatasi("bolge C{adim} okunamadı", "bolge tablosu")
+                    raise KullaniciHatasi("0x051 -> cannot read x coordinate in row {adim}")
 
                 bolge_y = tipVeyaNone(
                     int,
                     bolge_tablosu.address(f"{self.baslangic_konumlari.y[0]}{adim}"),
                 )
                 if bolge_y is None:
-                    raise KullaniciHatasi("bolge D{adim} okunamadı", "bolge tablosu")
+                    raise KullaniciHatasi("0x052 -> cannot read y coordinate in row {adim}")
 
                 self.bolgeler.append(Koordinat2D(bolge_x, bolge_y))
 
@@ -354,10 +354,10 @@ class BolgeDegistirici(Fare):
         """
         bul_ikonu_konum = tiklamaNoktasiGetir("bul_ikon")
         self.solTikla(bul_ikonu_konum)
-        klavyeGetir().tuslar((self.bolge_tablosu[self.hedef_bolge_index].x))
+        klavyeGetir().tuslar(tuslar=self.bolge_tablosu[self.hedef_bolge_index].x)
         bul_y_konum = tiklamaNoktasiGetir("bul_y")
         self.solTikla(bul_y_konum)
-        klavyeGetir().tuslar(self.bolge_tablosu[self.hedef_bolge_index].y)
+        klavyeGetir().tuslar(tuslar=self.bolge_tablosu[self.hedef_bolge_index].y)
         buyutec_ikonu_konum = tiklamaNoktasiGetir("buyutec_ikon")
         self.solTikla(buyutec_ikonu_konum)
         self._sonrakiBolge()

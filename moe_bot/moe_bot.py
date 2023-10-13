@@ -42,7 +42,7 @@ def main():
     moe_gatherer_arayuz.mainloop()
 
     if len(moe_gatherer_arayuz.interaction_variables.items()) != 3:
-        return exit()
+        return sys.exit(0)
 
     _bilgi_yazdir()
 

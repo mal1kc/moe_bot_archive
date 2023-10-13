@@ -50,11 +50,14 @@ def to_dict() -> dict[str, dict[str, str] | str]:
             "level_selection_warning": "You did not make a level selection.",
             # -- Information messages
             "bot_start_info": "s: Start bot.\nd : Stop bot. (It will stop after the screen scan is finished)",
+            # -- unexpected error
+            "unexpected_error": "An error occured. Please restart the program again.",
+            "gatherer_error_screen_resolution_error": "Screen resolution is not suitable. Please run it in 1366x768,1920x1080,3840x2160 resolutions.",  # noqa
         },
         "IMG_FOLDER": "en",
         "ERROR": {
             "server_session_renewal_error_package_not_found": "Package not found.",
-            "server_session_renewal_error_connection_error": "Could not connect to server.",
+            "server_connection_error": "Could not connect to server.",
             "server_session_renewal_error_server_error": "Server error.",
             "server_session_renewal_error_unknown_error": "An unknown error has occurred.",
             "server_session_renewal_error_max_online_user": "Maximum quota reached. Try again later.",

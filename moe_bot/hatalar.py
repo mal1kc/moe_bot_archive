@@ -24,11 +24,11 @@ class KullaniciHatasi(Hata):
     """
 
     def __init__(self, msg: str, *args, **kwargs) -> None:
-        self.hata_mesaji = msg
+        self.hata_mesaji = "❌ " + msg + " ❌"
         win32api.MessageBox(
             None,
             self.hata_mesaji,
-            "❌ Kullanıcı Hatası ❌",
+            "❌ User Error ❌",
             win32con.MB_OK | win32con.MB_ICONERROR,
         )  # type: ignore
         super().__init__(*args, **kwargs)

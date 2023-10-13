@@ -3,7 +3,8 @@ import multiprocessing
 
 import os
 
-from moe_bot.hatalar import BaglantiHatasi, Hata
+from moe_bot.hatalar import BaglantiHatasi, Hata, KullaniciHatasi
+from moe_bot.kaynakislem import aktifEkranBoyutu
 from moe_bot.sabilter import CRED_PATH, GUI_LOGO_PATH, GUI_ICON_PATH, GUI_ENTRY_WIDTH
 
 from moe_bot.sifremele import sifre_hash_olustur
@@ -53,17 +54,19 @@ def _load_credentials() -> tuple[str, str]:
 
 
 def _save_credentials(credentials: tuple[str, str]) -> None:
-    with open("credentials.txt", "w") as f:
+    if not os.path.exists(os.path.dirname(CRED_PATH)):
+        os.makedirs(os.path.dirname(CRED_PATH))
+    with open(CRED_PATH, "w") as f:
         f.write(credentials[0] + "\n")
         f.write(credentials[1] + "\n")
 
 
 def _error_msgbx(error: str) -> None:
-    messagebox.showerror(Diller.lokalizasyon("msgbx_error_title"), Diller.lokalizasyon(error))
+    messagebox.showerror(Diller.lokalizasyon("msgbx_error_title", "UI"), Diller.lokalizasyon(error, "UI"))
 
 
 def _warning_msgbx(warning: str) -> None:
-    messagebox.showwarning(Diller.lokalizasyon("msgbx_warning_title"), Diller.lokalizasyon(warning))
+    messagebox.showwarning(Diller.lokalizasyon("msgbx_warning_title", "UI"), Diller.lokalizasyon(warning, "UI"))
 
 
 class SelectibleModEnum(Enum):
@@ -264,9 +267,9 @@ class Login_Page:
                 password_hash=sifre_hash_olustur(user_data[1]),
             )
             self.sunucu_islem = SunucuIslem(self.user_login_data)
+            if self.rem_me_var.get():
+                _save_credentials(user_data)
             if (giris_sonucu := self.sunucu_islem.giris_yap()) == SunucuIslemSonucu.BASARILI:
-                if self.rem_me_var.get():
-                    _save_credentials(user_data)
                 self.frame.destroy()
                 self.parent.interaction_variables["server"] = self.sunucu_islem
                 self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
@@ -330,6 +333,13 @@ class Moe_Gatherer_Page:
     def __init__(self, parent, window) -> None:
         self.parent = parent
         self.name = ModEnum.MOE_GATHERER
+        try:
+            aktifEkranBoyutu()  # eğer uygun değilse zaten hata fırlatır
+        except KullaniciHatasi as exc:
+            LOGGER.exception(f"Exception occured {exc}")
+            _error_msgbx("gatherer_error_screen_resolution_error")
+            self.parent.root.destroy()
+            return
 
         self.parent.root.geometry("540x400")
         self.parent.change_title(Diller.lokalizasyon("window_title_gatherer"))
@@ -606,17 +616,15 @@ class Moe_Gatherer_Page:
         return
 
     def get_settings(self) -> dict:
-        # check if is there any resource selected if not raise error
         if not any([self.resorce_variables[resource].get() for resource in self.resorce_variables]):
             LOGGER.debug("Kaynak seçimi yapılmadı. Hata mesajı gösteriliyor.")
             _error_msgbx("resource_selection_error")
-            raise Hata("Kaynak seçimi yapılmadı.")
+            raise Hata(Diller.lokalizasyon("resource_selection_error", "UI"))
 
-        # check if is there any lvl selected if not show warning
         if not any([self.lvl_selection_variables[lvl_num - 1].get() for lvl_num in range(1, len(self.lvl_selection_variables) + 1)]):
             LOGGER.debug("Seviye seçimi yapılmadı. Uyarı mesajı gösteriliyor.")
             _warning_msgbx("level_selection_warning")
-            raise Hata("Seviye seçimi yapılmadı.")
+            raise Hata(Diller.lokalizasyon("level_selection_warning", "UI"))
 
         return {
             "march_count": int(self.march_selection_combo.get()),

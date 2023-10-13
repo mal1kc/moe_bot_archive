@@ -33,9 +33,9 @@ class EngelTarayiciİslem:
             DosyaIslemleri.gorselGetir("oyundan_cik"),
             DosyaIslemleri.gorselGetir("geri_buton"),
             DosyaIslemleri.gorselGetir("baglanti_yok"),
+            DosyaIslemleri.gorselGetir("devam_buton"),
             # DosyaIslemleri.gorselGetir("kalkan"),
             # DosyaIslemleri.gorselGetir("devre_disi"),
-            # DosyaIslemleri.gorselGetir("devam_buton"),
         )
         eminlikler: tuple[float, ...] = (
             eminlikGetir("sehir_ikonu"),  # type: ignore
@@ -51,9 +51,9 @@ class EngelTarayiciİslem:
             eminlikGetir("oyundan_cik"),
             eminlikGetir("geri_buton"),
             eminlikGetir("baglanti_yok"),
+            eminlikGetir("devam_buton"),
             # eminlikGetir("kalkan"),
             # eminlikGetir("devre_disi"),
-            # eminlikGetir("devam_buton"),
         )
         bolgeler: tuple[Kare, ...] = (
             taramaBolgesiGetir("sehir_ikonu"),
@@ -69,9 +69,9 @@ class EngelTarayiciİslem:
             taramaBolgesiGetir("oyundan_cik"),
             taramaBolgesiGetir("geri_buton"),
             taramaBolgesiGetir("baglanti_yok"),
+            taramaBolgesiGetir("devam_buton"),
             # taramaBolgesiGetir("kalkan"),
             # taramaBolgesiGetir("devre_disi"),
-            # taramaBolgesiGetir("devam_buton"),
         )
         self.sehirIkon_tarayici = Tarayici(
             ornek_d=dler[0],
@@ -164,14 +164,14 @@ class EngelTarayiciİslem:
             gri_tarama=True,
             isim="engelTarayici.baglantiYok_tarayici",
         )
+        self.devam_buton_tarayici = Tarayici(
+            ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
+        )
         # self.kalkan_tarayici = Tarayici(
         #     ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.kalkan_tarayici"
         # )
         # self.devre_disi_tarayici = Tarayici(
         #     ornek_d=dler[14], eminlik=eminlikler[14], bolge=bolgeler[14], gri_tarama=True, isim="engelTarayici.devre_disi_tarayici"
-        # )
-        # self.devam_buton_tarayici = Tarayici(
-        #     ornek_d=dler[15], eminlik=eminlikler[15], bolge=bolgeler[15], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
         # )
 
     def _gunlukcuBaslat(self) -> None:
@@ -193,6 +193,9 @@ class EngelTarayiciİslem:
                 self._sinyalYolla(ModSinyal.Bekle)
                 Fare.solTikla(_geriok_kare.merkez())
                 _geriOkTara()
+                _devambutonTara()
+                _maviTamamTara()
+
             self.gunlukcu.debug("geri ok tarama bitti")
 
         def _sehirYoksa() -> None:
@@ -233,11 +236,13 @@ class EngelTarayiciİslem:
                         Fare.solTikla(geri_konum.merkez())
                         Fare.sagTikla()
 
-        # def _devambutonTara():
-        #     devamTara = self.devam_buton_tarayici.ekranTara()
-        #     if devamTara is not None:
-        #         sleep(0.5)
-        #         Fare.solTikla(devamTara.merkez())
+        def _devambutonTara():
+            devamTara = self.devam_buton_tarayici.ekranTara()
+            if devamTara is not None:
+                sleep(ENGEL_KONTROL_SURESI / 2)
+                Fare.solTikla(devamTara.merkez())
+                _devambutonTara()
+                sleep(ENGEL_KONTROL_SURESI / 2)
 
         # def _barisKalkani():
         #     kalkanTara = self.kalkan_tarayici.ekranTara()
@@ -299,7 +304,7 @@ class EngelTarayiciİslem:
             _maviTamamTara()
             _geriOkTara()
             _oyundancikisTara()
-            # _devambutonTara()
+            _devambutonTara()
             _sehirIkonuTara()
             _maksSeferUyariTara()
             self._sinyalYolla(ModSinyal.DevamEt)
