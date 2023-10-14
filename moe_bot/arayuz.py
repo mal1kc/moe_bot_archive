@@ -2,6 +2,7 @@ from __future__ import annotations
 import multiprocessing
 
 import os
+import sys
 
 from moe_bot.hatalar import BaglantiHatasi, Hata, KullaniciHatasi
 from moe_bot.kaynakislem import aktifEkranBoyutu
@@ -338,7 +339,11 @@ class Moe_Gatherer_Page:
         except KullaniciHatasi as exc:
             LOGGER.exception(f"Exception occured {exc}")
             _error_msgbx("gatherer_error_screen_resolution_error")
-            self.parent.root.destroy()
+            try:
+                self.parent.root.destroy()
+            except Exception as exc:
+                LOGGER.exception(f"Exception occured {exc}")
+                sys.exit(1)
             return
 
         self.parent.root.geometry("540x400")

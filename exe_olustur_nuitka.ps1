@@ -12,16 +12,35 @@ $PYTHON_PATH = Join-Path $VENV_PATH "Scripts\python.exe"
 echo "using python : $PYTHON_PATH"
 
 # Create the exe file with Nuitka using the virtual environment Python
-& "$PYTHON_PATH" -m nuitka --standalone `
+# & "$PYTHON_PATH" -m nuitka --standalone `
+#  --enable-plugin=tk-inter `
+#  --include-plugin-directory=moe_bot\lokalizasyon `
+#  --include-data-dir=imgs=imgs `
+#  --include-data-dir=arayuz=arayuz `
+#  --nofollow-import-to='*.tests' `
+#  --windows-icon-from-ico=arayuz\moe_icon.ico `
+#   moe_bot_program.py
+
+& "$PYTHON_PATH" -m nuitka --onefile `
  --enable-plugin=tk-inter `
+ --onefile-tempdir-spec="%TEMP%\moe_bot_program\%VERSION%" `
+ --warn-unusual-code `
+ --assume-yes-for-downloads `
  --include-plugin-directory=moe_bot\lokalizasyon `
  --include-data-dir=imgs=imgs `
  --include-data-dir=arayuz=arayuz `
  --nofollow-import-to='*.tests' `
  --windows-icon-from-ico=arayuz\moe_icon.ico `
+ --output-dir=dist `
+ --show-progress `
+ --file-version=0.10.2 `
+ --copyright="mstafa & Yns" `
+ --show-anti-bloat-changes `
+  --noinclude-default-mode="nofollow" `
   moe_bot_program.py
 
-#  --enable-plugin=upx `
-#  --upx-binary=$UPX_BINARY `
 
-cp -Recurse -Force coordinates\ moe_bot_program.dist\coordinates
+cp -Recurse -Force coordinates\ dist\coordinates
+
+# Deactivate the virtual environment
+& "$VENV_PATH\Scripts\deactivate"

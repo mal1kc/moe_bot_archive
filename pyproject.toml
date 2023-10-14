@@ -1,9 +1,3 @@
-[project]
-name = "moe_bot"
-version = "0.10.2"
-description = "moe helper bot"
-
-
 [tool.poetry]
 name = "moe_bot"
 version = "0.10.2"

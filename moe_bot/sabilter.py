@@ -3,6 +3,7 @@ import os
 import sys
 import logging
 import tempfile
+import pathlib
 
 from moe_bot.temel_fonksiyonlar import sozlukeriBirlestir
 from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
@@ -10,10 +11,17 @@ from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
 try:
     BASE_PATH = sys._MEIPASS  # type: ignore
 except Exception:
-    BASE_PATH = os.path.abspath(".")
+    BASE_PATH = pathlib.Path(__file__).parent.parent.resolve()
+
+if not (BASE_PATH / "loglar").exists():
+    # makedirs
+    # ignore if exists
+    if not BASE_PATH.exists():
+        BASE_PATH.mkdir(parents=True)
+    (BASE_PATH / "loglar").mkdir()
 
 UYUMA_SURESI = 0.5  # Saniye
-GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
+GUNLUK_KLASORU = BASE_PATH / "loglar"
 GUNLUK_SEVIYESI = logging.DEBUG
 if GUNLUK_SEVIYESI == logging.INFO:
     sys.tracebacklimit = -1
@@ -22,12 +30,11 @@ if GUNLUK_SEVIYESI == logging.INFO:
 ENGEL_KONTROL_SURESI = 1  # Saniye
 MESAJ_GECIKMESI = ENGEL_KONTROL_SURESI + 0.2  # Saniye
 
-TEMP_DIR = os.path.join(tempfile.gettempdir(), "Moe_auto_bot\\")
-# CRED_PATH = os.path.join(BASE_PATH, "credentials.txt")
-CRED_PATH = os.path.join(TEMP_DIR, "creds.txt")
+TEMP_DIR = pathlib.Path(tempfile.gettempdir()) / "Moe_auto_bot"
+CRED_PATH = TEMP_DIR / "creds.txt"
 
-GUI_LOGO_PATH = os.path.join(BASE_PATH, "arayuz\\moe_logo.png")
-# GUI_ICON_PATH = os.path.join(BASE_PATH, "arayuz\\moe_icon.ico")
+GUI_LOGO_PATH = BASE_PATH / "arayuz" / "moe_logo.png"
+# GUI_ICON_PATH = BASE_PATH / "arayuz" / "moe_icon.ico"
 GUI_ICON_PATH = GUI_LOGO_PATH
 
 

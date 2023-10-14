@@ -1,3 +1,4 @@
+import sys
 from typing import Any
 
 import win32api  # noqa: F401
@@ -32,4 +33,4 @@ class KullaniciHatasi(Hata):
             win32con.MB_OK | win32con.MB_ICONERROR,
         )  # type: ignore
         super().__init__(*args, **kwargs)
-        exit(1)
+        sys.exit(1)  # noqa: F821

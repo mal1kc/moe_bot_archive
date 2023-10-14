@@ -16,12 +16,14 @@ def test_singleton_is_always_same():
 
     assert Varsayilanlar() is not Dummy()
 
+
 def test_glob_dns_olustur():
     ekran_byt_etiketi = aktifEkranBoyutuEtiketi()
     assert "EKMEK" in _glob_dsn_sozluk_olustur(ekran_byt_etiketi)
     img_klasor = sabilter.TaramaSabitleri.DOSYA_YOLLARI[1]
     beklenen_glob_dsn = f"{img_klasor}/{Diller.aktif_dil_getir().name.lower()}/{ekran_byt_etiketi}/{sabilter.TaramaSabitleri.GLOB_DSNLER['EKMEK']}"  # noqa
     assert _glob_dsn_sozluk_olustur(ekran_byt_etiketi)["EKMEK"] == beklenen_glob_dsn
+
 
 # def test_compare_glob_dsn_olustur_funcs():
 #     ekran_byt_etiketi = aktifEkranBoyutuEtiketi()
