@@ -1,6 +1,5 @@
 import enum
 
-
 class ModSinyal(enum.IntEnum):
     DevamEt = 0
     Bekle = 1

@@ -21,6 +21,12 @@ def ifItsNone(degisken1: Any, degisken2: Any) -> Any:
     return degisken1
 
 
+def getValIfKeyExist(sozluk: dict, key: Any, default: Any = None) -> Any:
+    if key in sozluk.keys():
+        return sozluk[key]
+    return default
+
+
 def sozlukeriBirlestir(sozluk1: dict, *sozlukler: dict) -> dict:
     """
     iki ve daha fazla sözlüğü birleştirir

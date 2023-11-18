@@ -2,9 +2,11 @@ from __future__ import annotations
 import multiprocessing
 
 import os
+import sys
 
-from moe_bot.hatalar import BaglantiHatasi, Hata
-from moe_bot.sabilter import BASE_PATH
+from moe_bot.hatalar import BaglantiHatasi, Hata, KullaniciHatasi
+from moe_bot.kaynakislem import aktifEkranBoyutu
+from moe_bot.sabilter import CRED_PATH, GUI_LOGO_PATH, GUI_ICON_PATH, GUI_ENTRY_WIDTH
 
 from moe_bot.sifremele import sifre_hash_olustur
 from moe_bot.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
@@ -31,20 +33,41 @@ from moe_bot.gunlukcu import gunlukcuGetir
 multiprocessing.freeze_support()  # noqa # for pyinstaller
 LOGGER = gunlukcuGetir(__name__)
 
-# TODO : ayarlardan al
-LOGO_PATH = os.path.join(BASE_PATH, "arayuz/moe_logo.png")
+LOGO_PATH = GUI_LOGO_PATH
 
-ENTRY_WIDTH = 30
+ENTRY_WIDTH = GUI_ENTRY_WIDTH
 
-# ICON_PATH = os.path.join(BASE_PATH, "arayuz/moe_icon.ico")
+ICON_PATH = GUI_ICON_PATH
+
+
+def _load_credentials() -> tuple[str, str]:
+    if not os.path.exists(CRED_PATH):
+        return ("", "")
+    try:
+        with open(CRED_PATH, "r") as f:
+            name = f.readline().strip()
+            password = f.readline().strip()
+            return (name, password)
+    except Exception as exc:
+        LOGGER.exception(f"Exception occured {exc} while loading credentials")
+        _error_msgbx("login_error_credential_load_error")
+    return ("", "")
+
+
+def _save_credentials(credentials: tuple[str, str]) -> None:
+    if not os.path.exists(os.path.dirname(CRED_PATH)):
+        os.makedirs(os.path.dirname(CRED_PATH))
+    with open(CRED_PATH, "w") as f:
+        f.write(credentials[0] + "\n")
+        f.write(credentials[1] + "\n")
 
 
 def _error_msgbx(error: str) -> None:
-    messagebox.showerror(Diller.lokalizasyon("msgbx_error_title"), Diller.lokalizasyon(error))
+    messagebox.showerror(Diller.lokalizasyon("msgbx_error_title", "UI"), Diller.lokalizasyon(error, "UI"))
 
 
 def _warning_msgbx(warning: str) -> None:
-    messagebox.showwarning(Diller.lokalizasyon("msgbx_warning_title"), Diller.lokalizasyon(warning))
+    messagebox.showwarning(Diller.lokalizasyon("msgbx_warning_title", "UI"), Diller.lokalizasyon(warning, "UI"))
 
 
 class SelectibleModEnum(Enum):
@@ -80,12 +103,17 @@ class MainGui:
         title: str = "window_title_main",
         geometry: str = "500x600",
     ):
+        self.interaction_variables = {
+            "mod_name": None,
+            "mod_settings": None,
+            "server": None,
+        }
         if root is None:
             root = Tk()
         self.root = root
         self.root.resizable(False, False)
         self.root.geometry(geometry)
-        # self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
+        self.root.iconphoto(True, PhotoImage(file=ICON_PATH))
         self.change_title(title)
         self.interaction_variables = {}
         self.pageshow = Login_Page(self, self.root)
@@ -111,11 +139,11 @@ class MainGui:
                 self.interaction_variables = {
                     "mod_name": self.pageshow.name,
                     "mod_settings": self.pageshow.get_settings(),  # type: ignore
+                    "server": self.interaction_variables["server"],
                 }
             except Hata as exc:
                 LOGGER.exception(f"Exception occured {exc} while getting settings for {self.pageshow.name=}")
                 return
-            print(self.interaction_variables)
             self.root.destroy()
             return
         raise UnExpectedPageError("Unexpected page")
@@ -190,20 +218,38 @@ class Login_Page:
         self.pass_entry.bind("<Return>", _focus_next_widget)
         self.pass_entry.grid(row=2, column=1)
 
+        self.rem_me_var = BooleanVar()
+        self.rem_me_chkbx = Checkbutton(
+            self.frame,
+            text=Diller.lokalizasyon("rem_me_chkbx"),
+            variable=self.rem_me_var,
+        )
+        self.rem_me_chkbx.grid(row=3, column=1)
+
         self.sbt = Button(self.frame, text=Diller.lokalizasyon("login_btn"), command=self.clicked)
         self.sbt.bind("<Return>", _press_btn)
         self.sbt.grid(row=4, column=1)
 
         # -- login --
 
+        # -- save credentials --
+        if (credentials := _load_credentials()) != ("", ""):
+            self.name_entry.insert(0, credentials[0])
+            self.pass_entry.insert(0, credentials[1])
+            self.rem_me_var.set(True)
+
+        # -- save credentials --
+
     def _lang_changed(self, event) -> None:
         # update language
         Diller.aktif_dil_degistir(DilEnum[self.select_lang_combo.get()])  # type: ignore
         self.name_lbl.config(text=Diller.lokalizasyon("name_lbl"))
         self.pass_lbl.config(text=Diller.lokalizasyon("pass_lbl"))
+        self.rem_me_chkbx.config(text=Diller.lokalizasyon("rem_me_chkbx"))
         self.sbt.config(text=Diller.lokalizasyon("login_btn"))
         self.select_lang_lbl.config(text=Diller.lokalizasyon("select_lang_lbl"))
         self.login_lbl.config(text=Diller.lokalizasyon("login_lbl"))
+        self.parent.change_title(Diller.lokalizasyon("window_title_login"))
 
     def clicked(self):
         user_data = (self.name_entry.get(), self.pass_entry.get())
@@ -222,10 +268,12 @@ class Login_Page:
                 password_hash=sifre_hash_olustur(user_data[1]),
             )
             self.sunucu_islem = SunucuIslem(self.user_login_data)
+            if self.rem_me_var.get():
+                _save_credentials(user_data)
             if (giris_sonucu := self.sunucu_islem.giris_yap()) == SunucuIslemSonucu.BASARILI:
-                # TODO: sadece kullanicinin sahip oldugu modlari goster
                 self.frame.destroy()
-                self.parent.change_page(GUIPagesEnum.MOD_SELECT)
+                self.parent.interaction_variables["server"] = self.sunucu_islem
+                self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
             elif giris_sonucu == SunucuIslemSonucu.BAGLANTI_HATASI:
                 _error_msgbx("login_error_connection_error")
                 return
@@ -244,7 +292,6 @@ class Login_Page:
             _error_msgbx("login_error_connection_error")
         except Exception as exc:
             LOGGER.exception(f"Exception occured {exc}")
-            # TODO: bilinmeyen hata mesaji goster
             _error_msgbx("login_error_unknown_error")
 
 
@@ -280,7 +327,6 @@ class Mod_Select_Page:
 
     def clicked(self):
         self.frame.destroy()
-        # TODO: go to selected mod page
         self.parent.change_page(GUIPagesEnum.MOE_GATHERER)
 
 
@@ -288,6 +334,17 @@ class Moe_Gatherer_Page:
     def __init__(self, parent, window) -> None:
         self.parent = parent
         self.name = ModEnum.MOE_GATHERER
+        try:
+            aktifEkranBoyutu()  # eğer uygun değilse zaten hata fırlatır
+        except KullaniciHatasi as exc:
+            LOGGER.exception(f"Exception occured {exc}")
+            _error_msgbx("gatherer_error_screen_resolution_error")
+            try:
+                self.parent.root.destroy()
+            except Exception as exc:
+                LOGGER.exception(f"Exception occured {exc}")
+                sys.exit(1)
+            return
 
         self.parent.root.geometry("540x400")
         self.parent.change_title(Diller.lokalizasyon("window_title_gatherer"))
@@ -350,8 +407,8 @@ class Moe_Gatherer_Page:
             KaynakTipi.EKMEK: BooleanVar(),
             KaynakTipi.ODUN: BooleanVar(),
             KaynakTipi.TAS: BooleanVar(),
-            KaynakTipi.GUMUS: BooleanVar(),
             KaynakTipi.DEMIR: BooleanVar(),
+            KaynakTipi.GUMUS: BooleanVar(),
             KaynakTipi.ALTIN: BooleanVar(),
         }
 
@@ -359,8 +416,8 @@ class Moe_Gatherer_Page:
             "food",
             "wood",
             "stone",
-            "silver",
             "iron",
+            "silver",
             "gold",
         )
 
@@ -369,7 +426,7 @@ class Moe_Gatherer_Page:
                 self.resource_selection_lbl,
                 onvalue=True,
                 offvalue=False,
-                text=Diller.lokalizasyon(localization[resource.value]),
+                text=Diller.lokalizasyon(localization[resource.value - 1]),
                 variable=self.resorce_variables[resource],
             )
             for resource in self.resorce_variables
@@ -564,19 +621,18 @@ class Moe_Gatherer_Page:
         return
 
     def get_settings(self) -> dict:
-        # check if is there any resource selected if not raise error
         if not any([self.resorce_variables[resource].get() for resource in self.resorce_variables]):
             LOGGER.debug("Kaynak seçimi yapılmadı. Hata mesajı gösteriliyor.")
             _error_msgbx("resource_selection_error")
-            raise Hata("Kaynak seçimi yapılmadı.")
+            raise Hata(Diller.lokalizasyon("resource_selection_error", "UI"))
 
-        # check if is there any lvl selected if not show warning
         if not any([self.lvl_selection_variables[lvl_num - 1].get() for lvl_num in range(1, len(self.lvl_selection_variables) + 1)]):
             LOGGER.debug("Seviye seçimi yapılmadı. Uyarı mesajı gösteriliyor.")
             _warning_msgbx("level_selection_warning")
-            self.lvl_select_all_chkbx_var.set(True)
+            raise Hata(Diller.lokalizasyon("level_selection_warning", "UI"))
+
         return {
-            "march_count": str(self.march_selection_combo.get()),
+            "march_count": int(self.march_selection_combo.get()),
             "resources": [resource for resource in self.resorce_variables if self.resorce_variables[resource].get()],
             "lvls": [
                 lvl_num

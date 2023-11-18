@@ -46,24 +46,46 @@
 - login arayüzü (yapıldı)
 
 ## eklendi - test edilecek
-
+- arayuz: beni hatirla (exe ye çevirildiğindde çalışcakmı)
 
 ## FIXME Sorunlar
 
-
 - tüm çözünürlüklerde de daha çok test and foto optimizasyonu +
-- confidence değerlerinin hepsi ayarlardan alınmıyor
-- v2 bitmedi ( çalışan bir sürümü yok )
+
 ## TODO eksikler
 
-- cprofile ile performans testi yapılacak ve pympler ile memory testi yapılacak
-    + minimum 10 sefer
-- daha moduler özellikler (v2 - aktif olarak yazılıyor)
-    - moe_gatherer (sonradan modulerleştirilecek)
-    - moe_advantures (sonra)
-    - moe_camp (sonra)
-    - moe_raid (sonra)
+- oturum yenileme hatası alınırsa ne yapılacak?
+    + geçici çözüm olarak k.hata fırlatılacak ve program kapatılacak
+- durma durumunda giriş yenileme yapılacak mı?
+    + geçici çözüm olarak hiçbir şey yapılmayacak
 
-## olsa güzel olur
-
-- pynput controller --> rlock oluşturduğundan (rlock pickle edilemiyor) kaldırılmıştı
+- çoklu dil desteği
+  - görsellerde dil desteği
+    + dile bağımlı görseller dile ait `imgs` alt klasörüne konulacak
+    + dile bağımlı olmayan görseller `imgs` ' in altına no_lang klasörüne konulacak
+    + eğer dil bağımlı ise `sabitler.TaramaSabitleri.GORSEL_YL_DIL_BEYANLARI` anahtar sözlüğüne True olarak eklenecek
+    + olması beklenen dosya yapısı
+    ```
+    ├─ imgs/
+    │  ├─ en/
+	│  │  ├─ _1920/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _3840/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _1366/
+	│  │  │  ├─ img_file.png
+	│  ├─ tr/
+	│  │  ├─ _1920/
+	│  │  │  ├─ img_file.png
+	│  │  ├─ _3840/
+	│  │  │  ├─ img_file.png
+    │  │  ├─ _1366/
+    │  │  │  ├─ img_file.png
+	│  ├─ no_lang/
+	│  │  ├─ _1920/
+	│  │  │  ├─ no_lang_img_file.png
+	│  │  ├─ _3840/
+    │  │  │  ├─ no_lang_img_file.png
+    │  │  ├─ _1366/
+    │  │  │  ├─ no_lang_img_file.png
+    ```

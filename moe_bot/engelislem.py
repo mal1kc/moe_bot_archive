@@ -2,7 +2,9 @@ import logging
 import multiprocessing
 from time import sleep
 
-from .temel_siniflar import ModSinyal
+from moe_bot.temel_siniflar import Kare
+
+from .enumlar import ModSinyal
 from .sabilter import ENGEL_KONTROL_SURESI
 from .moe_gatherer import (
     DosyaIslemleri,
@@ -17,7 +19,7 @@ from .moe_gatherer import (
 class EngelTarayiciİslem:
     def __init__(self) -> None:
         self._gunlukcuBaslat()
-        dler = (
+        dler: tuple[str, ...] = (
             DosyaIslemleri.gorselGetir("sehir_ikonu"),
             DosyaIslemleri.gorselGetir("moe_logo"),
             DosyaIslemleri.gorselGetir("hizmet_basarisiz"),
@@ -31,12 +33,12 @@ class EngelTarayiciİslem:
             DosyaIslemleri.gorselGetir("oyundan_cik"),
             DosyaIslemleri.gorselGetir("geri_buton"),
             DosyaIslemleri.gorselGetir("baglanti_yok"),
+            DosyaIslemleri.gorselGetir("devam_buton"),
             # DosyaIslemleri.gorselGetir("kalkan"),
             # DosyaIslemleri.gorselGetir("devre_disi"),
-            # DosyaIslemleri.gorselGetir("devam_buton"),
         )
-        eminlikler = (
-            eminlikGetir("sehir_ikonu"),
+        eminlikler: tuple[float, ...] = (
+            eminlikGetir("sehir_ikonu"),  # type: ignore
             eminlikGetir("moe_logo"),
             eminlikGetir("hizmet_basarisiz"),
             eminlikGetir("baglanti_kesildi"),
@@ -49,11 +51,11 @@ class EngelTarayiciİslem:
             eminlikGetir("oyundan_cik"),
             eminlikGetir("geri_buton"),
             eminlikGetir("baglanti_yok"),
+            eminlikGetir("devam_buton"),
             # eminlikGetir("kalkan"),
             # eminlikGetir("devre_disi"),
-            # eminlikGetir("devam_buton"),
         )
-        bolgeler = (
+        bolgeler: tuple[Kare, ...] = (
             taramaBolgesiGetir("sehir_ikonu"),
             taramaBolgesiGetir("moe_logo"),
             taramaBolgesiGetir("hizmet_basarisiz"),
@@ -67,9 +69,9 @@ class EngelTarayiciİslem:
             taramaBolgesiGetir("oyundan_cik"),
             taramaBolgesiGetir("geri_buton"),
             taramaBolgesiGetir("baglanti_yok"),
+            taramaBolgesiGetir("devam_buton"),
             # taramaBolgesiGetir("kalkan"),
             # taramaBolgesiGetir("devre_disi"),
-            # taramaBolgesiGetir("devam_buton"),
         )
         self.sehirIkon_tarayici = Tarayici(
             ornek_d=dler[0],
@@ -162,14 +164,14 @@ class EngelTarayiciİslem:
             gri_tarama=True,
             isim="engelTarayici.baglantiYok_tarayici",
         )
+        self.devam_buton_tarayici = Tarayici(
+            ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
+        )
         # self.kalkan_tarayici = Tarayici(
         #     ornek_d=dler[13], eminlik=eminlikler[13], bolge=bolgeler[13], gri_tarama=True, isim="engelTarayici.kalkan_tarayici"
         # )
         # self.devre_disi_tarayici = Tarayici(
         #     ornek_d=dler[14], eminlik=eminlikler[14], bolge=bolgeler[14], gri_tarama=True, isim="engelTarayici.devre_disi_tarayici"
-        # )
-        # self.devam_buton_tarayici = Tarayici(
-        #     ornek_d=dler[15], eminlik=eminlikler[15], bolge=bolgeler[15], gri_tarama=True, isim="engelTarayici.devam_buton_tarayici"
         # )
 
     def _gunlukcuBaslat(self) -> None:
@@ -180,7 +182,7 @@ class EngelTarayiciİslem:
         def _sehirIkonuTara() -> bool:
             _sehirIkonKare = self.sehirIkon_tarayici.ekranTara()
             if _sehirIkonKare is None:
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 _sehirYoksa()
             return True
 
@@ -188,11 +190,13 @@ class EngelTarayiciİslem:
             self.gunlukcu.debug("geri ok tarama basladi")
             _geriok_kare = self.geriOk_tarayici.ekranTara()
             if _geriok_kare is not None:
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 Fare.solTikla(_geriok_kare.merkez())
-            self.gunlukcu.debug("geri ok tarama bitti")
+                _geriOkTara()
+                _devambutonTara()
+                _maviTamamTara()
 
-        # FIXME oyundan çıkış engeli kaldırma
+            self.gunlukcu.debug("geri ok tarama bitti")
 
         def _sehirYoksa() -> None:
             _maviTamamTara()
@@ -211,19 +215,19 @@ class EngelTarayiciİslem:
         def _hizmetBasarisizTara():
             if self.hizmetBasarisiz_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("hizmet basarisiz uyarisi algilandi.")
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 _yenidenDeneButonTikla()
 
         def _baglantiKesildiTara():
             if self.baglantiKesildi_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("baglanti kesildi uyarisi algilandi.")
-                # exit sinyali
-                self._sinyalYolla(ModSinyal.SONLANDIR)
+                # kapama sinyali gönder
+                self._sinyalYolla(ModSinyal.Sonlandir)
 
         def _maksSeferUyariTara():
             if self.maksSeferUyari_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("maks sefer uyarisi algilandi.")
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 tamam_konum = self.tamam_tarayici.ekranTara()
                 if tamam_konum is not None:
                     Fare.solTikla(tamam_konum.merkez())
@@ -232,11 +236,13 @@ class EngelTarayiciİslem:
                         Fare.solTikla(geri_konum.merkez())
                         Fare.sagTikla()
 
-        # def _devambutonTara():
-        #     devamTara = self.devam_buton_tarayici.ekranTara()
-        #     if devamTara is not None:
-        #         sleep(0.5)
-        #         Fare.solTikla(devamTara.merkez())
+        def _devambutonTara():
+            devamTara = self.devam_buton_tarayici.ekranTara()
+            if devamTara is not None:
+                sleep(ENGEL_KONTROL_SURESI / 2)
+                Fare.solTikla(devamTara.merkez())
+                _devambutonTara()
+                sleep(ENGEL_KONTROL_SURESI / 2)
 
         # def _barisKalkani():
         #     kalkanTara = self.kalkan_tarayici.ekranTara()
@@ -261,7 +267,7 @@ class EngelTarayiciİslem:
         def _maviTamamTara():
             maviTamamUyari_kare = self.maviTamam_tarayici.ekranTara()
             if maviTamamUyari_kare is not None:
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 self.gunlukcu.debug("mavi tamam butonu algilandi.")
                 sleep(ENGEL_KONTROL_SURESI)  # 2
                 Fare.solTikla(maviTamamUyari_kare.merkez())
@@ -272,20 +278,20 @@ class EngelTarayiciİslem:
             sleep(ENGEL_KONTROL_SURESI / 2)
             if self.oyundan_cik.ekranTara() is not None:
                 self.gunlukcu.debug("oyundak cik uyarrısı bulundu")
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 Fare.solTikla(konum=tiklamaNoktasiGetir("cikis_hayir"))
 
         def _moeLogoBekle() -> None:
             while self.moeLogo_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("moe logo algilandi.")
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 sleep(ENGEL_KONTROL_SURESI)
                 _yenidenDeneButonTikla()
 
         def _baglantiYokTara():
             if self.baglantiYok_tarayici.ekranTara() is not None:
                 self.gunlukcu.debug("baglanti yok algilandi.")
-                self._sinyalYolla(ModSinyal.DUR)
+                self._sinyalYolla(ModSinyal.Bekle)
                 sleep(ENGEL_KONTROL_SURESI)
                 _yenidenDeneButonTikla()
 
@@ -298,33 +304,37 @@ class EngelTarayiciİslem:
             _maviTamamTara()
             _geriOkTara()
             _oyundancikisTara()
-            # _devambutonTara()
+            _devambutonTara()
             _sehirIkonuTara()
             _maksSeferUyariTara()
-            self._sinyalYolla(ModSinyal.DEVAM_ET)
+            self._sinyalYolla(ModSinyal.DevamEt)
             sleep(ENGEL_KONTROL_SURESI)
             self._sinyalDurKontrol()
 
     def _sinyalYolla(self, sinyal) -> None:
         self.gunlukcu.debug("sinyal gonderildi.")
         self._sinyal_gonderme.value = sinyal
-        if sinyal != ModSinyal.DEVAM_ET:
+        if sinyal != ModSinyal.DevamEt:
             self._sinyalBekle()
 
     def _sinyalBekle(self) -> None:
         self.gunlukcu.debug("sinyal bekleniyor")
-        while self._sinyal_alma.value == ModSinyal.MESAJ_ULASMADI:
+        while self._sinyal_alma.value == ModSinyal.MesajUlasmadi:
             self.gunlukcu.debug("sinyal ulasmasi bekleniyor")
             sleep(0.1)
-        self._sinyal_alma.value = ModSinyal.MESAJ_ULASMADI
+        self._sinyal_alma.value = ModSinyal.MesajUlasmadi
         self.gunlukcu.debug("sinyal ulasti")
 
     def _sinyalDurKontrol(self) -> None:
-        if self._sinyal_alma.value == ModSinyal.DUR:
+        """
+        sinyal dur kontrol
+        """
+
+        if self._sinyal_alma.value == ModSinyal.Bekle:
             self.gunlukcu.debug("sinyal dur kontrol")
-            sleep(ENGEL_KONTROL_SURESI * 2)
+            sleep(ENGEL_KONTROL_SURESI / 2)
             self.gunlukcu.debug("sinyal dur kontrol bitti")
-        elif self._sinyal_alma == (ModSinyal.SONLANDIR, ModSinyal.FAILSAFE_SONLANDIR):
+        elif self._sinyal_alma == (ModSinyal.Sonlandir, ModSinyal.FailSafe):
             self.gunlukcu.debug("sinyal dur kontrol")
             self.kapat()
             sleep(ENGEL_KONTROL_SURESI)
@@ -334,6 +344,8 @@ class EngelTarayiciİslem:
         return f"{self.__class__.__name__}"  # type: ignore
 
     def _acikmi(self) -> bool:
+        if not hasattr(self, "_acik_event"):
+            self._acik_event = multiprocessing.Event()
         return not self._acik_event.is_set()
 
     def processOlustur(self, sinyal_gonderme, sinyal_alma) -> multiprocessing.Process:
@@ -344,4 +356,5 @@ class EngelTarayiciİslem:
         return multiprocessing.Process(target=self.engelKontrol)
 
     def kapat(self):
-        self._acik_event.set()
+        if hasattr(self, "_acik_event"):
+            self._acik_event.set()

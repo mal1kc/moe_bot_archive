@@ -3,7 +3,7 @@ import logging
 import pytest
 import requests
 from moe_bot.sifremele import hazirlanmis_sifre_olustur, sifre_hash_olustur
-from moe_bot.sunucu_islemleri import SunucuIslem, SunucuIslemSonucu
+from moe_bot.sunucu_islemleri import _URLS, SunucuIslem, SunucuIslemSonucu
 from moe_bot.temel_siniflar import KullaniciGirisVerisi
 
 LOCAL_SUNUCU_ADRESI = "http://127.0.0.1:5000"
@@ -86,6 +86,10 @@ def test_giris_yap_paketsiz_kullanici(
     sunucu_islem = SunucuIslem(
         kullanici_giris_verisi=kullanici_giris_verisi,
     )
+    SunucuIslem._urls = _URLS(
+        ULogin=LOCAL_SUNUCU_ADRESI + "/api/v1/user/login",
+        UInfo=LOCAL_SUNUCU_ADRESI + "/api/v1/user/info",
+    )
     sonuc = sunucu_islem.giris_yap()
     assert sonuc == SunucuIslemSonucu.PAKET_BULUNAMADI, sonuc
 
@@ -100,6 +104,10 @@ def test_giris_yap_paketli_kullanici(
     sunucu_islem = SunucuIslem(
         kullanici_giris_verisi=kullanici_giris_verisi,
     )
+    SunucuIslem._urls = _URLS(
+        ULogin=LOCAL_SUNUCU_ADRESI + "/api/v1/user/login",
+        UInfo=LOCAL_SUNUCU_ADRESI + "/api/v1/user/info",
+    )
     sonuc = sunucu_islem.giris_yap()
     assert sonuc == SunucuIslemSonucu.BASARILI, sonuc
 
@@ -113,6 +121,10 @@ def test_kullanici_bilgisi_paketli_kullanici(
     )
     sunucu_islem = SunucuIslem(
         kullanici_giris_verisi=kullanici_giris_verisi,
+    )
+    SunucuIslem._urls = _URLS(
+        ULogin=LOCAL_SUNUCU_ADRESI + "/api/v1/user/login",
+        UInfo=LOCAL_SUNUCU_ADRESI + "/api/v1/user/info",
     )
     sonuc = sunucu_islem._kullanici_bilgilerini_al()
     assert sonuc == SunucuIslemSonucu.BASARILI, sonuc

@@ -1,5 +1,5 @@
 """
-bu dosya 
+bu dosya
 - lokalizasyon anahtarını yazmak için kullanılan örnek
 - runtime sırasında kullanılmayacak
 - o yuzden dosya adı __ignore__.py

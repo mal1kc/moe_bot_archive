@@ -115,14 +115,14 @@
             "italic": true
         },
         {
-            "tag":"WARNING",
+            "tag": "WARNING",
             // yellowish color
             "color": "#FFCC50",
-            "strikethrough":false,
-            "underline":false,
-            "backgroundColor":"transparent",
-            "bold":true,
-            "italic":false
+            "strikethrough": false,
+            "underline": false,
+            "backgroundColor": "transparent",
+            "bold": true,
+            "italic": false
         }
     ],
     "python.analysis.typeCheckingMode": "basic",
@@ -131,7 +131,7 @@
         "editor.codeActionsOnSave": {
             "source.fixAll": true
         },
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "ms-python.python"
     },
     "python.testing.pytestArgs": [
         "tests"
@@ -183,5 +183,9 @@
             "iconColour": "#FFCC00",
             "foreground": "#00ff80"
         }
-    }
+    },
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.importFormat": "absolute",
+    "ruff.enableExperimentalFormatter": true,
 }

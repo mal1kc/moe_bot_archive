@@ -1,4 +1,4 @@
-from moe_bot.moe_gatherer import DosyaIslemleri, Tarayici, eminlikGetir, taramaBolgesiGetir
+from moe_bot.kaynakislem import DosyaIslemleri, Tarayici, eminlikGetir, taramaBolgesiGetir
 from moe_bot.temel_siniflar import Kare
 
 

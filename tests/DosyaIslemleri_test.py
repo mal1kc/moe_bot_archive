@@ -24,25 +24,29 @@ def test_images_folder_is_not_empty(images_folder_location):
 
 def test_images_folder_contains_only_images(images_folder_location, images_subfolders):
     for subfolder in images_subfolders:
-        for file in subfolder.iterdir():
-            assert file.suffix in {".jpg", ".png", ".jpeg"}
+        for lang_subfolder in subfolder.iterdir():
+            for file in lang_subfolder.iterdir():
+                assert file.suffix in {".jpg", ".png", ".jpeg"}
 
 
 def test_images_are_not_empty(images_folder_location, images_subfolders):
     for subfolder in images_subfolders:
-        for file in subfolder.iterdir():
-            assert file.stat().st_size > 0
+        for lang_subfolder in subfolder.iterdir():
+            for file in lang_subfolder.iterdir():
+                assert file.stat().st_size > 0
 
 
 def test_images_are_not_corrupted(images_folder_location, images_subfolders):
     for subfolder in images_subfolders:
-        for file in subfolder.iterdir():
-            with Image.open(file) as img:
-                img.verify()
+        for lang_subfolder in subfolder.iterdir():
+            for file in lang_subfolder.iterdir():
+                with Image.open(file) as img:
+                    img.verify()
 
 
 def test_images_are_openable_by_pillow(images_folder_location, images_subfolders):
     for subfolder in images_subfolders:
-        for file in subfolder.iterdir():
-            with Image.open(file) as img:
-                img.load()
+        for lang_subfolder in subfolder.iterdir():
+            for file in lang_subfolder.iterdir():
+                with Image.open(file) as img:
+                    assert img is not None

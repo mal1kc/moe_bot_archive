@@ -9,7 +9,7 @@ def load_diller():
 
 
 def test_varsayilan_dil():
-    assert Diller._aktif_dil is DilEnum.TR
+    assert Diller.aktif_dil_getir() is DilEnum.TR
 
 
 def test_dil_degistir():

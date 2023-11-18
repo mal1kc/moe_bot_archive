@@ -1,25 +1,21 @@
 from __future__ import annotations
 from enum import IntEnum, StrEnum, auto
+from functools import lru_cache
 
-# from .temel_fonksiyonlar import # noqa
 from logging import getLogger
 import requests
 from .hatalar import BaglantiHatasi, Hata
 
 from .sifremele import hazirlanmis_sifre_olustur_pass_hash
-from .temel_siniflar import KullaniciGirisVerisi
+from .temel_siniflar import Diller, KullaniciGirisVerisi
 
 LOGGER = getLogger(__name__)
 
-# TODO: bunu ayarlar dosyasına taşı
-SUNUCU_BASE_URL = "http://127.0.0.1:5000"  # sunucu adresi # FIXME: sunucu adresi degisecek
+SUNUCU_BASE_URL = "http://37.247.101.246:8080"  # sunucu adresi
 
-# TODO: bunu ayarlar dosyasına taşı
 URL_ONEKI = SUNUCU_BASE_URL + "/api/v1/user"  # user api endpoint
 
-# TODO: bunu ayarlar dosyasına taşı
-LOGIN_CACHE_LOCATION = "login_cache.json"  # login bilgilerinin kaydedileceği dosya
-# TODO: implement login_cache_location dosyası ve login bilgilerinin kaydedilmesi , geri yüklenmesi
+SUNUCU_OTURUM_SURESI = 30  # sunucu oturum süresi (saniye)
 
 
 class SunucuIslemSonucu(IntEnum):
@@ -50,7 +46,7 @@ class KullaniciBilgileriSonucu(StrEnum):
 
 class _URLS:
     _instance = None
-    __slots__ = ["ULogin", "UInfo", "Main"]  # instance variables
+    __slots__ = ["ULogin", "UInfo", "Main"]
     u_login: str
     up_info: str
     main: str
@@ -66,9 +62,8 @@ class _URLS:
 API_ENDPOINTS = _URLS(ULogin=URL_ONEKI + "/login", UInfo=URL_ONEKI + "/info")
 
 
-# TODO: singleton yap
 class SunucuIslem:
-    __slots__ = ["kullanici_giris_verisi", "kullanici_verisi", "_urls"]  # instance variables
+    __slots__ = ["kullanici_giris_verisi", "kullanici_verisi", "_urls", "_req_session"]
 
     def __init__(self, kullanici_giris_verisi: KullaniciGirisVerisi) -> None:
         self._urls = API_ENDPOINTS
@@ -77,13 +72,14 @@ class SunucuIslem:
             kullanici_giris_verisi.name,
             hazirlanmis_sifre_olustur_pass_hash(kullanici_giris_verisi.password_hash),
         )
+        self._req_session = requests.Session()
         if self._sunucu_acik_mi() != SunucuIslemSonucu.BASARILI:
-            raise BaglantiHatasi("sunucuya_erisilemiyor")
+            raise BaglantiHatasi(Diller.lokalizasyon("server_connection_error", "ERROR"))
         self.kullanici_verisi = None
 
     def _sunucu_acik_mi(self) -> SunucuIslemSonucu:
         try:
-            resp = requests.get(url=self._urls.Main)
+            resp = self._req_session.get(url=self._urls.Main)
             if resp.status_code == 200:
                 return SunucuIslemSonucu.BASARILI if resp.json()["status"] == "OK" else SunucuIslemSonucu.HATALI
             return SunucuIslemSonucu.HATALI
@@ -95,7 +91,7 @@ class SunucuIslem:
         try:
             LOGGER.debug(f"kullanici_giris_verisi: {self.kullanici_giris_verisi}")
             LOGGER.debug(f"url : {self._urls.ULogin}")
-            resp = requests.post(url=self._urls.ULogin, auth=self.kullanici_giris_verisi)
+            resp = self._req_session.post(url=self._urls.ULogin, auth=self.kullanici_giris_verisi)
             resp_json = resp.json()
             LOGGER.debug(f"resp_json: {resp_json}")
             if resp.status_code == 200:
@@ -116,11 +112,12 @@ class SunucuIslem:
         except Exception:
             return SunucuIslemSonucu.BAGLANTI_HATASI
 
+    @lru_cache(maxsize=1)
     def _kullanici_bilgilerini_al(self) -> SunucuIslemSonucu:
         try:
             LOGGER.debug(f"kullanici_verisi: {self.kullanici_verisi}")
             LOGGER.debug(f"url : {self._urls.UInfo}")
-            resp = requests.get(url=self._urls.UInfo, auth=self.kullanici_giris_verisi)
+            resp = self._req_session.get(url=self._urls.UInfo, auth=self.kullanici_giris_verisi)
             resp_json = resp.json()
             LOGGER.debug(f"resp_json: {resp_json}")
             if resp.status_code == 200:

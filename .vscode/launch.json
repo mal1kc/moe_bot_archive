@@ -5,14 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Module",
+            "name": "start moe_bot",
             "type": "python",
             "request": "launch",
-            "module": "moe_bot",
-            "justMyCode": true,
+            "program": "${workspaceFolder}\\moe_bot_program.py",
             "console": "integratedTerminal",
+            "justMyCode": true,
             "python": "${command:python.interpreterPath}"
         },
+        // {
+        //     "name": "Python: Module",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "module": "moe_bot",
+        //     "justMyCode": true,
+        //     "console": "integratedTerminal",
+        //     "python": "${command:python.interpreterPath}"
+        // },
         {
             "name": "Python: Current File",
             "type": "python",

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 import os
 import sys
 import logging
+import tempfile
+import pathlib
 
 from moe_bot.temel_fonksiyonlar import sozlukeriBirlestir
 from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
@@ -9,12 +11,34 @@ from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D
 try:
     BASE_PATH = sys._MEIPASS  # type: ignore
 except Exception:
-    BASE_PATH = os.path.abspath(".")
+    BASE_PATH = pathlib.Path(__file__).parent.parent.resolve()
 
-UYUMA_SURESI = 2  # Saniye
-GUNLUK_KLASORU = os.path.join(BASE_PATH, "loglar")
+if not (BASE_PATH / "loglar").exists():
+    # makedirs
+    # ignore if exists
+    if not BASE_PATH.exists():
+        BASE_PATH.mkdir(parents=True)
+    (BASE_PATH / "loglar").mkdir()
+
+UYUMA_SURESI = 0.5  # Saniye
+GUNLUK_KLASORU = BASE_PATH / "loglar"
 GUNLUK_SEVIYESI = logging.DEBUG
-ENGEL_KONTROL_SURESI = 2  # Saniye
+if GUNLUK_SEVIYESI == logging.INFO:
+    sys.tracebacklimit = -1
+
+
+ENGEL_KONTROL_SURESI = 1  # Saniye
+MESAJ_GECIKMESI = ENGEL_KONTROL_SURESI + 0.2  # Saniye
+
+TEMP_DIR = pathlib.Path(tempfile.gettempdir()) / "Moe_auto_bot"
+CRED_PATH = TEMP_DIR / "creds.txt"
+
+GUI_LOGO_PATH = BASE_PATH / "arayuz" / "moe_logo.png"
+# GUI_ICON_PATH = BASE_PATH / "arayuz" / "moe_icon.ico"
+GUI_ICON_PATH = GUI_LOGO_PATH
+
+
+GUI_ENTRY_WIDTH = 30
 
 
 @dataclass(frozen=True, order=True)
@@ -34,11 +58,11 @@ class TaramaSabitleri:
 
     kaynak_gorsel_yl_dsn = {
         KaynakTipi.EKMEK.name: "ek_*.png",
-        KaynakTipi.ALTIN.name: "al_*.png",
+        KaynakTipi.ODUN.name: "od_*.png",
+        KaynakTipi.TAS.name: "ta_*.png",
         KaynakTipi.DEMIR.name: "de_*.png",
         KaynakTipi.GUMUS.name: "gu_*.png",
-        KaynakTipi.TAS.name: "ta_*.png",
-        KaynakTipi.ODUN.name: "od_*.png",
+        KaynakTipi.ALTIN.name: "al_*.png",
     }
 
     engel_gorsel_yl_dsn = {
@@ -55,9 +79,9 @@ class TaramaSabitleri:
         "tamam_buton": "tamam_buton*.png",
         "geri_buton": "geri_buton.png",
         "baglanti_yok": "baglanti_yok.png",
+        "devam_buton": "devam_buton.png",
         # "kalkan": "kalkan.png",
         # "devre_disi": "devre_disi.png",
-        # "devam_buton": "devam_buton.png",
     }
 
     oyunui_gorsel_yl_dsn = {
@@ -90,9 +114,21 @@ class TaramaSabitleri:
         engel_gorsel_yl_dsn,
     )
 
-    # SVY_GORSEL_YL = [ 'svy_' + str(i) + '.png' for i in range(1, 12)]
+    # eğer oyun dili görsel diline etki ediyorsa True
+    # etki etmiyorsa False
 
-    # SEFER_GORSEL_YL = [ 'sefer_' + str(i) + '.png' for i in range(0, 7)]
+    # böylece çalışma sırasında etki etmeyenleri imgs/no_lang/{çöz}/{img_desen} yolundan alır
+    # etki edenleri ise imgs/{dil}/{çöz}/{img_desen} yolundan alır
+    # eğer dict içinde bulunmuyorsa False kabul edilir
+
+    GORSEL_YL_DIL_BEYANLARI = {
+        "ODUN": False,
+        "TAS": False,
+        "EKMEK": False,
+        "ALTIN": False,
+        "DEMIR": False,
+        "GUMUS": False,
+    }
 
     EKRAN_BOYUTLARI = {
         "_1366": EkranBoyut(1366, 768),
@@ -118,9 +154,9 @@ class TaramaSabitleri:
             "tamam_buton": Kare(1550, 1150, 1000, 500),
             "geri_buton": Kare(930, 1880, 500, 300),
             "baglanti_yok": Kare(1900, 500, 200, 200),
+            "devam_buton": Kare(430, 1600, 700, 500),
             # "kalkan": Kare(3650, 720, 160, 110),
             # "devre_disi": Kare(1780, 480, 250, 100),
-            # "devam_buton": Kare(430, 1600, 700, 500),
         },
         "_1920": {
             "svy": Kare(925, 160, 235, 140),
@@ -139,9 +175,9 @@ class TaramaSabitleri:
             "tamam_buton": Kare(825, 450, 500, 250),
             "geri_buton": Kare(490, 950, 200, 200),
             "baglanti_yok": Kare(740, 230, 470, 220),
+            "devam_buton": Kare(220, 850, 350, 220),
             # "kalkan": Kare(3650, 720, 160, 110), #değişecek
             # "devre_disi": Kare(1780, 480, 250, 100), #değişecek
-            # "devam_buton": Kare(200, 850, 550, 1030),
         },
         "_1366": {
             "svy": Kare(640, 130, 180, 70),
@@ -160,6 +196,7 @@ class TaramaSabitleri:
             "tamam_buton": Kare(610, 450, 140, 100),  #
             "geri_buton": Kare(300, 650, 200, 100),  #
             "baglanti_yok": Kare(480, 140, 410, 110),  #
+            "devam_buton": Kare(180, 660, 300, 170),
         },
     }
 
@@ -237,30 +274,28 @@ class TaramaSabitleri:
 
     kaynak_eminlikler = {
         "_3840": {
-            "FOOD": 0.8,
-            "WOOD": 0.8,
-            "STONE": 0.8,
-            "IRON": 0.8,
-            "SILVER": 0.8,
-            "GOLD": 0.8,
+            "EKMEK": 0.8,
+            "ODUN": 0.8,
+            "TAS": 0.8,
+            "DEMIR": 0.8,
+            "GUMUS": 0.8,
+            "ALTIN": 0.8,
         },
         "_1920": {
-            # geçici değerler
-            "WOOD": 0.7,
-            "FOOD": 0.7,
-            "STONE": 0.7,
-            "IRON": 0.7,
-            "SILVER": 0.7,
-            "GOLD": 0.7,
+            "EKMEK": 0.7,
+            "ODUN": 0.7,
+            "TAS": 0.7,
+            "DEMIR": 0.7,
+            "GUMUS": 0.7,
+            "ALTIN": 0.7,
         },
         "_1366": {
-            # geçici değerler
-            "WOOD": 0.7,
-            "FOOD": 0.7,
-            "STONE": 0.7,
-            "IRON": 0.7,
-            "SILVER": 0.7,
-            "GOLD": 0.7,
+            "EKMEK": 0.7,
+            "ODUN": 0.7,
+            "TAS": 0.7,
+            "DEMIR": 0.7,
+            "GUMUS": 0.7,
+            "ALTIN": 0.7,
         },
     }
 
@@ -302,9 +337,9 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
             # "kalkan": 0.8,
             # "devre_disi": 0.8,
-            # "devam_buton": 0.8,
         },
         "_1920": {
             "sehir_ikonu": 0.8,
@@ -320,6 +355,7 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
         },
         "_1366": {
             "sehir_ikonu": 0.8,
@@ -335,6 +371,7 @@ class TaramaSabitleri:
             "tamam_buton": 0.8,
             "geri_buton": 0.8,
             "baglanti_yok": 0.8,
+            "devam_buton": 0.8,
         },
     }
 
@@ -349,7 +386,7 @@ class TaramaSabitleri:
         },
         "_1366": {
             "svy": 0.8,
-            "sefer": 0.8,
+            "sefer": 0.9,
         },
     }
 

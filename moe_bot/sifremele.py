@@ -1,8 +1,7 @@
 import hashlib
 
-# TODO: ayarlara tasi
 encoding = "utf-8"
-# TODO: ayarlara tasi
+
 SIFRELEME_SIFRESI = "owko2c0m2130x*o123k".encode(encoding)
 
 

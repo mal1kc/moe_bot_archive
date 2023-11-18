@@ -1,33 +1,23 @@
 import logging
-import time
-from pyautogui import size as screen_size
+
 from collections import namedtuple
 from enum import Enum, auto
+import threading
 
 # -- typing
-import pathlib
-from typing import Optional, Self, Protocol, NamedTuple
-from multiprocessing.synchronize import Event
+from typing import Callable, Optional, NamedTuple
+from threading import Timer
 
 # -- end typing
 
-import multiprocessing
-import functools
 
-import pyautogui
-
-from moe_bot.ayarlar import genel_ayarlar
-
-from .enumlar import EkranBoyutEnum, DilEnum, ModSinyal  # noqa
-from .hatalar import Hata, KullaniciHatasi
-
+from moe_bot.enumlar import DilEnum
 
 Koordinat2D = namedtuple("Koordinat2D", ["x", "y"], defaults=[0, 0])
 
-_GUNLUKCU = logging.getLogger("moe_bot.genel")
+_GUNLUKCU = logging.getLogger()
 
 
-# TODO: move this to moe_gatherer.py
 class KaynakTipi(Enum):
     EKMEK = auto()
     ODUN = auto()
@@ -150,122 +140,22 @@ class KaynakKare(Kare):
         )
 
 
-class GenelAyarlar:
-    __slots__ = ()
-    UYUMA_SURESI: float = genel_ayarlar.UYUMA_SURESI
-    DOSYA_YOLLARI: tuple[str, str] = genel_ayarlar.DOSYA_YOLLARI  # type: ignore
-    EKRAN_BOYUTU: EkranBoyut | None = None
-    FARE_UYUMA_SURESI: float = genel_ayarlar.UYUMA_SURESI / 2
-    KLAVYE_UYUMA_SURESI: float = genel_ayarlar.UYUMA_SURESI / 1.5
-
-    def __init__(self) -> None:
-        "this class works without instance"
-        raise NotImplementedError
-
-    @staticmethod
-    def ayarla(
-        uyuma_suresileri=(genel_ayarlar.UYUMA_SURESI, genel_ayarlar.UYUMA_SURESI / 2, genel_ayarlar.UYUMA_SURESI / 1.5),
-        dosya_yollari=genel_ayarlar.DOSYA_YOLLARI,
-        ekran_boyutu=None,
-    ):
-        uyuma_suresi, fare_uyuma_suresi, klavye_uyuma_suresi = uyuma_suresileri
-
-        GenelAyarlar.UYUMA_SURESI = uyuma_suresi if uyuma_suresi is not None else genel_ayarlar.UYUMA_SURESI
-
-        GenelAyarlar.FARE_UYUMA_SURESI = fare_uyuma_suresi if fare_uyuma_suresi is not None else uyuma_suresi / 2
-
-        GenelAyarlar.KLAVYE_UYUMA_SURESI = klavye_uyuma_suresi if klavye_uyuma_suresi is not None else uyuma_suresi / 1.5
-
-        GenelAyarlar.DOSYA_YOLLARI = dosya_yollari
-
-        GenelAyarlar.EKRAN_BOYUTU = ekran_boyutu if ekran_boyutu is not None else aktif_ekran_boyutu_getir()
-
-    @staticmethod
-    def gorsel_dosya_yolu(gorsel_yolu_oneki: str) -> str:
-        '-> ex: "imgs/{lang}/{resolution}/{file_name}.png"'
-        d_yolu_format = "{base_img_dir}/{lang}/{resolution}/{file_name}.png"
-        gorsel_klasor_yolu = GenelAyarlar.DOSYA_YOLLARI[1]
-        return d_yolu_format.format(
-            base_img_dir=gorsel_klasor_yolu,
-            lang=Diller.aktif_dil.name.lower(),
-            resolution=aktif_ekran_boyutu_getir(),
-            file_name=gorsel_yolu_oneki,
-        )
-
-
-def aktif_ekran_boyutu_getir() -> EkranBoyut:
-    aktif_ekran_boyutu = screen_size()
-    aktif_ekran_boyutu = EkranBoyut(aktif_ekran_boyutu.width, aktif_ekran_boyutu.height)
-    if aktif_ekran_boyutu not in EkranBoyutEnum.__members__.values():
-        raise KullaniciHatasi(f"aktif ekran çözünürlüğü {str(aktif_ekran_boyutu)}, bu çözünürlük desteklenmiyor.")
-    return aktif_ekran_boyutu
-
-
-def aktif_dil_getir() -> DilEnum:
-    return Diller.aktif_dil
-
-
-class BotModu(Protocol):
-    __slots__ = ("_sinyal_alma_knl", "_sinyal_gonderme_knl" + "_process", "_ayarlar") + (
-        # mod specific slots
-    )
-    _mod_ad: str
-    _aktif: Event = multiprocessing.Event()
-
-    def __new__(cls, *args, **kwargs) -> Self:
-        # if not hasattr(cls, "instance"):
-        #     cls.instance = super().__new__(cls)
-        # cls.__init__(*args, **kwargs)
-        # return cls.instance
-        ...
-
-    @functools.cached_property
-    def _gunlukcu(self) -> logging.Logger:
-        ...
-
-    @functools.cached_property
-    def ayarlar(self) -> dict[str, str]:
-        ...
-
-    def __init__(self) -> None:
-        ...
-
-    def _aktifmi(self) -> bool:
-        ...
-
-    def _sinyal_yolla(self, sinyal: int) -> None:
-        ...
-
-    def _sinyal_bekle(self) -> None:
-        ...
-
-    def _sinyal_kontrol(self) -> None:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
-    def process_olustur(self) -> multiprocessing.Process:
-        ...
-
-    def kapali(self) -> bool:
-        ...
-
-    def _aktiflik_yenile(self) -> None:
-        ...
-
-
 class Diller(object):
     __slots__ = []
     _instance = None
+    _instance_kilit = threading.Lock()
     _dil_kitapliklari = {}
     _aktif_dil: DilEnum | None = None
 
     def __new__(cls, dil: DilEnum | None = None) -> "Diller":
         if cls._instance is None:
-            if dil is None:
-                dil = DilEnum.TR
-            cls._instance = super().__new__(cls)
+            with cls._instance_kilit:
+                # Another thread could have created the instance
+                # before we acquired the lock. So check that the
+                # instance is still nonexistent.
+                if not cls._instance:
+                    dil = DilEnum.TR
+                    cls._instance = super().__new__(cls)
         if dil is not None:
             cls.aktif_dil_degistir(dil)
         return cls._instance
@@ -276,8 +166,9 @@ class Diller(object):
 
     @staticmethod
     def aktif_dil_degistir(dil: DilEnum):
-        Diller._aktif_dil = dil
-        Diller._dil_yukle()
+        with Diller._instance_kilit:
+            Diller._aktif_dil = dil
+            Diller._dil_yukle()
 
     @staticmethod
     def _dil_yukle(dil: DilEnum | None = None):
@@ -331,83 +222,27 @@ class Diller(object):
             del sys.modules["moe_bot.lokalizasyon.en"]
 
 
-class GorselYolu(pathlib.Path):
-    __slots__ = ["data"]
+class RepeatedTimer(object):
+    def __init__(self, interval: int | float, function: Callable, *args, **kwargs):
+        self._timer = None
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.is_running = False
+        self.start()
 
-    def gorsel_yukle(self):
-        if not hasattr(self, "data"):
-            if self.exists():
-                try:
-                    self.data = cv2.imread()  # noqa
-                except Exception as exc:
-                    _GUNLUKCU.error(f"dosya yüklenirken bir hata ile karşılaşıldı. hata kodu: {exc}")
-                    KullaniciHatasi("dosyalar yüklenirken bir hata ile karşılaşıldı. hata kodu: 01")
-        return self.data
+    def _run(self):
+        self.is_running = False
+        self.start()
+        self.function(*self.args, **self.kwargs)
 
+    def start(self):
+        if not self.is_running:
+            self._timer = Timer(self.interval, self._run)
+            self._timer.start()
+            self.is_running = True
 
-def gorsel_yolu_oluştur(gorse_yolu_oneki: str) -> GorselYolu:
-    gorsel_klasor_yolu = GenelAyarlar.gorsel_dosya_yolu(gorsel_yolu_oneki=gorse_yolu_oneki)
-    tam_dosya_yolu = gorsel_klasor_yolu + gorse_yolu_oneki + ".png"
-    return GorselYolu(tam_dosya_yolu)
-
-
-def gorseller_yolu_olustur(gorsel_yolu_onekleri: list[str]) -> list[GorselYolu]:
-    return [gorsel_yolu_oluştur(gorse_yolu_oneki) for gorse_yolu_oneki in gorsel_yolu_onekleri]
-
-
-def singleton_(cls):
-    """Decorator to create singleton classes"""
-    instances = {}
-
-    def get_instance(*args, **kwargs):
-        if cls not in instances:
-            instances[cls] = cls(*args, **kwargs)
-        return instances[cls]
-
-    return get_instance
-
-
-class Fare:
-    # TODO: belki silinebilir direkt pyautogui kullanılabilir veya alternatif bir kütüphane
-
-    @staticmethod
-    def sagTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi: int | float | None = None):
-        if uyuma_suresi is None:
-            uyuma_suresi = GenelAyarlar.FARE_UYUMA_SURESI
-        _GUNLUKCU.debug("sağ tıklandı")
-        time.sleep(uyuma_suresi)
-        pyautogui.rightClick(konum)
-        time.sleep(uyuma_suresi)
-
-    @staticmethod
-    def solTikla(konum: Optional[Koordinat2D] = None, uyuma_suresi: int | float | None = None):
-        if uyuma_suresi is None:
-            uyuma_suresi = GenelAyarlar.FARE_UYUMA_SURESI
-        _GUNLUKCU.debug(f"sol tıklanıyor , konum: {str(konum)}")
-        time.sleep(uyuma_suresi)
-        pyautogui.leftClick(konum)
-        time.sleep(uyuma_suresi)
-
-    @staticmethod
-    def hareketEt(konum: Koordinat2D, uyuma_suresi: int | float | None = None):
-        if uyuma_suresi is None:
-            uyuma_suresi = GenelAyarlar.FARE_UYUMA_SURESI
-        _GUNLUKCU.debug(f"fare hareket ettiriliyor , konum: {str(konum)}")
-        time.sleep(uyuma_suresi)
-        pyautogui.moveTo(konum)
-        time.sleep(uyuma_suresi)
-
-
-class Klavye:
-    # TODO: belki silinebilir direkt pyautogui kullanılabilir veya alternatif bir kütüphane
-    @staticmethod
-    def tus_tek(tus: str):
-        pyautogui.press(tus)
-        # eski versioyonda UYUMA_SURESI / 1.5
-        time.sleep(GenelAyarlar.KLAVYE_UYUMA_SURESI)
-
-    @staticmethod
-    def tuslar(tuslar: list[str] | str):
-        if isinstance(tuslar, int):
-            tuslar = str(tuslar)
-        pyautogui.write(tuslar, interval=GenelAyarlar.KLAVYE_UYUMA_SURESI)
+    def stop(self):
+        self._timer.cancel()  # type: ignore
+        self.is_running = False
