@@ -1,5 +1,6 @@
-from moe_bot import main
 import multiprocessing
+
+from moe_bot import main
 
 multiprocessing.freeze_support()
 

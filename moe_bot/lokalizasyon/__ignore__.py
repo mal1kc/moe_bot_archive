@@ -12,10 +12,10 @@ from functools import lru_cache
 def to_dict():
     return {
         "UI": {
-            "TR": "TR",  # example
-            "EN": "EN",  # example
-            "food": "FOOD",  # example
-            "wood": None,  # field needed to be translated
+            "TR": None,
+            "EN": None,
+            "food": None,
+            "wood": None,
             "stone": None,
             "iron": None,
             "silver": None,
@@ -25,6 +25,7 @@ def to_dict():
             "login_btn": None,
             "name_lbl": None,
             "pass_lbl": None,
+            "rem_me_chkbx": None,
             "msgbx_error_title": None,
             "moe_gatherer": None,
             "mod_select_continue_btn": None,
@@ -42,7 +43,6 @@ def to_dict():
             "window_title_login": None,
             "window_title_main": None,
             "window_title_mod_select": None,
-            # -- Error messages
             "login_error_username_too_short_or_long": None,
             "login_error_password_too_short_or_long": None,
             "login_error_connection_error": None,
@@ -54,8 +54,16 @@ def to_dict():
             "login_error_unknown_error": None,
             "resource_selection_error": None,
             "level_selection_warning": None,
-            # -- Information messages
             "bot_start_info": None,
+            "unexpected_error": None,
+            "gatherer_error_screen_resolution_error": None,
         },
-        "IMG_FOLDER": "LANG_SHORT_NAME",  # TR, EN, DE, etc.
+        "IMG_FOLDER": None,
+        "ERROR": {
+            "server_connection_error": None,
+            "server_session_renewal_error_package_not_found": None,
+            "server_session_renewal_error_server_error": None,
+            "server_session_renewal_error_unknown_error": None,
+            "server_session_renewal_error_max_online_user": None,
+        },
     }

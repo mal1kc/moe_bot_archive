@@ -1,9 +1,9 @@
-from dataclasses import dataclass
-import os
-import sys
 import logging
-import tempfile
+import os
 import pathlib
+import sys
+import tempfile
+from dataclasses import dataclass
 
 from moe_bot.temel_fonksiyonlar import sozlukeriBirlestir
 from moe_bot.temel_siniflar import EkranBoyut, Kare, KaynakTipi, Koordinat2D

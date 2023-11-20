@@ -1,3 +1,3 @@
-from multiprocessing.synchronize import Event  # noqa
 from multiprocessing.sharedctypes import SynchronizedBase  # noqa
-from typing import Any, Optional, Protocol, NamedTuple, Self  # noqa
+from multiprocessing.synchronize import Event  # noqa
+from typing import Any, NamedTuple, Optional, Protocol, Self  # noqa

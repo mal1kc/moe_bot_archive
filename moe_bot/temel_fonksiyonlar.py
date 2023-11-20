@@ -1,5 +1,11 @@
 from typing import Any, Optional
 
+from pyautogui import size as _ekranBoyutu
+
+from moe_bot.enumlar import EkranBoyutEnum
+from moe_bot.hatalar import KullaniciHatasi
+from moe_bot.temel_siniflar import EkranBoyut
+
 
 def tipVeyaNone(tip: type, degisken: Any) -> Optional[Any]:
     """
@@ -52,3 +58,11 @@ def sozlukBirlestir(sozluk1: dict, sozluk2: dict):
     else:
         sonuc = {**sozluk1, **sozluk2}
     return sonuc
+
+
+def aktifEkranBoyutu() -> EkranBoyutEnum:
+    aktif_ekran_boyutu = _ekranBoyutu()
+    aktif_ekran_boyutu = EkranBoyut(aktif_ekran_boyutu.width, aktif_ekran_boyutu.height)
+    if aktif_ekran_boyutu not in [ekran_boyut.value for ekran_boyut in EkranBoyutEnum]:
+        raise KullaniciHatasi("0x03 -> cannot find suitable screen size")
+    return aktif_ekran_boyutu

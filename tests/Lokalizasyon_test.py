@@ -1,6 +1,7 @@
 import pytest
-from moe_bot.temel_siniflar import Diller, DilEnum
-from moe_bot.lokalizasyon import tr, en  # noqa: F401
+
+from moe_bot.lokalizasyon import en, tr  # noqa: F401
+from moe_bot.temel_siniflar import DilEnum, Diller
 
 
 @pytest.fixture(autouse=True)

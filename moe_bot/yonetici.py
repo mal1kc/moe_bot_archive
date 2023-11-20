@@ -1,22 +1,21 @@
 import ctypes
 import functools
 import logging
-from multiprocessing import RLock
 import multiprocessing
+from multiprocessing import RLock
 from time import sleep
 
 import pynput
 import win32api
 import win32con
+
+from moe_bot.gunlukcu import Gunlukcu  # noqa
 from moe_bot.hatalar import KullaniciHatasi
-
-from moe_bot.sunucu_islemleri import SunucuIslem, SUNUCU_OTURUM_SURESI, SunucuIslemSonucu
-
-# from .engelislem import EngelTarayiciİslem
-from .engelislem import EngelTarayiciİslem
-from .gunlukcu import Gunlukcu  # noqa
-from .moe_gatherer import TaramaIslem
-from .temel_siniflar import ModSinyal, KaynakTipi
+from moe_bot.mod.moe_engelislem import EngelIslemModulu
+from moe_bot.mod.moe_gatherer_islem import MoeGatherer, KaynakTipi
+from moe_bot.sunucu_islemleri import SUNUCU_OTURUM_SURESI, SunucuIslem, SunucuIslemSonucu
+from moe_bot.enumlar import IslemSinyal
+from moe_bot.temel_siniflar import Diller, RepeatedTimer
 
 
 class BotIslemYonetici:
@@ -38,14 +37,14 @@ class BotIslemYonetici:
             self.s_islem = sunucu_islem
             self.sunucu_o_kontrol_zamanlayici = RepeatedTimer(SUNUCU_OTURUM_SURESI, self._oturum_kontrol)
             self.tarama_islem_argumanları = (kaynak_tipleri, svyler, maks_sefer_sayisi)
-            self.tarama_islem = TaramaIslem(
+            self.tarama_islem = MoeGatherer.TaramaIslem(
                 kaynak_tipleri=self.tarama_islem_argumanları[0],
                 svyler=self.tarama_islem_argumanları[1],
                 maks_sefer_sayisi=self.tarama_islem_argumanları[2],
             )
-            self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, ModSinyal.DevamEt)
-            self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, ModSinyal.MesajUlasmadi)
-            self.engel_tarayici_islem = EngelTarayiciİslem()
+            self._sinyal_knl1 = multiprocessing.Value(ctypes.c_short, IslemSinyal.DevamEt)
+            self._sinyal_knl2 = multiprocessing.Value(ctypes.c_short, IslemSinyal.MesajUlasmadi)
+            self.engel_tarayici_islem = EngelIslemModulu()
             # self._process_listesi = []
             self._process_olusturma_kilidi = RLock()
             self.klavye_dinleyici = pynput.keyboard.Listener(on_press=self.tusKontrol)
@@ -81,12 +80,12 @@ class BotIslemYonetici:
                 break
             if hasattr(self, "tarama_islem_process") and hasattr(self, "engel_tarayici_islem_process"):
                 if self.engel_tarayici_islem_process.is_alive():
-                    if self.engel_tarayici_islem._sinyal_gonderme.value == ModSinyal.Sonlandir:
+                    if self.engel_tarayici_islem._sinyal_gonderme.value == IslemSinyal.Sonlandir:
                         return
                 if self.tarama_islem_process.is_alive():
-                    if self.tarama_islem._sinyal_gonderme.value == ModSinyal.FailSafe:
-                        self.engel_tarayici_islem._sinyal_gonderme.value = ModSinyal.Bekle
-            if self._sinyal_knl1 == ModSinyal.Sonlandir:
+                    if self.tarama_islem._sinyal_gonderme.value == IslemSinyal.FailSafe:
+                        self.engel_tarayici_islem._sinyal_gonderme.value = IslemSinyal.Bekle
+            if self._sinyal_knl1 == IslemSinyal.Sonlandir:
                 self._on_exit(win32con.CTRL_CLOSE_EVENT)
 
     def tusKontrol(self, key):
@@ -174,7 +173,7 @@ class BotIslemYonetici:
             win32con.CTRL_SHUTDOWN_EVENT,
         ):
             self._gunlukcu.debug("program kapatılıyor")
-            self._sinyal_knl1.value = ModSinyal.Sonlandir
+            self._sinyal_knl1.value = IslemSinyal.Sonlandir
             sleep(3)
             if hasattr(self, "tarama_islem_process"):
                 if self.tarama_islem_process.is_alive():

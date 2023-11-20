@@ -2,14 +2,11 @@ import multiprocessing
 import sys
 import threading
 import time
-from moe_bot.yonetici import BotIslemYonetici  # noqa
-
 
 from moe_bot import arayuz
-
-from moe_bot.temel_siniflar import DilEnum, Diller  # noqa
-
 from moe_bot.hatalar import Hata  # noqa
+from moe_bot.temel_siniflar import DilEnum, Diller  # noqa
+from moe_bot.yonetici import BotIslemYonetici  # noqa
 
 CHILD_WAIT_TIME = 2
 
@@ -29,7 +26,7 @@ def _tum_tread_ve_alt_processleri_oldur():
                 try:
                     thread.join(timeout=CHILD_WAIT_TIME)
                 except RuntimeError:
-                    print(f"f* you {thread.name}")
+                    pass  # thread zaten ölmüş
         for process in tum_processler:
             process.join(timeout=CHILD_WAIT_TIME)
     except Exception:

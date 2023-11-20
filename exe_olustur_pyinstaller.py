@@ -1,5 +1,6 @@
-import PyInstaller.__main__
 from distutils.dir_util import copy_tree
+
+import PyInstaller.__main__
 
 
 def main():

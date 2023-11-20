@@ -1,30 +1,26 @@
+from __future__ import annotations
+
 import logging
-
-from collections import namedtuple
-from enum import Enum, auto
 import threading
-
-# -- typing
-from typing import Callable, Optional, NamedTuple
-from threading import Timer
+from collections import namedtuple
 
 # -- end typing
+from pathlib import Path
+from threading import Timer
 
+# -- typing
+from typing import Callable, NamedTuple, Optional
+
+import pyautogui
 
 from moe_bot.enumlar import DilEnum
+from moe_bot.hatalar import Hata
 
 Koordinat2D = namedtuple("Koordinat2D", ["x", "y"], defaults=[0, 0])
 
+GorselYolu = str | Path
+
 _GUNLUKCU = logging.getLogger()
-
-
-class KaynakTipi(Enum):
-    EKMEK = auto()
-    ODUN = auto()
-    TAS = auto()
-    DEMIR = auto()
-    GUMUS = auto()
-    ALTIN = auto()
 
 
 class KullaniciGirisVerisi(NamedTuple):
@@ -61,7 +57,7 @@ class EkranBoyut(NamedTuple):
         return f"{self.genislik}x{self.yukseklik}"
 
 
-class KaynakKare(Kare):
+class GelismisKare(Kare):
     def __new__(
         cls,
         x: int | Kare,
@@ -93,10 +89,10 @@ class KaynakKare(Kare):
         if Kare.gecersizMi(self.koordinat):  # type: ignore
             raise Hata(f"Geçersiz kare: {self.koordinat}")
 
-        _GUNLUKCU.debug(f"KaynakKare oluşturuldu: {self},{id(self)}")
+        _GUNLUKCU.debug(f"GelismisKare oluşturuldu: {self},{id(self)}")
 
     def __str__(self) -> str:
-        return f"KaynakKare({self.koordinat.x},{self.koordinat.y},{self.koordinat.genislik},{self.koordinat.yukseklik})"
+        return f"GelismisKare({self.koordinat.x},{self.koordinat.y},{self.koordinat.genislik},{self.koordinat.yukseklik})"
 
     def __repr__(self) -> str:
         return self.__str__()
@@ -138,6 +134,56 @@ class KaynakKare(Kare):
             self.koordinat.x + self.koordinat.genislik / 2,
             self.koordinat.y + self.koordinat.yukseklik / 2,
         )
+
+
+class Klavye:
+    _lock = threading.Lock()
+
+    @staticmethod
+    def tuslariBas(tus: str | list[str], aralik: float = 0.1):
+        with Klavye._lock:
+            pyautogui.press(tus, interval=aralik)
+
+
+class Fare:
+    _lock = threading.Lock()
+
+    @staticmethod
+    def tikla(konum: Koordinat2D | None | Kare, sol_tik: bool = True):
+        if konum is Kare:
+            konum = konum.merkez()
+        with Fare._lock:
+            if sol_tik:
+                pyautogui.click(konum.x, konum.y)
+            else:
+                pyautogui.rightClick(konum.x, konum.y)
+
+    @staticmethod
+    def sagTikla(konum: Koordinat2D | None | Kare):
+        Fare.tikla(konum, False)
+
+    @staticmethod
+    def hareketEt(konum: Koordinat2D | None | Kare):
+        if konum is Kare:
+            konum = konum.merkez()
+        with Fare._lock:
+            pyautogui.moveTo(konum.x, konum.y)
+
+    @staticmethod
+    def hareketEtRelatif(x: int, y: int):
+        with Fare._lock:
+            pyautogui.moveRel(x, y)
+
+    @staticmethod
+    def kaydir(miktar: int = -1000, x: int | None = None, y: int | None = None):
+        with Fare._lock:
+            pyautogui.scroll(miktar, x, y)
+
+    @staticmethod
+    def konumu_normalize_et(konum: Koordinat2D | None | Kare) -> Koordinat2D:
+        if konum is Kare:
+            konum = konum.merkez()
+        return konum
 
 
 class Diller(object):

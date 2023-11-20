@@ -1,9 +1,9 @@
-from moe_bot.moe_gatherer import KaynakFare, Varsayilanlar
+from moe_bot.mod.moe_gatherer_islem import MoeGatherer
 from moe_bot.temel_siniflar import Koordinat2D
 
 
 def test_kisitli_bolgeler():
-    for tiklama_kistilamasi in Varsayilanlar().TIKLAMA_KISITLAMALARI:
+    for tiklama_kistilamasi in MoeGatherer.ayarlar.TIKLAMA_KISITLAMALARI:
         for k, v in tiklama_kistilamasi.items():
             assert isinstance(v, int)
             assert v >= 0
@@ -19,7 +19,7 @@ def test_bolge_kisitlimi_1366():
         Koordinat2D(550, 170),
         Koordinat2D(410, 510),
     ]
-    kaynak_fare = KaynakFare()
+    kaynak_fare = MoeGatherer.KaynakFare()
     kaynak_fare.tiklama_kisitlamalari = [
         {"x_taban": 0, "x_tavan": 400, "y_taban": 0, "y_tavan": 440},
         {"y_taban": 560},

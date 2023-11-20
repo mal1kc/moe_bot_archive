@@ -1,12 +1,13 @@
 import enum
 
-class ModSinyal(enum.IntEnum):
-    DevamEt = 0
-    Bekle = 1
-    Sonlandir = 2
-    MesajUlasmadi = 3
-    MesajUlasti = 4
-    FailSafe = 5
+
+class IslemSinyal(enum.IntEnum):
+    DEVAM_ET = 0
+    BEKLE = 1
+    SONLANDIR = 2
+    MESAJ_ULASMADI = 3
+    MESAJ__LASTII = 4
+    FAILSAFE = 5
 
 
 class EkranBoyutEnum(enum.Enum):
@@ -18,3 +19,23 @@ class EkranBoyutEnum(enum.Enum):
 class DilEnum(enum.StrEnum):
     TR = "tr"
     EN = "en"
+
+
+class SelectibleModEnum(enum.Enum):
+    moe_gatherer = enum.auto()
+    # moe_raid = auto()
+    # moe_camp = auto()
+    # moe_arena = auto()
+
+
+class GUIPagesEnum(enum.Enum):
+    LOGIN = enum.auto()
+    MOD_SELECT = enum.auto()
+    MOE_GATHERER = enum.auto()
+
+
+class ModEnum(enum.Enum):
+    MOE_GATHERER = enum.auto()
+    # MOE_RAID = auto()
+    # MOE_CAMP = auto()
+    # MOE_ARENA = auto()

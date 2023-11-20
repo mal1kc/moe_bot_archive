@@ -1,6 +1,5 @@
 from typing import Callable
 
-
 try:
     import psutil
 
@@ -30,9 +29,9 @@ def memory_usage(func: Callable) -> Callable:
 @memory_usage
 def main():
     print("mem usage in start: ", current_memory_usage())
-    from dataclasses import dataclass
     import os
     import sys
+    from dataclasses import dataclass
 
     sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     print("memory usage after stdlib imports: ", current_memory_usage())

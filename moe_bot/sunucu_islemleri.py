@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 from enum import IntEnum, StrEnum, auto
 from functools import lru_cache
-
 from logging import getLogger
-import requests
-from .hatalar import BaglantiHatasi, Hata
 
+import requests
+
+from .hatalar import BaglantiHatasi, Hata
 from .sifremele import hazirlanmis_sifre_olustur_pass_hash
 from .temel_siniflar import Diller, KullaniciGirisVerisi
 

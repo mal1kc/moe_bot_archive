@@ -131,7 +131,7 @@
         "editor.codeActionsOnSave": {
             "source.fixAll": true
         },
-        "editor.defaultFormatter": "ms-python.python"
+        "editor.defaultFormatter": "charliermarsh.ruff"
     },
     "python.testing.pytestArgs": [
         "tests"

@@ -6,19 +6,18 @@ from datetime import datetime
 from typing import Any
 
 if __name__ == "__main__":
-    GUNLUK_KLASORU = "loglar"
+    GUNLUK_KLASOR = "loglar"
 
     try:
-        print(f"{GUNLUK_KLASORU} klasorunu temizliyorum.")
-        for gunluk in os.listdir(GUNLUK_KLASORU):
-            os.remove(f"{GUNLUK_KLASORU}/{gunluk}")
+        print(f"{GUNLUK_KLASOR} klasorunu temizliyorum.")
+        for gunluk in os.listdir(GUNLUK_KLASOR):
+            os.remove(f"{GUNLUK_KLASOR}/{gunluk}")
     except Exception as e:
         print(f"hata meydana geldi {e}")
 else:
-    from .sabilter import GUNLUK_KLASORU, GUNLUK_SEVIYESI
+    from moe_bot.ayarlar.genel_ayarlar import GUNLUK_KLASOR, GUNLUK_SEVIYESI
 
     # Hata => circular import hatası alabiliriz
-
     # gunlukcu = logging.getLogger('gunlukcu')
     """
     __qualname__ : classın ismini alıyor
@@ -30,12 +29,12 @@ else:
             # self.stream_handlr =logging.StreamHandler()
 
             # self.addHandler(self.stream_handlr)
-            if not os.path.exists(GUNLUK_KLASORU):
-                os.mkdir(GUNLUK_KLASORU)
+            if not os.path.exists(GUNLUK_KLASOR):
+                os.mkdir(GUNLUK_KLASOR)
             if level == logging.DEBUG:
                 self.file_handlr = logging.handlers.RotatingFileHandler(
                     # f"{GUNLUK_KLASORU}/{name}_{_suan.hour}_{_suan.minute}.log",
-                    f"{GUNLUK_KLASORU}/{name}.log",
+                    f"{GUNLUK_KLASOR}/{name}.log",
                     mode="w",
                     maxBytes=1024 * 1024 * 10,  # 10 MB,
                     backupCount=10,

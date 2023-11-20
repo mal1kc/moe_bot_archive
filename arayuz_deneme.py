@@ -1,5 +1,5 @@
-from moe_bot.temel_siniflar import Diller, DilEnum
 from moe_bot import arayuz
+from moe_bot.temel_siniflar import DilEnum, Diller
 
 # def print_window_size(event):
 #     print("Window size: {}x{}".format(event.width, event.height))
