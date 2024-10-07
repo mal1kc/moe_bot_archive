@@ -1,0 +1,12 @@
+opencv-python
+pyautogui
+pynput
+pylightxl
+pywin32
+requests
+pillow
+pytest
+ruff-lsp
+isort
+black
+pre-commit

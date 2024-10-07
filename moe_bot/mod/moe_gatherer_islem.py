@@ -15,8 +15,8 @@ from moe_bot.ayarlar import Ayarlar
 from moe_bot.enumlar import IslemSinyal
 from moe_bot.gunlukcu import Gunlukcu  # noqa
 from moe_bot.hatalar import Hata, KullaniciHatasi
+from moe_bot.tarayicilar import Tarayici
 from moe_bot.mod.moe_genel import DosyaIslemleri
-from moe_bot.tarayicilar import PyAutoTarayici
 from moe_bot.temel_fonksiyonlar import ifItsNone, tipVeyaNone
 from moe_bot.temel_siniflar import Fare, GelismisKare, Kare, Klavye, Koordinat2D
 from moe_bot.types import Event
@@ -65,7 +65,7 @@ class MoeGatherer:
         return MoeGatherer.ayarlar.ekstra_ayarlar["tiklama_noktalari"][nokta_adi]  # type: ignore
 
     @staticmethod
-    def tarayiciGetir(t_adi: str) -> tuple[str, float, Optional[Kare]]:
+    def tarayiciGetir(t_adi: str) -> Tarayici | CokluTarayici:
         return MoeGatherer.ayarlar.tarayicilar[t_adi]  # type: ignore
 
     @functools.cached_property
@@ -134,7 +134,7 @@ class MoeGatherer:
     class BolgeDegistirici(Fare):
         """
         Fare sınıfından türetilmiş BolgeDegistirici sınıfı\n
-        -> Fare sınıfının solTikla ve sagTikla metotlarını kullanır\n
+        -> Fare sınıfının tikla ve sagTikla metotlarını kullanır\n
         -> BolgeTablosu sınıfından bolge koordinatlarını alır\n
         -> GelismisKare sınıfından kareler oluşturur\n
         -> buyutec ikonuna tıklar\n
@@ -172,13 +172,13 @@ class MoeGatherer:
             ve x y koordinatlarını kullanarak bolgeyi değiştirir\n
             """
             bul_ikonu_konum = MoeGatherer.tiklamaNoktasiGetir("bul_ikon")
-            self.solTikla(bul_ikonu_konum)
+            self.tikla(bul_ikonu_konum)
             Klavye.tuslariBas((self.bolge_tablosu[self.hedef_bolge_index].x))
             bul_y_konum = MoeGatherer.tiklamaNoktasiGetir("bul_y")
-            self.solTikla(bul_y_konum)
+            self.tikla(bul_y_konum)
             Klavye.tuslariBas((self.bolge_tablosu[self.hedef_bolge_index].y))
             buyutec_ikonu_konum = MoeGatherer.tiklamaNoktasiGetir("buyutec_ikon")
-            self.solTikla(buyutec_ikonu_konum)
+            self.tikla(buyutec_ikonu_konum)
             self._sonrakiBolge()
 
         def __repr__(self) -> str:
@@ -257,14 +257,17 @@ class MoeGatherer:
         ) -> None:
             if type(kaynak_tipi) is KaynakTipi:
                 self.ornek_dler: list[str] = DosyaIslemleri.gorselleriGetir(
-                    gorsel_id=str(kaynak_tipi.name + "_svy"), sirala=True
+                    glob_dsn=str(kaynak_tipi.name + "_svy"), sirala=True
                 )  # siralamak önemli
             else:
-                self.ornek_dler: list[str] = DosyaIslemleri.gorselleriGetir(gorsel_id="svy", sirala=True)
+                self.ornek_dler: list[str] = DosyaIslemleri.gorselleriGetir(glob_dsn="svy", sirala=True)
 
             # siralama = True -> svy_10.png, svy_9.png, ... svy_1.png
-            if bolge is not None and Kare.gecersizMi(bolge):
-                bolge = MoeGatherer.taramaBolgesiGetir("svy")
+
+            # ! devre dışı bırakıldı çünkü tarayici \
+            # ! # MoeGatherer.ayarlar da belirtilmiştir
+            # if bolge is not None and Kare.gecersizMi(bolge):
+            #     bolge = MoeGatherer.taramaBolgesiGetir("svy")
 
             self.eminlik = eminlik
             super().__init__(bolge=bolge, eminlik=eminlik, gri_tarama=False, ornek_dler=self.ornek_dler, isim="SvyTarayici")
@@ -277,11 +280,14 @@ class MoeGatherer:
             eminlik: Optional[float] = None,
             bolge: Optional[Kare] = None,
         ) -> None:
-            if bolge is not None and Kare.gecersizMi(bolge):
-                bolge = MoeGatherer.taramaBolgesiGetir("sefer")
+            # ! devre dışı bırakıldı çünkü tarayici \
+            # ! # MoeGatherer.ayarlar da belirtilmiştir
+            # if bolge is not None and Kare.gecersizMi(bolge):
+            #     bolge = MoeGatherer.taramaBolgesiGetir("sefer")
+
             super().__init__(
-                bolge=ifItsNone(bolge, MoeGatherer.taramaBolgesiGetir("sefer")),
-                eminlik=ifItsNone(eminlik, MoeGatherer.eminlikGetir("sefer")),
+                bolge=bolge,
+                eminlik=ifItsNone(eminlik, 0.9),
                 gri_tarama=True,  # FIXME gri_tarama icin varsayılanlar sozlugu
                 ornek_dler=DosyaIslemleri.gorselleriGetir("sefer"),
                 isim="SeferTarayici",
@@ -322,6 +328,9 @@ class MoeGatherer:
                     MoeGatherer._gunlukcu.debug("sefer sayisi maksimum azalması bekleniyor")  # type: ignore
                     Fare.hareketEt((400, 200))  # type: ignore
                     sefer_sayisi = self._ekranTara()
+                    if sefer_sayisi is None:
+                        # KONTROL_ETMEK_LAZIM: bu sorun oluşturabilir
+                        sefer_sayisi = 0
                     Fare.hareketEt((600, 400))  # type: ignore
                 self._seferMenusuAcKapat()
                 return True
@@ -331,14 +340,9 @@ class MoeGatherer:
         def __init__(self, maks_sefer_sayisi: Optional[int] = None, svyler: tuple[int, ...] = ()) -> None:
             super().__init__()
 
-            self.tiklama_kisitlamalari = MoeGatherer.TIKLAMA_KISITLAMALARI  # FIXME: TIKLAMA_KISITLAMALARI
+            self.tiklama_kisitlamalari = MoeGatherer.ayarlar.tiklama_kisitlamalari
             # self.svy_tarayici = SvyTarayici(bolge=taramaBolgesiGetir("svy"))
-            self.isgal_durumu = PyAutoTarayici(
-                DosyaIslemleri.gorselGetir("isgal_durumu"),
-                bolge=MoeGatherer.taramaBolgesiGetir("isgal_durumu"),
-                eminlik=MoeGatherer.eminlikGetir("isgal_durumu"),
-                gri_tarama=True,
-            )
+            self.isgal_durumu_tarayici = MoeGatherer.tarayiciGetir("isgal_durumu")
 
             # FIXME geçici olarak iptal edilmiştir.
 
@@ -417,9 +421,9 @@ class MoeGatherer:
                 MoeGatherer._gunlukcu.debug("sefer kontrol false dondu tiklama islemi yarım bırakılıyor.")  # type: ignore
                 return
 
-            self.solTikla(tiklama_konumu)
+            self.tikla(tiklama_konumu)
 
-            isgal_durumu_kare = self.isgal_durumu.ekranTara()
+            isgal_durumu_kare = self.isgal_durumu_tarayici.ekranTara()
             MoeGatherer._gunlukcu.debug(f"{isgal_durumu_kare=}")  # type: ignore
             if isgal_durumu_kare:
                 if len(self.svyler) == 0 | len(self.svyler) > 13:
@@ -439,9 +443,9 @@ class MoeGatherer:
             """
             basması gereken butonların konumlarını tespit eder ve tıklayarak sefer yollar
             """
-            self.solTikla(self.isgal_butonu_konumu)
-            self.solTikla(self.isgal_duzeni_konumu)
-            self.solTikla(self.isgal_butonu2_konumu)
+            self.tikla(self.isgal_butonu_konumu)
+            self.tikla(self.isgal_duzeni_konumu)
+            self.tikla(self.isgal_butonu2_konumu)
 
         def _islemDevamEtsinMi(self) -> bool:
             """instance override edilecek"""
@@ -629,14 +633,14 @@ class MoeGatherer:
                     sleep(5)  # 5 saniye bekle ve tekrar dene
                 except Exception as exc:
                     MoeGatherer._gunlukcu.debug(f"Exception yakalandı, {exc}")
-                    self._sinyal_gonderme.value = IslemSinyal.DUR
+                    self._sinyal_gonderme.value = IslemSinyal.SONLANDIR
 
         def acikmi(self) -> bool:
             #  __tarama_islemi_gunlukcu().debug(
             #     f'tarama işlemi çalışmaya devam edecek mi kontrol edildi: {not self.acikmi_event.is_set()=}'
             # )   # type: ignore
             MoeGatherer._gunlukcu.debug(f"sinyal kontrol : {self._sinyal_alma.value=} {self._sinyal_gonderme.value=}")
-            while self._sinyal_alma.value == IslemSinyal.DUR:
+            while self._sinyal_alma.value == IslemSinyal.SONLANDIR:
                 self._sinyal_gonderme.value = IslemSinyal.MESAJ_ULASTI
                 sleep(3)
                 if self._sinyal_alma.value == IslemSinyal.DEVAM_ET:

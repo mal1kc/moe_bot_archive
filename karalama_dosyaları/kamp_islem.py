@@ -1,37 +1,55 @@
-import os
-import time
+import ctypes
 from glob import glob
+import multiprocessing
 from pathlib import Path
-from time import sleep
-from typing import Any, Optional
+import threading
 
+from time import sleep
+import time
+from typing import Any, Optional
 import cv2
+import os
+
+
 import numpy
 import pylightxl as xl
+from PIL import Image
+from pyautogui import (
+    click,
+    locateOnScreen,
+    moveTo,
+    press,
+    rightClick,
+    scroll,
+    center,
+    mouseDown,
+    mouseUp,
+)
+from pyautogui import write
 from ayarlar import (
-    TIKLAMA_KISITLAMALARI,
-    KampSaldiriAyarlar,
     KampTaramaAyarlar,
+    KampSaldiriAyarlar,
     Kare,
-    Koordinat2D,
     MevsimTipiEnum,
     OnSvyEnum,
-    SabitTiklama,
     TumEminlikler,
     TumTaramaBolgeleri,
     ekran_goruntusu_al,
+    Koordinat2D,
+    SabitTiklama,
+    TIKLAMA_KISITLAMALARI,
 )
-from PIL import Image
-from pyautogui import center, click, locateOnScreen, mouseDown, mouseUp, moveTo, press, rightClick, scroll, write
+from enumlar import ModSinyal
 
-# class IsimliDizi:
-#     def __init__(self, isim: str, dizi) -> None:
-#         self.isim = isim
-#         self.iterable = dizi
 
-#     def __iter__(self):
-#         for item in self.iterable:
-#             yield item
+class IsimliDizi:
+    def __init__(self, isim: str, dizi) -> None:
+        self.isim = isim
+        self.iterable = dizi
+
+    def __iter__(self):
+        for item in self.iterable:
+            yield item
 
 
 class MultiImageTemplateMatcher:
@@ -49,6 +67,8 @@ class MultiImageTemplateMatcher:
 
     def match(self, haystack_img: numpy.array) -> tuple[int, int, int, int] | None:  # type: ignore
         """
+        NOT: Verilen ana resmin içindeki konuma göre template konumu dönüyor.
+
         Tries to find the needle images in the haystack image
         - If no match found in needle image tries the next needle image
         - If no match found in any needle image, returns None
@@ -102,7 +122,7 @@ class MultiImageTemplateMatcher:
 
 
 class DosyaIslemleri:
-    directory_path = ".\img\_3840/"
+    directory_path = ".\\img\\_3840/"
 
     # Get list of all files in current directory
     directory = os.listdir(path=directory_path)
@@ -200,7 +220,7 @@ class BolgeDegistir:
             )
             if self.sekme_buton is not None:
                 click(self.sekme_buton)
-                moveTo(3000, 1200)
+                moveTo(3000, 1200)  # FIXME : sabitler değişçek
                 self.rast_yazi = locateOnScreen(
                     self.rastgele_resim,
                     region=TumTaramaBolgeleri["rastgele_bolge"],
@@ -209,30 +229,32 @@ class BolgeDegistir:
                 )
                 while self.rast_yazi is None:
                     scroll(-10000)
-                    self.rast_yazi2 = locateOnScreen(
+                    rast_yazi2 = locateOnScreen(
                         self.rastgele_resim,
                         region=TumTaramaBolgeleri["rastgele_bolge"],
                         confidence=TumEminlikler["rastgele_eminlik"],
                         grayscale=self.gri_tarama,
                     )
-                    if self.rast_yazi2 is not None:
-                        self.kullan_buton = locateOnScreen(
+                    if rast_yazi2 is not None:
+                        kullan_buton = locateOnScreen(
                             self.kullan_resim,
+                            # FIXME : sabitler değişçek
                             region=(
-                                self.rast_yazi2[0] - 100,
-                                self.rast_yazi2[1],
+                                rast_yazi2[0] - 100,
+                                rast_yazi2[1],
                                 1200,
                                 500,
                             ),
                             confidence=TumEminlikler["kullan_buton_eminlik"],
                             grayscale=self.gri_tarama,
                         )
-                        if self.kullan_buton is None:
+                        if kullan_buton is None:
                             self.satin_al = locateOnScreen(
                                 self.satin_al_resim,
+                                # FIXME : sabitler değişçek
                                 region=(
-                                    self.rast_yazi2[0] - 100,
-                                    self.rast_yazi2[1],
+                                    rast_yazi2[0] - 100,
+                                    rast_yazi2[1],
                                     1500,
                                     500,
                                 ),
@@ -241,12 +263,13 @@ class BolgeDegistir:
                             )
                             if self.satin_al is not None:
                                 click(self.satin_al)
-                                self.kullan_buton = (
+                                kullan_buton = (
                                     locateOnScreen(
                                         self.kullan_resim,
+                                        # FIXME : sabitler değişçek
                                         region=(
-                                            self.rast_yazi2[0] - 100,
-                                            self.rast_yazi2[1],
+                                            rast_yazi2[0] - 100,
+                                            rast_yazi2[1],
                                             1200,
                                             500,
                                         ),
@@ -277,9 +300,9 @@ class BolgeTablosu:
             bitis = baslangic + self.bolge_sayisi
 
             for adim in range(baslangic, bitis):
-                bolge_x = (bolge_tablosu.address(f"{self.baslangic_konumlari.x[0]}{adim}"),)
+                bolge_x = bolge_tablosu.address(f"{self.baslangic_konumlari.x[0]}{adim}")
 
-                bolge_y = (bolge_tablosu.address(f"{self.baslangic_konumlari.y[0]}{adim}"),)
+                bolge_y = bolge_tablosu.address(f"{self.baslangic_konumlari.y[0]}{adim}")
 
                 self.bolgeler.append(Koordinat2D(bolge_x, bolge_y))
 
@@ -308,16 +331,13 @@ class Fare:
 
 
 class Klavye:
-    @staticmethod
-    def tus_tek(tus: str):
-        press(tus)
-        sleep(0.75)
+    _lock = threading.Lock()
 
     @staticmethod
-    def tuslar(tuslar: list[str] | str):
-        if isinstance(tuslar, int):
-            tuslar = str(tuslar)
-        write(tuslar, interval=0.5)
+    def tuslariBas(tus: str | list[str], aralik: float = 0.4):
+        with Klavye._lock:
+            tus = "".join(str(tus))
+            write(tus, interval=aralik)
 
 
 class BolgeDegistirici(Fare):
@@ -325,7 +345,7 @@ class BolgeDegistirici(Fare):
     Fare sınıfından türetilmiş BolgeDegistirici sınıfı\n
      -> Fare sınıfının solTikla ve sagTikla metotlarını kullanır\n
      -> BolgeTablosu sınıfından bolge koordinatlarını alır\n
-     -> GelismisKare sınıfından kareler oluşturur\n
+     -> KaynakKare sınıfından kareler oluşturur\n
      -> buyutec ikonuna tıklar\n
      -> BolgeTablosunda kaldigi yerden devam eder\n
      -> bolgeDegistir metodu ile bolge değiştirir\n
@@ -364,10 +384,12 @@ class BolgeDegistirici(Fare):
         """
         bul_ikonu_konum = (1550, 80)
         self.solTikla(bul_ikonu_konum)
-        Klavye.tuslar(tuslar=self.bolge_tablosu[self.hedef_bolge_index].x)
+        sleep(0.4)
+        Klavye.tuslariBas(self.bolge_tablosu[self.hedef_bolge_index].x)
         bul_y_konum = (2050, 350)
         self.solTikla(bul_y_konum)
-        Klavye.tuslar(tuslar=self.bolge_tablosu[self.hedef_bolge_index].y)
+        sleep(0.1)
+        Klavye.tuslariBas(self.bolge_tablosu[self.hedef_bolge_index].y)
         buyutec_ikonu_konum = (2300, 350)
         self.solTikla(buyutec_ikonu_konum)
         self._sonrakiBolge()
@@ -383,37 +405,54 @@ class BolgeDegistirici(Fare):
 
 
 class KaydirmaYontemleri:
+    kaydirma_sonrasi_sure = 0.3
+
+    @staticmethod
+    def ekranSabitle():
+        mouseDown(SabitTiklama["inaktif_bolge1"])
+        moveTo(SabitTiklama["inaktif_bolge2"])
+        mouseUp()
+
     @staticmethod
     def _kareSol():
         mouseDown(SabitTiklama["sol_nokta"], button="left")
         moveTo(SabitTiklama["sag_nokta"])
-        sleep(0.1)
+        moveTo(SabitTiklama["sag_nokta2"])
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
         mouseUp(button="left")
-        sleep(0.5)
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
+        KaydirmaYontemleri.ekranSabitle()
 
     @staticmethod
     def _kareSag():
         mouseDown(SabitTiklama["sag_nokta"], button="left")
         moveTo(SabitTiklama["sol_nokta"])
-        sleep(0.1)
+        moveTo(SabitTiklama["sol_nokta2"])
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
         mouseUp(button="left")
-        sleep(0.5)
+
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
+        KaydirmaYontemleri.ekranSabitle()
 
     @staticmethod
     def _kareUst():
         mouseDown(SabitTiklama["ust_nokta"], button="left")
         moveTo(SabitTiklama["ust_bitis"])
-        sleep(0.1)
+        moveTo(SabitTiklama["ust_bitis2"])
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
         mouseUp(button="left")
-        sleep(0.5)
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
+        KaydirmaYontemleri.ekranSabitle()
 
     @staticmethod
     def _kareAlt():
         mouseDown(SabitTiklama["alt_nokta"], button="left")
         moveTo(SabitTiklama["alt_bitis"])
-        sleep(0.1)
+        moveTo(SabitTiklama["alt_bitis2"])
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
         mouseUp(button="left")
-        sleep(0.5)
+        # sleep(KaydirmaYontemleri.kaydirma_sonrasi_sure)
+        KaydirmaYontemleri.ekranSabitle()
 
 
 class CokluTarayici:
@@ -422,123 +461,229 @@ class CokluTarayici:
         bolge: Kare | None,
         eminlik: float,
         gri_tarama: bool,
-        ornek_ds_yl: list[str],
+        ornek_dosya_dizileri: list[IsimliDizi],
         isim: str = "İsimsiz",
     ) -> None:
         self.isim = isim
         self.bolge = bolge
         self.eminlik = eminlik
         self.gri_tarama = gri_tarama
-        self.ornek_ds_yl = ornek_ds_yl
+        self.ornek_dosya_dizileri = ornek_dosya_dizileri
+
+    def _islemDevamEtsinMi(self):
+        """instance sirasinda uzerine yazilacak"""
+        return True
 
     def _ekranTara(self) -> int | None:
         """
-        ilk bulunan örnek dosyanın adının sonundaki sayıyı döndürür\n
+        ilk bulunan örnek dosyanın indeksinin liste uzunluğundan çıkarılmış halini döndürür\n
         bulunamazsa None döndürür\n
         """
-        for ornek_ds_yl in self.ornek_ds_yl:
-            kare = locateOnScreen(
-                ornek_ds_yl,
-                region=self.bolge,
-                confidence=self.eminlik,
-                grayscale=self.gri_tarama,
-            )
-            if kare is not None:
-                return int(ornek_ds_yl.split(".")[-2].split("_")[-1])
+        for ornek_dosya_dizisi in self.ornek_dosya_dizileri:
+            for ornek_dosyasi in ornek_dosya_dizisi:
+                islem_devam_etsin_mi = self._islemDevamEtsinMi()
+                if not islem_devam_etsin_mi:
+                    return None
+                kare = locateOnScreen(
+                    ornek_dosyasi,
+                    region=self.bolge,
+                    confidence=self.eminlik,
+                    grayscale=self.gri_tarama,
+                )
+                if kare is not None:
+                    return ornek_dosya_dizisi.isim
         return None
 
 
-class SeviyeTarayici(CokluTarayici):
-    def __init__(self) -> None:
-        eminlik = TumEminlikler["svy_eminlik"]
+# class SeviyeTarayici(CokluTarayici):
+#     def __init__(self) -> None:
+#         eminlik = TumEminlikler["svy_eminlik"]
 
-        ornek_ds_yl: list[str] = DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["svy"])
+#         ornek_ds_yl: list[str] = DosyaIslemleri.gorselleriGetir(
+#             KampTaramaAyarlar["svy"]
+#         )
 
-        bolge = TumTaramaBolgeleri["seviye"]
+#         bolge = TumTaramaBolgeleri["seviye"]
 
-        super().__init__(
-            bolge=bolge,
-            eminlik=eminlik,
-            gri_tarama=False,
-            ornek_ds_yl=ornek_ds_yl,
-            isim="SeviyeTarayici",
-        )
+#         super().__init__(
+#             bolge=bolge,
+#             eminlik=eminlik,
+#             gri_tarama=False,
+#             ornek_ds_yl=ornek_ds_yl,
+#             isim="SeviyeTarayici",
+#         )
 
-    def svyKontrol(self, svy) -> bool:
-        """
-        açılan kamp sayfasınının en üstündeki seviyenin ön seviye ile aynı olup olmadığını kontrol eder.
-        aynı olup olmadığına göre true ya da false (bool) bool
-        """
-        taramasonucu = self._ekranTara()
-        return taramasonucu == svy
+#     def svyKontrol(self, svy) -> bool:
+#         """
+#         açılan kamp sayfasınının en üstündeki seviyenin ön seviye ile aynı olup olmadığını kontrol eder.
+#         aynı olup olmadığına göre true ya da false (bool) bool
+#         """
+#         taramasonucu = self._ekranTara()
+#         return taramasonucu == svy
 
 
-class SeferTarayici(CokluTarayici):
+###############################################################################
+# class SeferBoncukTaryici(CokluTarayici):
+#     def __init__(
+#         self,
+#         maks_sefer_boncuk: int,
+#     ) -> None:
+#         isim: str = "SeferBoncukTarayici"
+#         bolge = TumTaramaBolgeleri["sefer_boncuk_bolge"]
+#         eminlik = TumEminlikler["sefer_eminlik"]
+#         gri_tarama = True
+#         # ornek_ds_yl = DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["sefer"])
+#         ornek_dosya_dizileri = [
+#             IsimliDizi(
+#                 isim=sefer_boncuk_sayisi,
+#                 dizi=DosyaIslemleri.gorselleriGetir(
+#                     KampTaramaAyarlar["sefer_boncuk_sayisi_resim"].format(
+#                         sefer_boncuk_sayisi=sefer_boncuk_sayisi
+#                     )
+#                 ),
+#             )
+#             for sefer_boncuk_sayisi in range(maks_sefer_boncuk + 1)
+#         ]
+
+
+#         super().__init__(bolge, eminlik, gri_tarama, ornek_dosya_dizileri, isim)
+
+#         self.sefer_boncuk_sayisi = maks_sefer_boncuk
+#         self.sefer_menusu_acik_mi = None
+#         self.bekleme_suresi = 1
+
+#     def seferBoncukSayisiGetir(self) -> int :
+#         """
+#         -> kırmızı boncuktan sefer sayısının kaç olduğunu getirir.
+#         """
+#         sefer_boncuk_sayisi = self._ekranTara()
+#         sayac = 0
+#         while sefer_boncuk_sayisi is None and sayac < 3:
+#             sefer_boncuk_sayisi = self._ekranTara()
+#             sayac = sayac + 1
+#         return sefer_boncuk_sayisi if sefer_boncuk_sayisi is not None else 1 #FIXME
+
+#     def seferMaksBoncukKontrol(self) -> bool :
+#         """
+#         -> maksimum sefer sayısını, seferleri açmadan boncuk ile takip eder.
+#         """
+#         sefer_boncuk_sayisi = self.seferBoncukSayisiGetir()
+#         while sefer_boncuk_sayisi > 0:
+#             sefer_boncuk_sayisi = self.seferBoncukSayisiGetir()
+#             moveTo(1250, 1000)
+#             sleep(0.5)
+#             moveTo(900, 1300)
+#             if SeferTarayici._islemDevamEtsinMi() is False:
+#                 return False
+#         KampFare.kalemiGoster()
+#         self._seferMenusuAcKapat()
+#         return True
+
+
+#########################################################################
+
+
+class SeferTarayici:
     def __init__(
         self,
         maks_sefer_sayisi: int,
     ) -> None:
-        isim: str = "SeferTarayici"
-        bolge = TumTaramaBolgeleri["sefer_bolge"]
+        # Ortak değişkenler
         eminlik = TumEminlikler["sefer_eminlik"]
         gri_tarama = True
-        ornek_ds_yl = DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["sefer"])
 
-        super().__init__(bolge, eminlik, gri_tarama, ornek_ds_yl, isim)
+        # Ana Sefer in değişkenleri
+        ana_sefer_bolge = TumTaramaBolgeleri["sefer_bolge"]
+        ana_sefer_ornek_dosya_dizileri = [
+            IsimliDizi(
+                isim=sefer_sayisi,
+                dizi=DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["sefer_sayisi_resim"].format(sefer_sayisi=sefer_sayisi)),
+            )
+            for sefer_sayisi in range(maks_sefer_sayisi + 1)
+        ]
+
+        self.ana_sefer_tarayici = CokluTarayici(ana_sefer_bolge, eminlik, gri_tarama, ana_sefer_ornek_dosya_dizileri)
 
         self.maks_sefer_sayisi = maks_sefer_sayisi
-        self.sefer_menusu_acik_mi = None
-        self.bekleme_suresi = 1
+        self.ana_sefer_menusu_acik_mi = None
+        self.ana_bekleme_suresi = 1
+
+        # Boncuk Sefer in değişkenleri
+        boncuk_sefer_bolge = TumTaramaBolgeleri["sefer_boncuk_bolge"]
+        boncuk_sefer_ornek_dosya_dizileri = [
+            IsimliDizi(
+                isim=sefer_boncuk_sayisi,
+                dizi=DosyaIslemleri.gorselleriGetir(
+                    KampTaramaAyarlar["sefer_boncuk_sayisi_resim"].format(sefer_boncuk_sayisi=sefer_boncuk_sayisi)
+                ),
+            )
+            for sefer_boncuk_sayisi in range(1, maks_sefer_sayisi + 1)
+        ]
+
+        self.sefer_boncuk_tarayici = CokluTarayici(boncuk_sefer_bolge, eminlik, gri_tarama, boncuk_sefer_ornek_dosya_dizileri)
 
     def _islemDevamEtsinMi(self) -> bool:
+        """
+        instance override edilecek
+        """
         return True
 
-    def _seferMenusuAcKapat(self):
-        press("z")
+    def _anaSeferMenusuAcKapat(self):
+        press("z", interval=0.5)
 
-    def seferSayisiGetir(self) -> int | None:
+    def seferSayisiGetir(self, boncuk=True) -> int:
         """
         -> sefer sayısının kaç olduğunu döner
         ->bulamazsa none döner.
         """
+        if boncuk:
+            sefer_sayisi = self.sefer_boncuk_tarayici._ekranTara()
+            return sefer_sayisi if sefer_sayisi is not None else 0  # FIXME
 
-        sefer_sayisi = self._ekranTara()
+        # deaktif cünkü kampfarede bu kullanılmıyor.
+        # if not self._islemDevamEtsinMi():
+        #     return None
+
+        sefer_sayisi = self.ana_sefer_tarayici._ekranTara()
         sayac = 0
         while sefer_sayisi is None and sayac < 3:
-            self._seferMenusuAcKapat()
-            sefer_sayisi = self._ekranTara()
+            self._anaSeferMenusuAcKapat()
+            sefer_sayisi = self.ana_sefer_tarayici._ekranTara()
             sayac = sayac + 1
 
-        return sefer_sayisi
+        return sefer_sayisi if sefer_sayisi is not None else 1  # FIXME
 
-    def seferMaksKontrol(self) -> bool:
+    def seferMaksKontrol(self, boncuk: bool = True) -> bool:
         """
         -> eğer sefer maks ise kodu bekletip sefer sayısının azalmasını bekler
         """
-        sefer_sayisi = self.seferSayisiGetir()
-        while sefer_sayisi >= self.maks_sefer_sayisi:
-            sefer_sayisi = self.seferSayisiGetir()
-            moveTo(920, 320)
+        sefer_sayisi = self.seferSayisiGetir(boncuk)
+        while sefer_sayisi == self.maks_sefer_sayisi:
+            sefer_sayisi = self.seferSayisiGetir(boncuk)
+            moveTo(900, 350)
             sleep(0.5)
-            moveTo(1200, 700)
-            if self._islemDevamEtsinMi() is False:
-                return False
-        # FIXME: bulamazsa da true döndüğünden dolayı iyileştirme için sefer sayısını bulmalı
+            moveTo(1300, 750)
+            # if self._islemDevamEtsinMi() is False:
+            #     return False
+        if not boncuk:
+            self._anaSeferMenusuAcKapat()
         return True
 
-    def seferMinKontrol(self) -> bool:
+    def seferMinKontrol(self, boncuk: bool = False) -> bool:
         """
         -> sefer sayısı 0 olana kadar bekler
         """
         # FIXME: seferMinKontrol
-        sefer_sayisi = self.seferSayisiGetir()
-        while sefer_sayisi == 0:
-            sefer_sayisi = self.seferSayisiGetir()
+        sefer_sayisi = self.seferSayisiGetir(boncuk)
+        while sefer_sayisi > 0:
+            sefer_sayisi = self.seferSayisiGetir(boncuk)
             moveTo(1250, 1000)
             sleep(0.5)
             moveTo(900, 1300)
-            if self._islemDevamEtsinMi() is False:
-                return False
+            # if self._islemDevamEtsinMi() is False:
+            #     return False
+        if not boncuk:
+            self._anaSeferMenusuAcKapat()
         return True
 
 
@@ -608,6 +753,8 @@ class KampKare(Kare):
 
     def onSeviyeTaramaAlaniGetir(self) -> Kare:
         sol_ust_x = int(self.x - (self.genislik * 2))
+        if sol_ust_x < 0:
+            sol_ust_x = 0
         sol_ust_y = int(self.y)
         genislik = int(self.genislik * 4)
         yukseklik = int(self.yukseklik * 3)
@@ -615,36 +762,40 @@ class KampKare(Kare):
         return Kare(sol_ust_x, sol_ust_y, genislik, yukseklik)
 
 
-class Soguma(CokluTarayici):  #  ENGEL TARAYICI İÇİNE GİDECEK
-    def __init__(
-        self,
-        bolge: Kare | None,
-        eminlik: float,
-        gri_tarama: True,
-    ) -> None:
-        self.bolge = bolge
-        self.eminlik = eminlik
-        self.gri_tarama = gri_tarama
+# class Soguma(CokluTarayici):  #  ENGEL TARAYICI İÇİNE GİDECEK
+#     def __init__(
+#         self,
+#         bolge: Kare | None,
+#         eminlik: float,
+#         gri_tarama: True,
+#     ) -> None:
+#         self.bolge = bolge
+#         self.eminlik = eminlik
+#         self.gri_tarama = gri_tarama
 
-        self.soguma_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["soguma_resim"])
-        self.tamam_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["tamam_buton_resim"])
+#         self.soguma_resim = DosyaIslemleri.gorselGetir(
+#             KampSaldiriAyarlar["soguma_resim"]
+#         )
+#         self.tamam_resim = DosyaIslemleri.gorselGetir(
+#             KampSaldiriAyarlar["tamam_buton_resim"]
+#         )
 
-    def sogumaKontrol(self):
-        self.sogumada = locateOnScreen(
-            self.soguma_resim,
-            region=TumTaramaBolgeleri["pop_up_bolge"],
-            confidence=TumEminlikler["pop_up_eminlik"],
-            grayscale=self.gri_tarama,
-        )
-        if self.sogumada is not None:
-            self.tamam_kontrol = locateOnScreen(
-                self.tamam_resim,
-                region=TumTaramaBolgeleri["tamam_buton_bolge"],
-                confidence=TumEminlikler["tamam_buton_eminlik"],
-                grayscale=self.gri_tarama,
-            )
-            if self.tamam_kontrol is not None:
-                click(self.tamam_kontrol)
+#     def sogumaKontrol(self):
+#         self.sogumada = locateOnScreen(
+#             self.soguma_resim,
+# -            region=TumTaramaBolgeleri["pop_up_bolge"],
+#             confidence=TumEminlikler["pop_up_eminlik"],
+#             grayscale=self.gri_tarama,
+#         )
+#         if self.sogumada is not None:
+#             self.tamam_kontrol = locateOnScreen(
+#                 self.tamam_resim,
+# -               region=TumTaramaBolgeleri["tamam_buton_bolge"],
+#                 confidence=TumEminlikler["tamam_buton_eminlik"],
+#                 grayscale=self.gri_tarama,
+#             )
+#             if self.tamam_kontrol is not None:
+#                 click(self.tamam_kontrol)
 
 
 class OnSeviyeTarayici:
@@ -655,6 +806,7 @@ class OnSeviyeTarayici:
                 MultiImageTemplateMatcher(
                     isim=on_svy.value,
                     needle_image_paths=DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["onsvy_ad"].format(onsvy_val=on_svy.value)),
+                    threshold=TumEminlikler["onsvy_eminlik"],
                 ),
             )
 
@@ -666,53 +818,206 @@ class OnSeviyeTarayici:
                 tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
                 tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
             ]
+            print(f"tarama_alani: {tarama_alani}")
+            print(f"kırpılmış ekran_g : genislik -> {screenshot_crp.shape[1]}, yukseklik -> {screenshot_crp.shape[0]}")
             onsvy_kare = onsvy_template_matcher.match(screenshot_crp)
             if onsvy_kare is not None:
                 return onsvy_template_matcher.isim
         return None
 
+    def svyTaraThreaded(self, tarama_alani: Kare) -> OnSvyEnum | None:
+        buldum_etkinlik = threading.Event()
+        buldum_etkinlik.clear()
+        bulunan = multiprocessing.Queue(maxsize=1)
 
-#####---------###########-----------##################-------------------################
+        def _tara(func, fixed_ret, *aargs: tuple):
+            if buldum_etkinlik.is_set():
+                return
+            sonuc = func(*aargs)
+            if sonuc is not None:
+                nonlocal bulunan
+                bulunan.put_nowait(fixed_ret)
+                buldum_etkinlik.set()
+
+        ekran_g = ekran_goruntusu_al()
+        ekran_krp = ekran_g[
+            tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+            tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+        ]
+
+        threads = []
+        for onsvy_template_matcher in self.template_matchers:
+            thread = threading.Thread(
+                target=_tara,
+                args=(
+                    onsvy_template_matcher.match,
+                    onsvy_template_matcher.isim,
+                    ekran_krp,
+                ),
+            )
+            thread.start()
+            threads.append(thread)
+
+        while not buldum_etkinlik.is_set():
+            for thread in threads:
+                thread.join(0.1)
+
+        if bulunan.qsize() > 0:
+            return bulunan.get()
+        return None
 
 
 class MevsimTara:
-    def __init__(self, mevsimler: tuple[MevsimTipiEnum]) -> None:
-        self.template_matchers: list[MultiImageTemplateMatcher] = []
-        for mevsim in mevsimler:
-            self.template_matchers.append(
-                MultiImageTemplateMatcher(
-                    isim=mevsim.value,
-                    needle_image_paths=DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["mvsm"].format(onsvy_val=mevsim.value)),
-                ),
-            )
+    def __init__(self, mevsim: MevsimTipiEnum) -> None:
+        self.mvsm_template_matcher = MultiImageTemplateMatcher(
+            isim=mevsim.value,
+            needle_image_paths=DosyaIslemleri.gorselleriGetir(KampTaramaAyarlar["mevsim"].format(mvsm_nm=mevsim.name)),
+            threshold=0.75,
+        )
+        self.carpi_ikonu_dosya = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["cikiskamp_resim"])
+        self.cikis_bina_dosya = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["cikis_bina_resim"])
+        self.isin_kontrol_dosya = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["isinlanma_resim"])
 
-    def mvsmTaraVeIsinlan(self, tarama_alani: Kare) -> MevsimTipiEnum | None:
-        for mvsm_template_matcher in self.template_matchers:
-            screenshot: numpy.array[int, int, int] = ekran_goruntusu_al()
-            # screenshot = [y,x]
+    def mvsmTaraVeIsinlan(self, tarama_alani: Kare | None = None) -> MevsimTipiEnum | None:
+        if tarama_alani is None:
             tarama_alani = TumTaramaBolgeleri["mevsim_bolge"]
-            screenshot_crp = screenshot[
-                tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
-                tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
-            ]
-            mvsm_kare = mvsm_template_matcher.match(screenshot_crp)
-            if mvsm_kare is not None:
-                # return mvsm_template_matcher.isim
-                # #FIXME return olarak mevsimin adı dönüyor ancak burası tıklamaya uygunluğunu dönecek ve ona göre ışınlanılacak.
-                click(center(mvsm_kare))
-                isin_kontrol = locateOnScreen(
-                    DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["isinlanma_resim"]),
-                    region=TumTaramaBolgeleri["isinlanma_bolge"],
-                    confidence=TumEminlikler["isinlanma_eminlik"],
+
+        screenshot: numpy.array[int, int, int] = ekran_goruntusu_al()
+        # screenshot = [y,x]
+        screenshot_crp = screenshot[
+            tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+            tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+        ]
+        mvsm_kare = self.mvsm_template_matcher.match(screenshot_crp)
+        if mvsm_kare is not None:
+            # sınırlı alan içerisinde bulunan template in koordinatlarını normal ekran boyutuna göre ayarlama
+            mvsm_kare = Kare(
+                mvsm_kare[0] + tarama_alani.x,
+                mvsm_kare[1] + tarama_alani.y,
+                mvsm_kare[2],
+                mvsm_kare[3],
+            )
+            # return mvsm_template_matcher.isim
+            # FIXME return olarak mevsimin adı dönüyor ancak \
+            # # burası tıklamaya uygunluğunu dönecek ve ona göre ışınlanılacak.
+            click(center(mvsm_kare))
+            sleep(0.5)
+            isin_kontrol = locateOnScreen(
+                self.isin_kontrol_dosya,
+                region=TumTaramaBolgeleri["isinlanma_bolge"],
+                confidence=TumEminlikler["isinlanma_eminlik"],
+                grayscale=True,
+            )
+            if isin_kontrol is not None:
+                click(center(isin_kontrol))
+                sleep(0.5)
+
+                carpi_kontrol = locateOnScreen(
+                    self.carpi_ikonu_dosya,
+                    region=TumTaramaBolgeleri["pop_up_cikis_bolge"],
+                    confidence=TumEminlikler["pop_up_eminlik"],
                     grayscale=True,
                 )
-                if isin_kontrol is not None:
-                    click(center(isin_kontrol))
+                if carpi_kontrol is not None:
+                    click(center(carpi_kontrol))
+                    sleep(0.1)
 
-        return None  # FIXME None dönmemesi gereiyor. ışınlanacak yer bulana kadar taramaya devam.
+                    if tarama_alani is None:
+                        tarama_alani = TumTaramaBolgeleri["mevsim_bolge"]
 
+                    screenshot: numpy.array[int, int, int] = ekran_goruntusu_al()
+                    # screenshot = [y,x]
+                    screenshot_crp = screenshot[
+                        tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+                        tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+                    ]
+                    mvsm_kare = self.mvsm_template_matcher.match(screenshot_crp)
+                    if mvsm_kare is not None:
+                        # sınırlı alan içerisinde bulunan template in koordinatlarını normal ekran boyutuna göre ayarlama
+                        mvsm_kare = Kare(
+                            mvsm_kare[0] + tarama_alani.x,
+                            mvsm_kare[1] + tarama_alani.y,
+                            mvsm_kare[2],
+                            mvsm_kare[3],
+                        )
+                        # return mvsm_template_matcher.isim #
+                        # FIXME return olarak mevsimin adı dönüyor ancak \
+                        # # burası tıklamaya uygunluğunu dönecek ve ona göre ışınlanılacak.
+                        click(center(mvsm_kare))
+                        sleep(0.5)
 
-#####---------###########-----------##################-------------------################
+                self.cikis_bina_kontrol = locateOnScreen(
+                    self.cikis_bina_dosya,
+                    region=TumTaramaBolgeleri["cikis_bina_bolge"],
+                    confidence=TumEminlikler["cikis_bina_eminlik"],
+                    grayscale=True,
+                )
+                if self.cikis_bina_kontrol is not None:
+                    click(center(self.cikis_bina_kontrol))
+                    sleep(0.1)
+
+                    if tarama_alani is None:
+                        tarama_alani = TumTaramaBolgeleri["mevsim_bolge"]
+
+                    screenshot: numpy.array[int, int, int] = ekran_goruntusu_al()
+                    # screenshot = [y,x]
+                    screenshot_crp = screenshot[
+                        tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+                        tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+                    ]
+                    mvsm_kare = self.mvsm_template_matcher.match(screenshot_crp)
+                    if mvsm_kare is not None:
+                        # sınırlı alan içerisinde bulunan template in koordinatlarını normal ekran boyutuna göre ayarlama
+                        mvsm_kare = Kare(
+                            mvsm_kare[0] + tarama_alani.x,
+                            mvsm_kare[1] + tarama_alani.y,
+                            mvsm_kare[2],
+                            mvsm_kare[3],
+                        )
+
+                        click(center(mvsm_kare))
+                        sleep(0.5)
+
+            else:
+                rightClick()
+
+                if tarama_alani is None:
+                    tarama_alani = TumTaramaBolgeleri["mevsim_bolge"]
+
+                screenshot: numpy.array[int, int, int] = ekran_goruntusu_al()
+                # screenshot = [y,x]
+                screenshot_crp = screenshot[
+                    tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+                    tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+                ]
+                mvsm_kare = self.mvsm_template_matcher.match(screenshot_crp)
+                if mvsm_kare is not None:
+                    # sınırlı alan içerisinde bulunan template in koordinatlarını normal ekran boyutuna göre ayarlama
+                    mvsm_kare = Kare(
+                        mvsm_kare[0] + tarama_alani.x,
+                        mvsm_kare[1] + tarama_alani.y,
+                        mvsm_kare[2],
+                        mvsm_kare[3],
+                    )
+                    click(center(mvsm_kare))
+                    sleep(0.5)
+
+            print(mvsm_kare)
+            moveTo(mvsm_kare.x, mvsm_kare.y)
+
+            isin_kontrol = locateOnScreen(
+                self.isin_kontrol_dosya,
+                region=TumTaramaBolgeleri["isinlanma_bolge"],
+                confidence=TumEminlikler["isinlanma_eminlik"],
+                grayscale=True,
+            )
+            if isin_kontrol is not None:
+                click(center(isin_kontrol))
+                sleep(0.1)
+
+                return True
+
+        return False
 
 
 class KampFare:
@@ -724,18 +1029,25 @@ class KampFare:
         )
         self.musama_aktif_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["musama_aktif_resim"])
         self.musama_liste_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["musama_liste_resim"])
-        self.cikiskamp_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["cikiskamp_resim"])
-        self.hizli_saldir = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["hizli_saldir_resim"])
+        self.popup_carpi_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["cikiskamp_resim"])
+        # self.hizli_saldir = DosyaIslemleri.gorselGetir(
+        #     KampSaldiriAyarlar["hizli_saldir_resim"]
+        # )
         self.satin_al_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["satin_al_resim"])
         self.kullan_resim = DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["kullan_buton_resim"])
         self.kalemi_goster_matcher = MultiImageTemplateMatcher(
             isim="_kalemiGoster",
-            needle_image_paths=[DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["kalemi_goster.png"])],
+            needle_image_paths=[DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["kalemi_goster_resim"])],
             threshold=0.8,
         )
         self.saldir_buton_matcher = MultiImageTemplateMatcher(
             isim="m",
             needle_image_paths=[DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["saldir_buton_resim"])],
+            threshold=0.8,
+        )
+        self.hizli_saldir_matcher = MultiImageTemplateMatcher(
+            isim="_hizliSaldir",
+            needle_image_paths=[DosyaIslemleri.gorselGetir(KampSaldiriAyarlar["hizli_saldir_resim"])],
             threshold=0.8,
         )
 
@@ -744,7 +1056,14 @@ class KampFare:
         self.onsvy_tarayici = onseviye_tarayici
 
         self.musama_sure_kontrol = 0
-        self.ilk_saldiri = False
+        self.ilk_saldiri_yapildimi = False
+
+    def _menudeyimSinyaliYolla(self, giris=True):
+        """
+        instance uzerine yazilacak
+        arg= giris: bool
+        """
+        return
 
     def _bolge_kisitlimi(self, tıklama_konumu: Koordinat2D) -> bool:
         """
@@ -811,42 +1130,48 @@ class KampFare:
         saldiri_kontrol = self.saldir_buton_matcher.match(ornek_resim)
 
         if saldiri_kontrol is None:
+            self._menudeyimSinyaliYolla(giris=True)
             click(SabitTiklama["saldir_sayac"])
-            self.musama_liste_kontrol = locateOnScreen(
+            sleep(0.23)
+            musama_liste_kontrol = locateOnScreen(
                 self.musama_liste_resim,
-                region=TumTaramaBolgeleri["musama_liste_resim"],
-                confidence=TumEminlikler,
+                region=TumTaramaBolgeleri["musama_liste_bolge"],
+                confidence=TumEminlikler["musama_liste_eminlik"],
                 grayscale=True,
             )
-            if self.musama_liste_kontrol is not None:
-                click(center(self.musama_liste_kontrol))
-                self.kullan_btn_kontrol = locateOnScreen(
+            if musama_liste_kontrol is not None:
+                kullan_btn_kontrol = locateOnScreen(
                     self.kullan_resim,
                     region=TumTaramaBolgeleri["musama_kullan_bolge"],
                     confidence=TumEminlikler["kullan_buton_eminlik"],
                     grayscale=True,
                 )
-                if self.kullan_btn_kontrol is not None:
-                    click(center(self.kullan_btn_kontrol))
+                if kullan_btn_kontrol is not None:
+                    click(center(kullan_btn_kontrol))
+                    sleep(0.2)
                     self.musama_sure_kontrol = time.time()
                 else:
-                    self.satin_al_buton_kontrol = locateOnScreen(
+                    satin_al_buton_kontrol = locateOnScreen(
                         self.satin_al_resim,
                         region=TumTaramaBolgeleri["satin_al_resim"],
                         confidence=TumEminlikler["satin_al_eminlik"],
                         grayscale=True,
                     )
-                    if self.satin_al_buton_kontrol is not None:
-                        click(center(self.satin_al_buton_kontrol))
-                        self.kullan_btn_kontrol = locateOnScreen(
+                    if satin_al_buton_kontrol is not None:
+                        click(center(satin_al_buton_kontrol))
+                        sleep(0.1)
+                        kullan_btn_kontrol = locateOnScreen(
                             self.kullan_resim,
                             region=TumTaramaBolgeleri["kullan_resim"],
                             confidence=TumEminlikler["kullan_buton_eminlik"],
                             grayscale=True,
                         )
-                        if self.kullan_btn_kontrol is not None:
-                            click(center(self.kullan_btn_kontrol))
+                        if kullan_btn_kontrol is not None:
+                            click(center(kullan_btn_kontrol))
+                            sleep(0.1)
                             self.musama_sure_kontrol = time.time()
+
+        self._menudeyimSinyaliYolla(giris=False)
 
     def _musamaAktifKontrol(self) -> bool:
         """
@@ -870,30 +1195,47 @@ class KampFare:
         """
         açılan kamp sayfasından çıkış yapmak için kullanılır.
         """
-        self.cikiskamp_resim_kontrol = locateOnScreen(
-            self.cikiskamp_resim,
-            region=TumTaramaBolgeleri["cikiskamp_resim"],
-            confidence=TumTaramaBolgeleri["cikiskamp_bolge"],
+        cikiskamp_resim_kontrol = locateOnScreen(
+            self.popup_carpi_resim,
+            region=TumTaramaBolgeleri["cikiskamp_bolge"],
+            confidence=TumEminlikler["cikiskamp_eminlik"],
             grayscale=True,
         )
-        if self.cikiskamp_resim_kontrol is not None:
-            click(center(self.cikiskamp_resim_kontrol))
+        if cikiskamp_resim_kontrol is not None:
+            click(center(cikiskamp_resim_kontrol))
 
-    def _kalemiGoster(self):
+    def _sogumaKontrol(self):
+        # TODO: cikis kamp ile birleşebilir
+        sogumada_carpi = locateOnScreen(
+            self.popup_carpi_resim,
+            region=TumTaramaBolgeleri["pop_up_cikis_bolge"],
+            confidence=TumEminlikler["pop_up_eminlik"],
+            grayscale=True,
+        )
+        if sogumada_carpi is not None:
+            click(center(sogumada_carpi))
+
+    def kalemiGoster(self):
         """
-        ->Tarama yapılmadan önce kaleyi ekranda ortalar.
+        ->kaleyi ekranda ortalar.
         """
-        self.kalemi_goster_resim_kontrol = ekran_goruntusu_al()
-        self.tarama_alani = TumTaramaBolgeleri["kalemi_goster_bolge"]
-        ornek_resim = self.kalemi_goster_resim_kontrol[
-            self.tarama_alani.y : self.tarama_alani.y + self.tarama_alani.yukseklik,
-            self.tarama_alani.x : self.tarama_alani.x + self.tarama_alani.genislik,
+        kalemi_goster_resim_kontrol = ekran_goruntusu_al()
+        tarama_alani = TumTaramaBolgeleri["kalemi_goster_bolge"]
+        ornek_resim = kalemi_goster_resim_kontrol[
+            tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+            tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
         ]
-        self.loc = self.kalemi_goster_matcher.match(ornek_resim)
-        if self.loc is not None:
-            click(center(self.loc))
+        loc = self.kalemi_goster_matcher.match(ornek_resim)
+        if loc is not None:
+            tiklama_konumu = Kare(
+                loc[0] + tarama_alani.x,
+                loc[1] + tarama_alani.y,
+                loc[2],
+                loc[3],
+            )
+            click(center(tiklama_konumu))
 
-    def kampSaldiri(self, bulunan_kamp_karesi: KampKare):
+    def kampSaldiri(self, bulunan_kamp_karesi: KampKare) -> bool:
         """
         ->bulunan kamp karenin altındaki  karesi taranıp uygun olan seviyeler içindki görsellerden
             -> görsel bulunursa tıklama yapılıp hızlı saldırı yapılacak.
@@ -901,22 +1243,45 @@ class KampFare:
 
         tarama_alani = bulunan_kamp_karesi.onSeviyeTaramaAlaniGetir()
         bolge_kisitlimi = self._bolge_kisitlimi(bulunan_kamp_karesi.merkez())
+
         if bolge_kisitlimi:
             return False
-        if self.sefer_tarayici.seferMaksKontrol():
-            seviye = self.onsvy_tarayici.svyTara(tarama_alani)
-            if seviye is not None:
+
+        onseviye = self.onsvy_tarayici.svyTara(tarama_alani)
+        if onseviye is not None:
+            if self.sefer_tarayici.seferMaksKontrol():  # FIXME
+                # menü açlıdı (kamp menüsü)
                 click(bulunan_kamp_karesi.merkez())
                 sleep(0.4)
 
-                # menü açlıdı (kamp menüsü)
-
-                if self._musamaAktifKontrol() is False and self.ilk_saldiri:
+                if self._musamaAktifKontrol() is False and self.ilk_saldiri_yapildimi:
                     self._musamaAktiflestir()
+                    sleep(0.1)
 
-                # tikla
-                click(SabitTiklama["hizli_saldiri"])
-                self.ilk_saldiri = True
+                # hizli saldiri tıklama
+                hizli_saldir_resim_kontrol = ekran_goruntusu_al()
+                tarama_alani = TumTaramaBolgeleri["hizli_saldir_bolge"]
+                ornek_resim = hizli_saldir_resim_kontrol[
+                    tarama_alani.y : tarama_alani.y + tarama_alani.yukseklik,
+                    tarama_alani.x : tarama_alani.x + tarama_alani.genislik,
+                ]
+                loc = self.hizli_saldir_matcher.match(ornek_resim)
+                if loc is not None:
+                    tiklama_konumu = Kare(
+                        loc[0] + tarama_alani.x,
+                        loc[1] + tarama_alani.y,
+                        loc[2],
+                        loc[3],
+                    )
+                    click(center(tiklama_konumu))
+                else:
+                    self._cikisKamp()
+
+                sleep(0.1)
+                self._sogumaKontrol()
+                self.ilk_saldiri_yapildimi = True
+                return True
+        return False
 
         # FIXME tıklama öncesi veya sonrası ihtiyaca göre _musamaAktifKontrol
         # FIXME self.onseviye_tarayici kullanılıp seviye belirlenecek ve ona göre tıklama yapılacak
@@ -930,6 +1295,7 @@ class KampTarayici:
     def __init__(self, kamp_fare: KampFare | None = None) -> None:
         cascade_xml = DosyaIslemleri.cascadeGetir(KampTaramaAyarlar["kamp_tip_cascade"])
         self.CascadeClassifier = cv2.CascadeClassifier(cascade_xml)
+        self.tarama_bolgesi: Kare = TumTaramaBolgeleri["kamp_tip_tarama_bolge"]
         self.kamp_fare = kamp_fare
         self.kamp_kareleri = set()
 
@@ -937,20 +1303,25 @@ class KampTarayici:
         return True
 
     def ekranTara(self, liste_don=False) -> bool | set | None:
-        gecici_kareler = self.CascadeClassifier.detectMultiScale(ekran_goruntusu_al())
+        ekran_g = ekran_goruntusu_al()
+
+        ekran_g_kirp = ekran_g[
+            self.tarama_bolgesi.y : self.tarama_bolgesi.y + self.tarama_bolgesi.yukseklik,
+            self.tarama_bolgesi.x : self.tarama_bolgesi.x + self.tarama_bolgesi.genislik,
+        ]
+        gecici_kareler = self.CascadeClassifier.detectMultiScale(ekran_g_kirp)
         for gecici_kare in gecici_kareler:
             islem_devam_etsin_mi = self._islemDevamEtsinMi()
             if not islem_devam_etsin_mi:
                 return  # eğer işlem devam etmiyorsa erkenden tarama iptali
             if gecici_kare is not None:
                 bulunan_kare = KampKare(
-                    int(gecici_kare[0]),
-                    int(gecici_kare[1]),
+                    self.tarama_bolgesi.x + int(gecici_kare[0]),
+                    self.tarama_bolgesi.y + int(gecici_kare[1]),
                     int(gecici_kare[2]),
                     int(gecici_kare[3]),
                 )
-                islem_devam_etsin_mi = self._kampkareEkleVeSaldir(bulunan_kare)
-            del islem_devam_etsin_mi
+                self._kampkareEkleVeSaldir(bulunan_kare)
 
         if len(self.kamp_kareleri) > 0:
             if liste_don:
@@ -974,13 +1345,11 @@ class KampTarayici:
             return True
         return False
 
-    def _kampkareEkleVeSaldir(self, kare: KampKare) -> bool | None:
+    def _kampkareEkleVeSaldir(self, kare: KampKare) -> bool:
         if self._kampKareEkle(kare):
-            # FIXME :  DENEME YAPILIRKEN PASS YORUMDAN ÇIKARILCAK
-            # pass
-
             if self.kamp_fare:
                 return self.kamp_fare.kampSaldiri(bulunan_kamp_karesi=kare)
+        return False
 
 
 def yorumlar():
@@ -1133,23 +1502,67 @@ def seferDeneme():
     print(sfr_tarayici.seferSayisiGetir())
 
 
-def calistir():
+def seferMaksDeneme():
+    sfr_tarayici = SeferTarayici(maks_sefer_sayisi=2)
+    print(sfr_tarayici.seferSayisiGetir())
+
+
+def calistir_eski():
     onsvy_tarayici = OnSeviyeTarayici(
         on_svyler=(
             OnSvyEnum.BES,
-            # OnSvyEnum.ALTI
-            # OnSvyEnum.BES,
+            OnSvyEnum.ALTI,
+            # OnSvyEnum.BIR,
+            # OnSvyEnum.IKI,
+            # OnSvyEnum.UC,
+            # OnSvyEnum.ON,
+            # OnSvyEnum.ONBIR,
+            # OnSvyEnum.ONIKI,
+            OnSvyEnum.YEDI,
             # istenilen diger onseviyeler
         )
     )
 
-    sfr_tarayici = SeferTarayici(maks_sefer_sayisi=2)
+    sfr_tarayici = SeferTarayici(maks_sefer_sayisi=3)
 
     kamp_fare_e = KampFare(sefer_tarayici=sfr_tarayici, onseviye_tarayici=onsvy_tarayici)
 
     kamp_t = KampTarayici(kamp_fare=kamp_fare_e)  # noqa
+    bolge_degistirici = BolgeDegistirici()
+    mevsim_tarayici = MevsimTara(MevsimTipiEnum.YAZ)
 
-    kamp_t.ekranTara()
+    akis_yonu = (
+        KaydirmaYontemleri._kareAlt,  # false
+        KaydirmaYontemleri._kareUst,
+        KaydirmaYontemleri._kareSag,  # True
+        KaydirmaYontemleri._kareSol,  # false
+        KaydirmaYontemleri._kareUst,  # True
+        KaydirmaYontemleri._kareAlt,  # kale göster,false
+        KaydirmaYontemleri._kareSol,
+        KaydirmaYontemleri._kareSag,
+        # KaydirmaYontemleri._kareAlt,
+    )
+    kalemi_goster = False
+    while True:
+        sleep(0)
+        kamp_t.kamp_fare.sefer_tarayici.seferMinKontrol()
+        bolge_degistirici.bolgeDegistir()
+        mevsim_tarayici.mvsmTaraVeIsinlan()
+        kalemi_goster = False
+        kamp_t.ekranTara()
+        for siradaki_yon in akis_yonu:
+            # not : sira onemli
+            if kalemi_goster:
+                kamp_t.kamp_fare.kalemiGoster()
+                sleep(0.3)
+            siradaki_yon()
+            sleep(0.2)
+            kamp_t.ekranTara()
+            kalemi_goster = not kalemi_goster
+            print(
+                "------------------------------------------------------------- ",
+                kalemi_goster,
+            )
 
 
 def kaydirma_deneme():
@@ -1163,14 +1576,163 @@ def kaydirma_deneme():
         i = i + 1
 
 
+def mevsim_deneme():
+    mvsm = MevsimTara(mevsim=MevsimTipiEnum.YAZ)
+    bulunandu_mu = mvsm.mvsmTaraVeIsinlan()
+    print(bulunandu_mu)
+    print(mvsm.mvsm_template_matcher.needle_image_paths)
+    # moveTo((3105,727))
+
+
+def tus_deneme():
+    # Klavye.tuslariBas(("3\n",),.2)
+    # Klavye.tuslariBas("".join(("3523", "124")),0.3)
+    Klavye.tuslariBas("124 ", 0.25)
+    Klavye.tuslariBas("124 ", 0.3)
+    Klavye.tuslariBas("124 ", 0.4)
+
+
+def maksdeneme():
+    sf = SeferTarayici(maks_sefer_sayisi=6)
+    KampFare(None, None)
+    sf.seferMaksKontrol()
+
+
+class MoeKamp:
+    __slots__ = (
+        "akis_yonu",
+        "arayuz_degiskenleri",
+        "bolge_degistirici",
+        "faree",
+        "kampp",
+        "kapat_event",
+        "mevsim_tarayici",
+        "sfr_tarayici",
+        "sinyal_kanal_1",
+        "sinyal_kanal_2",
+    )
+
+    def __init__(self, arayuz_degiskenleri: dict, sinyal_kanal_1, sinyal_kanal_2) -> None:
+        self.kapat_event = multiprocessing.Event()
+        self.arayuz_degiskenleri = arayuz_degiskenleri  # (ön seviye, mevsim, maks sefer)
+        self.sinyal_kanal_1 = sinyal_kanal_1
+        self.sinyal_kanal_2 = sinyal_kanal_2
+        onsvy_tarayici = OnSeviyeTarayici(on_svyler=tuple(self.arayuz_degiskenleri["onsvy"]))
+        self.sfr_tarayici = SeferTarayici(maks_sefer_sayisi=int(self.arayuz_degiskenleri["sefer"]))
+
+        self.faree = KampFare(sefer_tarayici=self.sfr_tarayici, onseviye_tarayici=onsvy_tarayici)
+
+        self.kampp = KampTarayici(kamp_fare=self.faree)
+        self.bolge_degistirici = BolgeDegistirici()
+        self.mevsim_tarayici = MevsimTara(self.arayuz_degiskenleri["mevsim"])
+
+        # TODO: belki functools.partial() kullanılmalı
+        self.sfr_tarayici._islemDevamEtsinMi = self._devamEdiyorMu
+        self.kampp._islemDevamEtsinMi = self._devamEdiyorMu
+        self.bolge_degistirici._islemDevamEtsinMi = self._devamEdiyorMu
+        self.faree._menudeyimSinyaliYolla = self._MenudeyimSinyaliYolla
+
+        self.akis_yonu = (
+            KaydirmaYontemleri._kareAlt,  # false
+            KaydirmaYontemleri._kareUst,
+            KaydirmaYontemleri._kareSag,  # True
+            KaydirmaYontemleri._kareSol,  # false
+            KaydirmaYontemleri._kareUst,  # True
+            KaydirmaYontemleri._kareAlt,  # kale göster,false
+            KaydirmaYontemleri._kareSol,
+            KaydirmaYontemleri._kareSag,
+            # KaydirmaYontemleri._kareAlt,
+        )
+
+    def _devamEdiyorMu(self):
+        if self.sinyal_kanal_1.value == ModSinyal.Bekle:
+            self.sinyal_kanal_2.value == ModSinyal.MesajUlasti
+            while self.sinyal_kanal_1.value == ModSinyal.Bekle:
+                print("sinyal bekleniyor")
+                sleep(0.5)
+            self.sinyal_kanal_2.value == ModSinyal.MesajUlasti
+        elif self.sinyal_kanal_1.value == ModSinyal.Sonlandir or self.sinyal_kanal_1.value == ModSinyal.FailSafe:
+            self.sinyal_kanal_2.value == ModSinyal.MesajUlasti
+            return False
+        self.sinyal_kanal_2.value == ModSinyal.MesajUlasmadi
+        return True
+
+    def _MenudeyimSinyaliYolla(self, giris=True):
+        if giris:
+            self.sinyal_kanal_2.value = ModSinyal.Menudeyim
+        else:
+            self.sinyal_kanal_2.value = ModSinyal.DevamEt
+
+    def kapat(self):
+        self.kapatevent.set()
+
+    def _ana_dongu(self):
+        kalemi_goster = False
+        while True:
+            sleep(0)
+            if self.kapat_event.is_set():
+                break
+            self.kampp.kamp_fare.sefer_tarayici.seferMinKontrol()
+            self.bolge_degistirici.bolgeDegistir()
+            self.mevsim_tarayici.mvsmTaraVeIsinlan()
+            kalemi_goster = False
+            if self.kampp.ekranTara() is None:
+                break
+
+            for siradaki_yon in self.akis_yonu:
+                # not : sira onemli
+                if kalemi_goster:
+                    self.kampp.kamp_fare.kalemiGoster()
+                    sleep(0.3)
+                siradaki_yon()
+                sleep(0.2)
+                self.kampp.ekranTara()
+                kalemi_goster = not kalemi_goster
+                print(
+                    "------------------------------------------------------------- ",
+                    kalemi_goster,
+                )
+
+    def processOlustur(self) -> multiprocessing.Process:
+        self.kapat_event = multiprocessing.Event()
+        return multiprocessing.Process(target=self.engelKontrol)
+
+
+def yeni_calistir():
+    kanal1 = multiprocessing.Value(ctypes.c_short, ModSinyal.DevamEt)
+    kanal2 = multiprocessing.Value(ctypes.c_short, ModSinyal.DevamEt)
+    moe_kamp = MoeKamp(
+        {
+            "onsvy": (OnSvyEnum.DOKUZ,),
+            "mevsim": MevsimTipiEnum.YAZ,
+            "saat": "12",
+            "dakika": "0",
+            "sefer": 3,
+        },
+        kanal1,
+        kanal2,
+    )
+    # print(dir(moe_kamp))
+    moe_kamp_process = moe_kamp.processOlustur()
+    moe_kamp_process.start()
+    moe_kamp_process.join()
+
+
 if __name__ == "__main__":
     # play = KampFare(None, None)
     # play._musamaAktiflestir()
+    # mevsim_deneme()
     # kaydirma_deneme()
     # cascade_kampT_deneme()
     # onsvy_tarama_deneme()
     # deneme_alan()
     # seferDeneme()
-    calistir()
+    calistir_eski()
+    # maksdeneme()
     # musamaaktifkontrol_deneme()
     # enerji_kontrol_deneme()
+    # seferMaksDeneme()
+    # tus_deneme()
+    # """
+    # 124 124 124
+    # """

@@ -1,3 +1,10 @@
+# moe_bot
+
+- this projects stored for archiving reasons
+- imgs are non-existed in public branches
+- a bot that plays a moe
+- this projects v2 branch is in unfunctinal state
+
 ## düzeltildi
 
 - d(durma) 'durumunda cpu kullanımı %10 - %20 değerlerine çıkıyor ( çalışma sırasında %1-%2 ) (çözüldü)

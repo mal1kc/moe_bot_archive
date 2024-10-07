@@ -5,7 +5,7 @@ import time
 
 from moe_bot.ayarlar import Ayarlar
 from moe_bot.enumlar import IslemSinyal
-from moe_bot.tarayicilar import PyAutoTarayici
+from moe_bot.tarayicilar import PyAutoTarayiciOld
 from moe_bot.temel_siniflar import Fare
 
 # -- moe_bot
@@ -58,37 +58,37 @@ class EngelIslemModulu:
         # tarayıcıları oluştur
         sehir_ikon_ayarlari = self.ayarlar.tarayicilar["sehir_ikonu"]
 
-        self.sehirIkon_tarayici = PyAutoTarayici(
+        self.sehirIkon_tarayici = PyAutoTarayiciOld(
             gorsel_d=sehir_ikon_ayarlari[0], eminlik=sehir_ikon_ayarlari[1], konum=sehir_ikon_ayarlari[2]
         )
         dunya_ikon_ayarlari = self.ayarlar.tarayicilar["dunya_ikonu"]
-        self.dunyaIkon_tarayici = PyAutoTarayici(
+        self.dunyaIkon_tarayici = PyAutoTarayiciOld(
             gorsel_d=dunya_ikon_ayarlari[0], eminlik=dunya_ikon_ayarlari[1], konum=dunya_ikon_ayarlari[2]
         )
         hizmet_basarisiz_ayarlari = self.ayarlar.tarayicilar["hizmet_basarisiz"]
-        self.hizmetBasarisiz_tarayici = PyAutoTarayici(
+        self.hizmetBasarisiz_tarayici = PyAutoTarayiciOld(
             gorsel_d=hizmet_basarisiz_ayarlari[0], eminlik=hizmet_basarisiz_ayarlari[1], konum=hizmet_basarisiz_ayarlari[2]
         )
         baglanti_kesildi_ayarlari = self.ayarlar.tarayicilar["baglanti_kesildi"]
-        self.baglantiKesildi_tarayici = PyAutoTarayici(
+        self.baglantiKesildi_tarayici = PyAutoTarayiciOld(
             gorsel_d=baglanti_kesildi_ayarlari[0], eminlik=baglanti_kesildi_ayarlari[1], konum=baglanti_kesildi_ayarlari[2]
         )
         maks_sefer_uyari_ayarlari = self.ayarlar.tarayicilar["maks_sefer_uyari"]
-        self.maksSeferUyari_tarayici = PyAutoTarayici(
+        self.maksSeferUyari_tarayici = PyAutoTarayiciOld(
             gorsel_d=maks_sefer_uyari_ayarlari[0], eminlik=maks_sefer_uyari_ayarlari[1], konum=maks_sefer_uyari_ayarlari[2]
         )
         devam_buton_ayarlari = self.ayarlar.tarayicilar["devam_butonu"]
-        self.devam_buton_tarayici = PyAutoTarayici(
+        self.devam_buton_tarayici = PyAutoTarayiciOld(
             gorsel_d=devam_buton_ayarlari[0], eminlik=devam_buton_ayarlari[1], konum=devam_buton_ayarlari[2]
         )
         kalkan_ayarlari = self.ayarlar.tarayicilar["kalkan"]
-        self.kalkan_tarayici = PyAutoTarayici(gorsel_d=kalkan_ayarlari[0], eminlik=kalkan_ayarlari[1], konum=kalkan_ayarlari[2])
+        self.kalkan_tarayici = PyAutoTarayiciOld(gorsel_d=kalkan_ayarlari[0], eminlik=kalkan_ayarlari[1], konum=kalkan_ayarlari[2])
         devre_disi_ayarlari = self.ayarlar.tarayicilar["devre_disi"]
-        self.devre_disi_tarayici = PyAutoTarayici(
+        self.devre_disi_tarayici = PyAutoTarayiciOld(
             gorsel_d=devre_disi_ayarlari[0], eminlik=devre_disi_ayarlari[1], konum=devre_disi_ayarlari[2]
         )
         tekrar_dene_buton_ayarlari = self.ayarlar.tarayicilar["tekrar_dene_butonu"]
-        self.tekrarDeneButon_tarayici = PyAutoTarayici(
+        self.tekrarDeneButon_tarayici = PyAutoTarayiciOld(
             gorsel_d=tekrar_dene_buton_ayarlari[0], eminlik=tekrar_dene_buton_ayarlari[1], konum=tekrar_dene_buton_ayarlari[2]
         )
 

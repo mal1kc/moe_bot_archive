@@ -118,7 +118,7 @@ class BotIslemYonetici:
                     self.tarama_islem_process.start()
                     return
 
-            elif key == pynput.keyboard.KeyCode.from_char("d"):
+            elif key == pynput.keyboard.KeyCode.from_char("d"):  # FIXME: d tuşuna basıldığında tarama işlemi kapatılmıyor
                 self.tarama_islem.kapat()
                 self._gunlukcu.debug("tarama işlemi kapatıldı")
                 self.tarama_islem_process = self.tarama_islem.processOlustur(

@@ -1,86 +1,121 @@
 import logging
-from pathlib import Path
-from typing import Any
+import multiprocessing
+from os import PathLike
+import threading
+
+import pyscreeze
 
 import cv2
 import numpy
+
+from cv2.typing import MatLike
+from pathlib import Path
+from typing import Any, Protocol
+from PIL import Image
 from pyscreeze import locateOnScreen
 
-from moe_bot.temel_siniflar import GorselYolu, Kare
+
+from moe_bot.temel_siniflar import Gorsel, IsimliDizi, Kare
+
+# TODO: Cascade disindaki tum tarayticilar coklu olabilir
+
+
+def ekran_goruntusu(bolge: Kare | None = None):
+    screenshot_img = pyscreeze.screenshot(region=bolge)
+    return screenshot_img
+
+
+class ekranTaramaSonuc(Protocol):
+    bulundu_mu: bool
+    sirali_tarama: bool
+    bulunan_kare: Kare | None
+    bulunan_cisim: str | None
+    bulunan_cisim_sirasi: int | None
+
+
+# FIXME : tüm tarayicilar bu protokole uymalı
+class Tarayici(Protocol):
+    def __call__(self, *args: Any, **kwds: Any) -> Any: ...
+
+    def ekranTara(self) -> ekranTaramaSonuc: ...
 
 
 class PyAutoTarayici:
-    __slots__ = ("gorsel_d", "eminlik", "konum", "gri_tarama", "isim")
+    __slots__ = ("isim", "gorsel_yollari", "eminlikler", "konum", "gri_tarama")
 
     def __init__(
         self,
-        gorsel_d: GorselYolu,
-        eminlik: float,
+        isim: str,
+        gorsel_yollari: tuple[Gorsel, ...] | Gorsel,
+        eminlikler: tuple[float, ...] | float,
         konum: Kare | None = None,
         gri_tarama: bool = False,
-        isim: str = "isimsiz_tarayici",
-    ):
+        resimleri_ramde_tut: bool = False,
+    ) -> None:
         self.isim = isim
-        self.gorsel_d = gorsel_d
-        self.eminlik = eminlik
+        if isinstance(gorsel_yollari, tuple):
+            self.gorsel_yollari = gorsel_yollari
+        elif isinstance(gorsel_yollari, str) or isinstance(gorsel_yollari, Path):
+            self.gorsel_yollari = (gorsel_yollari,)
+        else:
+            raise TypeError("gorsel_yolları str|Path veya str|Pathlardan oluşan tuple olmalı")
+
+        if isinstance(eminlikler, tuple):
+            self.eminlikler = eminlikler
+        elif isinstance(eminlikler, float):
+            self.eminlikler = (eminlikler,)
+        else:
+            raise TypeError("eminlikler float veya floatlardan oluşan tuple olmalı")
+
+        if len(self.gorsel_yollari) != len(self.eminlikler):
+            raise ValueError("gorsel_yolları ve eminlikler aynı uzunlukta olmalı")
+
         self.konum = konum
         self.gri_tarama = gri_tarama
 
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        return self.ekranTara()
+        if resimleri_ramde_tut:
+            self._gunlukcu.debug(f"{self.isim} -> resimleri ramde tutulacak")
+            if isinstance(self.gorsel_yollari[0], PathLike):
+                self.gorsel_yollari = tuple(Image.open(gorsel_yol) for gorsel_yol in self.gorsel_yollari)  # type: ignore
+        self._gunlukcu.debug(f"{self.isim} -> {self.gorsel_yollari}")
 
     @property
     def _gunlukcu(self):
         return logging.getLogger(__name__)
 
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        return self.ekranTara()
+
     def ekranTara(self) -> Kare | None:
-        if isinstance(self.konum, Kare):
-            tarama_sonucu = locateOnScreen(self.gorsel_d, confidence=self.eminlik, region=self.konum, grayscale=self.gri_tarama)
-        else:
-            tarama_sonucu = locateOnScreen(self.gorsel_d, confidence=self.eminlik, grayscale=self.gri_tarama)
-        self._gunlukcu.debug(f"{self.isim} ekran taraması -> {tarama_sonucu}")
-        if tarama_sonucu:
-            return Kare(tarama_sonucu.left, tarama_sonucu.top, tarama_sonucu.width, tarama_sonucu.height)
+        for dosya_yolu, eminlik in zip(self.gorsel_yollari, self.eminlikler):
+            tarama_sonucu = locateOnScreen(dosya_yolu, confidence=eminlik, region=self.konum, grayscale=self.gri_tarama)
+            self._gunlukcu.debug(f"{self.isim} ekran taraması -> {tarama_sonucu}")
+            if tarama_sonucu:
+                return Kare(tarama_sonucu.left, tarama_sonucu.top, tarama_sonucu.width, tarama_sonucu.height)
         return None
 
-    @staticmethod
-    def ekranTaraStatic(gorsel_d: GorselYolu, eminlik: float, konum: Kare | None = None, gri_tarama: bool = False) -> Kare | None:
-        return PyAutoTarayici(
-            gorsel_d=gorsel_d,
-            eminlik=eminlik,
-            konum=konum,
-            gri_tarama=gri_tarama,
-        ).ekranTara()
 
-    def __str__(self) -> str:
-        return f"{self.isim} -> {self.gorsel_d} -> {self.eminlik} -> {self.konum} -> {self.gri_tarama}"
-
-    def __repr__(self) -> str:
-        return "{} -> {} -> {} -> {} -> {}".format(self.isim, self.gorsel_d, self.eminlik, self.konum, self.gri_tarama)
-
-
-class SiraliPyAutoTarayici:
+class SiraliPyAutoTarayici(Tarayici):
     def __init__(
         self,
+        isimli_gorsel_yollari: IsimliDizi,
         bolge: Kare | None,
         eminlik: float,
         gri_tarama: bool,
-        ornek_ds_yl: list[str],
         isim: str = "İsimsiz",
     ) -> None:
         self.isim = isim
         self.bolge = bolge
         self.eminlik = eminlik
         self.gri_tarama = gri_tarama
-        self.ornek_ds_yl = ornek_ds_yl
+        self.isimli_gorsel_yollari = isimli_gorsel_yollari
 
-    def _ekranTara(self) -> int | None:
+    def ekranTara(self) -> tuple[Any, Kare] | None:
         """
         ilk bulunan örnek dosyanın adının sonundaki sayıyı döndürür\n
         bulunamazsa None döndürür\n
         """
-        # TODO for döngüsü yerine threading ile bir deneme yapılabilir
-        for ornek_ds_yl in self.ornek_ds_yl:
+        for ornek_ds_yl in self.isimli_gorsel_yollari:
             kare = locateOnScreen(
                 ornek_ds_yl,
                 region=self.bolge,
@@ -88,8 +123,47 @@ class SiraliPyAutoTarayici:
                 grayscale=self.gri_tarama,
             )
             if kare is not None:
-                # TODO : daha iyi yol bulunabilir
-                return int(ornek_ds_yl.split(".")[-2].split("_")[-1])
+                return self.isimli_gorsel_yollari.isim, Kare(kare.left, kare.top, kare.width, kare.height)
+        return None
+
+    def ekranTaraThreaded(self) -> tuple[Any, Kare] | None:
+        """
+        aynı anda birden fazla ekran taraması yapar \n
+        isimli dizideki isim ve kareyi döndürür \n
+        bulunamazsa None döndürür
+        """
+        buldum_etkilik = multiprocessing.Event()
+        bulunan = multiprocessing.Queue(maxsize=1)
+
+        def _tara(ornek_ds_yl: str | Image.Image):
+            if buldum_etkilik.is_set():
+                return
+            kare = locateOnScreen(
+                ornek_ds_yl,
+                region=self.bolge,
+                confidence=self.eminlik,
+                grayscale=self.gri_tarama,
+            )
+            if kare is not None:
+                nonlocal bulunan
+                bulunan.put_nowait(Kare(kare.left, kare.top, kare.width, kare.height))
+                buldum_etkilik.set()
+
+        # basit thread pool
+        threads = []
+        for ornek_ds_yl in self.isimli_gorsel_yollari:
+            thread = threading.Thread(target=_tara, args=(ornek_ds_yl,))
+            if buldum_etkilik.is_set():
+                break
+            thread.start()
+            threads.append(thread)
+
+        while not buldum_etkilik.is_set():
+            for thread in threads:
+                thread.join()
+
+        if bulunan.qsize() > 0:
+            return self.isimli_gorsel_yollari.isim, bulunan.get_nowait()
         return None
 
 
@@ -120,7 +194,7 @@ class MultiImageTemplateMatcher:
         - If match found, returns the first match location
 
         Args:
-            haystack_img (np.array) : haystack image to search needle images
+            haystack_img (numpy.array) : haystack image to search needle images
 
         Returns:
             tuple[int,int,int,int] | None:
@@ -139,6 +213,88 @@ class MultiImageTemplateMatcher:
                     needle_img.shape[1],
                     needle_img.shape[0],
                 )
+        return None
+
+
+class SiraliOrnekTarayici(Tarayici):
+    __slots__ = ("isim", "gorsel_yollari", "eminlik", "tarama_bolgesi", "gri_tarama", "tarama_metodu")
+
+    def __init__(
+        self,
+        isim: str,
+        gorsel_yollari: IsimliDizi,
+        eminlik: float,
+        tarama_bolgesi: Kare | None = None,
+        gri_tarama: bool = False,
+        gorselleri_onceden_yukle: bool = False,
+    ) -> None:
+        """
+        TODO: burayı yaz
+        """
+        # IMPORTANT: eminlik tüm gorsel_yollari aynı ayarla tarama yapar
+        # değiştirilebilir İsimliÇifteDizi oluşturulabilir
+
+        if not isinstance(gorsel_yollari, IsimliDizi):
+            raise TypeError("gorsel_yollari IsimliDizi olmalı")
+
+        if not isinstance(eminlik, float):
+            raise TypeError("eminlik float olmalı")
+
+        self.isim = isim
+        self.gorsel_yollari = gorsel_yollari
+
+        if gorselleri_onceden_yukle:
+            self.gorsel_yollari = IsimliDizi(
+                gorsel_yollari.isim,
+                tuple(Image.open(gorsel_yol) for gorsel_yol in gorsel_yollari),
+            )
+
+        self.tarama_bolgesi = tarama_bolgesi
+        self.eminlik = eminlik
+        self.gri_tarama = gri_tarama
+        self.tarama_metodu = cv2.TM_CCOEFF_NORMED
+
+    def ekranTara(
+        self,
+    ) -> Kare | None:
+        ekran_g = ekran_goruntusu(bolge=self.tarama_bolgesi)
+        for gorsel_yol in self.gorsel_yollari:
+            if not Image.isImageType(gorsel_yol):
+                gorsel_yol = Image.open(gorsel_yol)
+            sonuc = SiraliOrnekTarayici.tara(gorsel_yol, ekran_g, self.eminlik, self.gri_tarama, self.tarama_metodu)
+            if sonuc is not None:
+                if self.tarama_bolgesi is not None:
+                    return Kare(
+                        sonuc.x + self.tarama_bolgesi.x,
+                        sonuc.y + self.tarama_bolgesi.y,
+                        genislik=sonuc.genislik,
+                        yukseklik=sonuc.yukseklik,
+                    )
+                return sonuc
+        return None
+
+    @staticmethod
+    def tara(
+        ornek_gorsel: Image.Image,
+        taranicak_gorsel: Image.Image,
+        eminlik: float = 0.9,
+        gri_tarama: bool = True,
+        tarama_metodu=cv2.TM_CCOEFF_NORMED,
+    ) -> Kare | None:
+        gorsel: MatLike = numpy.array(ornek_gorsel)
+        t_gorsel: MatLike = numpy.array(taranicak_gorsel)
+
+        if gri_tarama:
+            gorsel = cv2.cvtColor(gorsel, cv2.COLOR_RGB2GRAY)
+            t_gorsel = cv2.cvtColor(t_gorsel, cv2.COLOR_RGB2GRAY)
+
+        konumlar = []
+        result = cv2.matchTemplate(t_gorsel, gorsel, tarama_metodu)  # type: ignore
+        konumlar = numpy.where(result >= eminlik)  # type: ignore
+        konumlar = list(zip(*konumlar[::-1]))
+        if konumlar:
+            # genel ekrana göre konumlandır
+            return Kare(konumlar[0][0], konumlar[0][1], gorsel.shape[1], gorsel.shape[0])
         return None
 
 

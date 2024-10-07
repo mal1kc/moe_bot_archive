@@ -6,8 +6,9 @@ class IslemSinyal(enum.IntEnum):
     BEKLE = 1
     SONLANDIR = 2
     MESAJ_ULASMADI = 3
-    MESAJ__LASTII = 4
+    MESAJ_ULASTI = 4
     FAILSAFE = 5
+    FAILSAFE_SONLANDIR = 6
 
 
 class EkranBoyutEnum(enum.Enum):

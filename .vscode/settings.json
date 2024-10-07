@@ -34,13 +34,13 @@
             "italic": false
         },
         {
-            "tag": "//",
-            "color": "#474747",
-            "strikethrough": true,
-            "underline": false,
+            "tag": "KONTROL_ETMEK_LAZIM",
+            "color": "#e60060",
+            "strikethrough": false,
+            "underline": true,
             "backgroundColor": "transparent",
             "bold": false,
-            "italic": false
+            "italic": true
         },
         {
             "tag": "todo",
@@ -79,42 +79,6 @@
             "italic": true
         },
         {
-            "tag": "H2",
-            "color": "#936697",
-            "strikethrough": false,
-            "underline": false,
-            "backgroundColor": "transparent",
-            "bold": true,
-            "italic": true
-        },
-        {
-            "tag": "Q:",
-            "color": "#D16927",
-            "strikethrough": false,
-            "underline": false,
-            "backgroundColor": "#2f2f2f",
-            "bold": true,
-            "italic": true
-        },
-        {
-            "tag": "SUMMARY",
-            "color": "#37dd11",
-            "strikethrough": false,
-            "underline": false,
-            "backgroundColor": "transparent",
-            "bold": true,
-            "italic": true
-        },
-        {
-            "tag": "-",
-            "color": "#5D9160",
-            "strikethrough": false,
-            "underline": false,
-            "backgroundColor": "transparent",
-            "bold": true,
-            "italic": true
-        },
-        {
             "tag": "WARNING",
             // yellowish color
             "color": "#FFCC50",
@@ -129,7 +93,7 @@
     "[python]": {
         "editor.formatOnSave": true,
         "editor.codeActionsOnSave": {
-            "source.fixAll": true
+            "source.fixAll": "explicit"
         },
         "editor.defaultFormatter": "charliermarsh.ruff"
     },

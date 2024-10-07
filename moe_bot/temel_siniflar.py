@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Mapping
 import logging
 import threading
 from collections import namedtuple
@@ -9,7 +10,9 @@ from pathlib import Path
 from threading import Timer
 
 # -- typing
-from typing import Callable, NamedTuple, Optional
+from typing import Any, Callable, Iterable, NamedTuple, Optional
+from PIL.Image import Image
+from numpy.typing import ArrayLike as Matlike
 
 import pyautogui
 
@@ -18,9 +21,25 @@ from moe_bot.hatalar import Hata
 
 Koordinat2D = namedtuple("Koordinat2D", ["x", "y"], defaults=[0, 0])
 
-GorselYolu = str | Path
+Gorsel = str | Path | Image | Matlike
 
 _GUNLUKCU = logging.getLogger()
+
+
+class IsimliDizi:
+    __slots__ = ("isim", "dizi")
+    isim: Any
+    dizi: Iterable
+
+    def __init__(self, isim: Any, dizi: Iterable) -> None:
+        self.isim = isim
+        if not isinstance(dizi, Iterable):
+            raise Hata("dizi Iterable değil.")
+        self.dizi = dizi
+
+    def __iter__(self):
+        for item in self.dizi:
+            yield item
 
 
 class KullaniciGirisVerisi(NamedTuple):
@@ -41,6 +60,12 @@ class Kare(NamedTuple):
         if not any([isinstance(i, int) for i in self]):
             return True
         return self.genislik == 0 or self.yukseklik == 0
+
+    def merkez(self):
+        return Koordinat2D(
+            self.x + self.genislik / 2,
+            self.y + self.yukseklik / 2,
+        )
 
 
 class EkranBoyut(NamedTuple):
@@ -154,12 +179,12 @@ class Fare:
             konum = konum.merkez()
         with Fare._lock:
             if sol_tik:
-                pyautogui.click(konum.x, konum.y)
+                pyautogui.click(konum.x, konum.y)  # type: ignore
             else:
-                pyautogui.rightClick(konum.x, konum.y)
+                pyautogui.rightClick(konum.x, konum.y)  # type: ignore
 
     @staticmethod
-    def sagTikla(konum: Koordinat2D | None | Kare):
+    def sagTikla(konum: Koordinat2D | None | Kare = None):
         Fare.tikla(konum, False)
 
     @staticmethod
@@ -167,7 +192,7 @@ class Fare:
         if konum is Kare:
             konum = konum.merkez()
         with Fare._lock:
-            pyautogui.moveTo(konum.x, konum.y)
+            pyautogui.moveTo(konum.x, konum.y)  # type: ignore
 
     @staticmethod
     def hareketEtRelatif(x: int, y: int):
@@ -180,17 +205,17 @@ class Fare:
             pyautogui.scroll(miktar, x, y)
 
     @staticmethod
-    def konumu_normalize_et(konum: Koordinat2D | None | Kare) -> Koordinat2D:
+    def konumu_normalize_et(konum: Koordinat2D | None | Kare) -> Koordinat2D | None:
         if konum is Kare:
             konum = konum.merkez()
-        return konum
+        return konum  # type: ignore
 
 
 class Diller(object):
     __slots__ = []
     _instance = None
     _instance_kilit = threading.Lock()
-    _dil_kitapliklari = {}
+    _dil_kitapliklari: dict[str, Mapping[str, Mapping[str, str]]] = {}
     _aktif_dil: DilEnum | None = None
 
     def __new__(cls, dil: DilEnum | None = None) -> "Diller":
@@ -230,13 +255,13 @@ class Diller(object):
             Diller._dil_kitapliklari[dil] = lokalizasyon_kitapligi.to_dict()
 
     @staticmethod
-    def dil_kitapligi(dil: DilEnum) -> dict[str, dict[str, str]]:
+    def dil_kitapligi(dil: DilEnum) -> Mapping[str, Mapping[str, str]]:
         Diller.aktif_dil = dil
         Diller._dil_yukle(dil)
         return Diller._dil_kitapliklari[dil]
 
     @staticmethod
-    def lokalizasyon(kelime_anahtari, kitaplik="UI", dil: DilEnum | None = None):
+    def lokalizasyon(kelime_anahtari: str, kitaplik: str = "UI", dil: DilEnum | None = None):
         if dil is None:
             dil = Diller._aktif_dil
             if dil is None:
@@ -290,5 +315,6 @@ class RepeatedTimer(object):
             self.is_running = True
 
     def stop(self):
-        self._timer.cancel()  # type: ignore
-        self.is_running = False
+        if self._timer:
+            self._timer.cancel()  # type: ignore
+            self.is_running = False
